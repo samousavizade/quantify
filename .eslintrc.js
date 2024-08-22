@@ -13,12 +13,13 @@ module.exports = {
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:jsx-a11y/recommended',
-    'plugin:prettier/recommended',
+    // 'plugin:prettier/recommended',
     'next',
     'next/core-web-vitals',
+    // 'prettier',
   ],
   rules: {
-    'prettier/prettier': ['error', { semi: true }],
+    // 'prettier/prettier': ['error', {semi: true}],
     'react/react-in-jsx-scope': 'off',
     'jsx-a11y/anchor-is-valid': [
       'error',
@@ -35,6 +36,5 @@ module.exports = {
     '@typescript-eslint/no-var-requires': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/no-explicit-any': ['warn'],
-    '@next/next/no-page-custom-font': 'off',
   },
 };
