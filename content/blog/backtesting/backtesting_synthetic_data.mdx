@@ -29,10 +29,10 @@ The strategy uses a standard trading rule for exiting an opportunity when either
 
 The trading rule is defined by these thresholds $\{ \underline{\pi}, \bar{\pi} \}$.
 
-The goal is to find the optimal set of these thresholds, often denoted as $ R^\* $, that maximizes the Sharpe ratio, $ SR_R $, defined as:
+The goal is to find the optimal set of these thresholds, often denoted as $ R^{\*} $, that maximizes the Sharpe ratio, $ SR_R $, defined as:
 
 $$
-R^* = \arg \max_{R \in \Omega} \left\{ \frac{E[\pi_{i, T_i} \mid R]}{\sigma[\pi_{i, T_i} \mid R]} \right\}
+R^{*} = \arg \max_{R \in \Omega} \left\{ \frac{E[\pi_{i, T_i} \mid R]}{\sigma[\pi_{i, T_i} \mid R]} \right\}
 $$
 
 ## Defining Overfitting in Trading Rules
@@ -48,35 +48,36 @@ The algorithm for finding optimal trading rules involves these steps:
 The rest of the algorithm will be discussed in the next section.
 
 <div style={{display: 'flex', justifyContent: 'center'}}>
-  <table style={{tableLayout: 'fixed', width: '90%'}}>
-  <tr>
-    <th style={{width: '50%', textAlign: 'center'}}>Python</th>
-    <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
-  </tr>
+    <table style={{tableLayout: 'fixed', width: '90%'}}>
+        <tr>
+            <th style={{width: '50%', textAlign: 'center'}}>Python</th>
+            <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
+        </tr>
 
-  <tr>
-  <td style={{border: '1px solid transparent'}}>
+        <tr>
+            <td style={{border: '1px solid transparent'}}>
 
-```python
-def optimal_trading_rule(
-    sigma: float,
-    phi: float
-) -> Tuple[float, float]:
-```
+                ```python
+                def optimal_trading_rule(
+                sigma: float,
+                phi: float
+                ) -> Tuple[float, float]:
+                ```
 
-  </td>
-  <td style={{border: '1px solid transparent'}}>
+            </td>
+            <td style={{border: '1px solid transparent'}}>
 
-```julia
-function optimal_trading_rule(
-    sigma::Float64,
-    phi::Float64
-) -> Tuple{Float64, Float64}
-```
+                ```julia
+                function optimal_trading_rule(
+                sigma::Float64,
+                phi::Float64
+                ) -> Tuple{Float64, Float64}
+                ```
 
-  </td>
-  </tr>
-  </table>
+            </td>
+        </tr>
+    </table>
+
 </div>
 
 View More: [Python](https://www.github.com/risklabai/RiskLabAI.py) | [Julia](https://www.github.com/risklabai/RiskLabAI.jl)
@@ -88,47 +89,48 @@ These functionalities are available in both Python and Julia in the RiskLabAI li
 The RiskLabAI library offers a function for synthetic backtesting, which is useful for developing optimal trading rules without overfitting to historical data. This function can be implemented in both Python and Julia.
 
 <div style={{display: 'flex', justifyContent: 'center'}}>
-  <table style={{tableLayout: 'fixed', width: '90%'}}>
-  <tr>
-    <th style={{width: '50%', textAlign: 'center'}}>Python</th>
-    <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
-  </tr>
+    <table style={{tableLayout: 'fixed', width: '90%'}}>
+        <tr>
+            <th style={{width: '50%', textAlign: 'center'}}>Python</th>
+            <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
+        </tr>
 
-  <tr>
-  <td style={{border: '1px solid transparent'}}>
+        <tr>
+            <td style={{border: '1px solid transparent'}}>
 
-```python
-def syntheticBackTesting(
-    forecast :float,
-    halfLife :float,
-    sigma :float,
-    nIteration =1e5 :int,
-    maximumHoldingPeriod=100 :int,
-    profitTakingRange=np.linspace(.5,10,20) :np.array,
-    stopLossRange=np.linspace(.5,10,20) :np.array,
-    seed=0 :float
-) ->np.matrix:
-```
+                ```python
+                def syntheticBackTesting(
+                forecast :float,
+                halfLife :float,
+                sigma :float,
+                nIteration =1e5 :int,
+                maximumHoldingPeriod=100 :int,
+                profitTakingRange=np.linspace(.5,10,20) :np.array,
+                stopLossRange=np.linspace(.5,10,20) :np.array,
+                seed=0 :float
+                ) ->np.matrix:
+                ```
 
-  </td>
-  <td style={{border: '1px solid transparent'}}>
+            </td>
+            <td style={{border: '1px solid transparent'}}>
 
-```julia
-function Syntheticbacktesting(
-    forecast ::Float64,
-    halfLife ::Float64,
-    σ ::Float64,
-    maximumIteration =1e3 ::Int64,
-    maximumHoldingPeriod = 100 ::Int64,
-    profitTakingRange = LinRange(0.5,10,20) ::Array,
-    stopLossRange = LinRange(0.5,10,20) ::Array ,
-    seed = 0 ::Float64
-) ::Matrix:
-```
+                ```julia
+                function Syntheticbacktesting(
+                forecast ::Float64,
+                halfLife ::Float64,
+                σ ::Float64,
+                maximumIteration =1e3 ::Int64,
+                maximumHoldingPeriod = 100 ::Int64,
+                profitTakingRange = LinRange(0.5,10,20) ::Array,
+                stopLossRange = LinRange(0.5,10,20) ::Array ,
+                seed = 0 ::Float64
+                ) ::Matrix:
+                ```
 
-  </td>
-  </tr>
-  </table>
+            </td>
+        </tr>
+    </table>
+
 </div>
 
 View More: [Python](https://www.github.com/risklabai/RiskLabAI.py) | [Julia](https://www.github.com/risklabai/RiskLabAI.jl)

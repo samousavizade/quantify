@@ -3,18 +3,15 @@ import readingTime from 'reading-time';
 // Remark packages
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
-import {
-  extractTocHeadings,
-  remarkCodeTitles,
-  remarkExtractFrontmatter,
-  remarkImgToJsx,
-} from 'pliny/mdx-plugins/index.js';
+import { extractTocHeadings, remarkCodeTitles, remarkImgToJsx } from 'pliny/mdx-plugins/index.js';
 // Rehype packages
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeKatex from 'rehype-katex';
 import rehypePrismPlus from 'rehype-prism-plus';
 import rehypePresetMinify from 'rehype-preset-minify';
+import { remarkMdxFrontmatter } from 'remark-mdx-frontmatter';
+import remarkFrontmatter from 'remark-frontmatter';
 
 const computedFields: ComputedFields = {
   readingTime: { type: 'json', resolve: (doc) => readingTime(doc.body.raw) },
@@ -80,10 +77,10 @@ export default makeSource({
       remarkCodeTitles,
       remarkGfm,
       remarkMath,
-      remarkExtractFrontmatter,
+      remarkFrontmatter,
+      [remarkMdxFrontmatter, { name: 'matter' }],
       remarkCodeTitles,
       remarkImgToJsx,
-      extractTocHeadings,
     ],
   },
 });
