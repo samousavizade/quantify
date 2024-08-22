@@ -8,7 +8,7 @@ import { CoreContent, getAllTags } from '@/lib/utils/contentlayer';
 import type { Blog } from 'contentlayer/generated';
 import { allBlogs } from 'contentlayer/generated';
 import { useState } from 'react';
-import '@/css/tags_sidebar.css';
+import '../css/tags_sidebar.css';
 import {
   FaCalculator,
   FaChartLine,

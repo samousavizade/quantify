@@ -11,11 +11,10 @@ export const metadata = {
 
 export default function Blog() {
   const activePosts = allBlogs.filter((p) => p.draft === false);
-  const posts = sortedBlogPost(activePosts);
 
   return (
     <MainLayout>
-      <ListLayout posts={posts} />
+      <ListLayout posts={sortedBlogPost(activePosts)} />
     </MainLayout>
   );
 }
