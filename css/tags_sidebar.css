@@ -1,0 +1,40 @@
+/* Wrapper for the whole layout */
+.wrapper {
+  display: flex;
+  align-items: flex-start;
+}
+
+/* Sidebar container */
+.sidebar {
+  width: 300px;
+  box-sizing: border-box;
+  position: sticky;
+  top: 0;
+  height: 100vh; /* Full viewport height */
+  overflow-y: auto; /* Scroll inside sidebar if content overflows */
+}
+
+/* Tags styling */
+.tag {
+  display: block;
+  background-color: #555;
+  color: white;
+  padding: 10px;
+  margin-bottom: 10px;
+  text-align: center;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+/* Hover effect */
+.tag:hover {
+  background-color: #777;
+}
+
+/* Main content styling */
+.content {
+  flex: 1;
+  padding: 20px;
+  margin-left: 0px; /* Adjust for sidebar width + padding */
+}
