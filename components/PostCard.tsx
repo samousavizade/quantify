@@ -14,7 +14,7 @@ export interface PostCardProps {
 export default function PostCard({ posts, showTags = true }: PostCardProps) {
   return (
     <ul>
-      {posts.map(({ slug, title, tags, summary }, index) => (
+      {posts.map(({ slug, title, field, tags, summary }, index) => (
         <motion.li
           key={slug}
           className="py-2"
@@ -32,6 +32,9 @@ export default function PostCard({ posts, showTags = true }: PostCardProps) {
                     </span>
                   </Link>
                 </span>
+                <div className="flex flex-wrap gap-3 text-primary-700 dark:text-primary-300">
+                  {field}
+                </div>
                 {showTags && tags && (
                   <div className="flex flex-wrap gap-3">
                     {tags.map((tag) => (

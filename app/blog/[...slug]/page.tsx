@@ -4,15 +4,19 @@ import ScrollProgressBar from '@/components/ScrollProgressBar';
 import PostLayout from '@/layouts/MDX/PostLayout';
 import MainLayout from '@/layouts/MainLayout';
 import { coreContent, formatBlogLink, sortedBlogPost } from '@/lib/utils/contentlayer';
-import { allBlogs } from 'contentlayer/generated';
+import { allAuthors, allBlogs } from 'contentlayer/generated';
 import { Metadata } from 'next';
+
+// import AuthorLayout from "@/layouts/MDX/AuthorLayout";
 
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: {
+    slug: string[];
+  };
 }): Promise<Metadata> {
-  const slug = params.slug;
+  const slug = decodeURI(params.slug.join('/'));
   const post = allBlogs.find((p) => p.slug === slug);
 
   if (!post) {
@@ -25,12 +29,22 @@ export async function generateMetadata({
   };
 }
 
-export default function BlogPost({ params }: { params: { slug: string } }) {
-  const slug = params.slug;
+export default function BlogPost({
+  params,
+}: {
+  params: {
+    slug: string[];
+  };
+}) {
+  const slug = decodeURI(params.slug.join('/'));
   const sortedPosts = sortedBlogPost(allBlogs);
 
   const post = sortedPosts.find((p) => p.slug === slug);
-  const author = post?.author || ['default'];
+  const author = allAuthors.find((a) => a.name === post?.author);
+
+  if (!author) {
+    return null;
+  }
 
   const postIndex = sortedPosts.findIndex((p) => p.slug === slug);
   const prevContent = sortedPosts[postIndex + 1] || null;
@@ -40,10 +54,16 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
 
   return (
     <>
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" />
       <ScrollProgressBar />
       <MainLayout>
         {post && 'draft' in post && post.draft !== true ? (
-          <PostLayout content={post} prev={formatBlogLink(prev)} next={formatBlogLink(next)}>
+          <PostLayout
+            content={post}
+            author={author}
+            prev={formatBlogLink(prev)}
+            next={formatBlogLink(next)}
+          >
             <MDXLayoutRenderer toc={post.toc} content={post} authorDetails={author} />
           </PostLayout>
         ) : (

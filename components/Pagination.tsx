@@ -1,11 +1,19 @@
-import Link from 'next/link';
+// import Link from 'next/link';
+// import {Dispatch} from "react";
+import { LinkButton } from '@dlarroder/playground';
+
+// import {POSTS_PER_PAGE} from "@/types/default";
 
 interface Props {
-  totalPages: number;
-  currentPage: number;
+  pagination: any;
+  handleNextPage: any;
+  handlePreviousPage: any;
 }
 
-export default function Pagination({ totalPages, currentPage }: Props) {
+export default function Pagination({ pagination, handleNextPage, handlePreviousPage }: Props) {
+  const currentPage = pagination.currentPage;
+  const totalPages = pagination.totalPages;
+
   const prevPage = currentPage - 1 > 0;
   const nextPage = currentPage + 1 <= totalPages;
 
@@ -18,12 +26,9 @@ export default function Pagination({ totalPages, currentPage }: Props) {
           </button>
         )}
         {prevPage && (
-          <Link
-            href={currentPage - 1 === 1 ? `/blog/` : `/blog/page/${currentPage - 1}`}
-            className="underline-magical"
-          >
+          <LinkButton onClick={handlePreviousPage} className="underline-magical">
             <button>Previous</button>
-          </Link>
+          </LinkButton>
         )}
         <span>
           {currentPage} of {totalPages}
@@ -34,9 +39,9 @@ export default function Pagination({ totalPages, currentPage }: Props) {
           </button>
         )}
         {nextPage && (
-          <Link href={`/blog/page/${currentPage + 1}`} className="underline-magical">
+          <LinkButton onClick={handleNextPage} className="underline-magical">
             <button>Next</button>
-          </Link>
+          </LinkButton>
         )}
       </nav>
     </div>

@@ -1,10 +1,20 @@
 import { ComputedFields, defineDocumentType, makeSource } from 'contentlayer/source-files';
 import readingTime from 'reading-time';
-import rehypeAutolinkHeadings from 'rehype-autolink-headings';
-import rehypePrismPlus from 'rehype-prism-plus';
+// Remark packages
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import {
+  extractTocHeadings,
+  remarkCodeTitles,
+  remarkExtractFrontmatter,
+  remarkImgToJsx,
+} from 'pliny/mdx-plugins/index.js';
+// Rehype packages
 import rehypeSlug from 'rehype-slug';
-import remarkCodeTitles from './lib/remark-code-title';
-import { extractTocHeadings } from './lib/remark-toc-headings';
+import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import rehypeKatex from 'rehype-katex';
+import rehypePrismPlus from 'rehype-prism-plus';
+import rehypePresetMinify from 'rehype-preset-minify';
 
 const computedFields: ComputedFields = {
   readingTime: { type: 'json', resolve: (doc) => readingTime(doc.body.raw) },
@@ -22,6 +32,7 @@ export const Blog = defineDocumentType(() => ({
   fields: {
     title: { type: 'string', required: true },
     date: { type: 'date', required: true },
+    field: { type: 'string', required: true },
     tags: { type: 'list', of: { type: 'string' } },
     lastmod: { type: 'date' },
     draft: { type: 'boolean' },
@@ -58,7 +69,21 @@ export default makeSource({
   documentTypes: [Blog, Authors],
   mdx: {
     cwd: process.cwd(),
-    remarkPlugins: [remarkCodeTitles],
-    rehypePlugins: [rehypeSlug, rehypeAutolinkHeadings, [rehypePrismPlus, { ignoreMissing: true }]],
+    rehypePlugins: [
+      rehypeKatex,
+      rehypeSlug,
+      rehypeAutolinkHeadings,
+      rehypePresetMinify,
+      [rehypePrismPlus, { ignoreMissing: true }],
+    ],
+    remarkPlugins: [
+      remarkCodeTitles,
+      remarkGfm,
+      remarkMath,
+      remarkExtractFrontmatter,
+      remarkCodeTitles,
+      remarkImgToJsx,
+      extractTocHeadings,
+    ],
   },
 });

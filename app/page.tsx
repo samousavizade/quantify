@@ -6,6 +6,7 @@ import SectionContainer from '@/components/SectionContainer';
 import TopTracks from '@/components/Spotify/TopTracks';
 import Works from '@/components/Work/Works';
 import { allCoreContent, sortedBlogPost } from '@/lib/utils/contentlayer';
+// @ts-ignore
 import { allBlogs } from 'contentlayer/generated';
 import { Suspense } from 'react';
 

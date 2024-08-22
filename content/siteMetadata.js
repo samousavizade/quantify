@@ -1,10 +1,10 @@
 const siteMetadata = {
-  title: 'Dale Larroder',
-  author: 'Dale Larroder',
-  headerTitle: 'dalelarroder',
-  description: 'Software Developer at Aphex',
+  title: 'Quantify',
+  author: 'Ahura',
+  headerTitle: 'quantify',
+  description: 'Quantifying the Future',
   language: 'en-us',
-  theme: 'dark', // system, dark or light
+  theme: 'system', // system, dark or light
   siteUrl: 'https://dalelarroder.com',
   siteRepo: 'https://github.com/dlarroder/dalelarroder-blog',
   siteLogo: '/static/images/logo.png',

@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Link from 'next/link';
+// import Link from 'next/link';
 import { ReactElement, useContext, useEffect, useRef } from 'react';
 import { HiOutlineArrowNarrowDown } from 'react-icons/hi';
 import { ScrollContext } from './Providers/ScrollProvider';
@@ -10,7 +10,6 @@ import { renderCanvas } from './renderCanvas';
 export default function Hero(): ReactElement {
   const ref = useRef<HTMLHeadingElement>(null);
   const { scrollY } = useContext(ScrollContext);
-
   let progress = 0;
   const { current: elContainer } = ref;
 
@@ -32,17 +31,12 @@ export default function Hero(): ReactElement {
           <div className="-mt-36">
             <div ref={ref} className="flex cursor-default flex-col space-y-2">
               <h1 className="text-5xl font-semibold sm:text-7xl md:text-8xl xl:text-9xl">
-                Dale Larroder
+                Quantify
               </h1>
-              <h2 className="text-3xl font-medium opacity-80 sm:text-6xl md:text-6xl xl:text-7xl">
-                I build things for the web.
+              <h2 className="text-3xl font-medium opacity-70 sm:text-6xl md:text-6xl xl:text-7xl">
+                Quantifying the{' '}
+                <span className={'text-primary-700 dark:text-primary-300'}>Future</span> ...
               </h2>
-              <Link
-                href="/about"
-                className="underline-magical text-md w-max cursor-pointer sm:text-lg md:text-xl xl:text-2xl"
-              >
-                Read more about me &rarr;
-              </Link>
             </div>
             <motion.div
               animate={{

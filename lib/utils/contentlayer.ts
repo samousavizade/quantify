@@ -1,4 +1,4 @@
-import kebabCase from '@/lib/utils/kebabCase';
+// import kebabCase from '@/lib/utils/kebabCase';
 import type { Blog, DocumentTypes } from 'contentlayer/generated';
 
 export function dateSortDesc(a: string, b: string) {
@@ -59,11 +59,10 @@ export function getAllTags(allBlogs: Blog[]) {
   allBlogs.forEach((file) => {
     if (file.tags && file.draft !== true) {
       file.tags.forEach((tag) => {
-        const formattedTag = kebabCase(tag);
-        if (formattedTag in tagCount) {
-          tagCount[formattedTag] += 1;
+        if (tag in tagCount) {
+          tagCount[tag] += 1;
         } else {
-          tagCount[formattedTag] = 1;
+          tagCount[tag] = 1;
         }
       });
     }
@@ -72,7 +71,10 @@ export function getAllTags(allBlogs: Blog[]) {
   return tagCount;
 }
 
-export type BlogLink = { slug: string; title: string };
+export type BlogLink = {
+  slug: string;
+  title: string;
+};
 
 export function formatBlogLink(
   blog: Omit<Blog, 'body' | '_raw' | '_id'> | null
