@@ -50,7 +50,8 @@
     "remark": "14.0.3",
     "remark-gfm": "3.0.1",
     "remark-math": "^5.1.1",
-    "use-breakpoint": "4.0.1"
+    "use-breakpoint": "4.0.1",
+    "vercel": "^37.0.0"
   },
   "devDependencies": {
     "@svgr/webpack": "8.1.0",
