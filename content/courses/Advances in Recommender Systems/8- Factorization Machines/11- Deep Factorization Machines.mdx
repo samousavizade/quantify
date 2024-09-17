@@ -1,0 +1,198 @@
+---
+title: Deep Factorization Machines
+draft: false
+summary: Backtest statistics are essential for evaluating the efficacy of investment strategies.
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+### Deep Factorization Machines (DeepFM)
+
+Deep Factorization Machines (DeepFM) are an advanced model designed to improve the prediction of click-through rates (CTR) by integrating the strengths of both factorization machines (FM) and deep neural networks (DNNs). This approach addresses the limitations of traditional factorization machines, which typically model feature interactions in a linear fashion and struggle with complex, nonlinear interactions present in real-world data.
+
+#### Background and Motivation
+
+- **Factorization Machines**: These are used to model feature interactions in a linear paradigm, specifically focusing on bilinear interactions. While effective for second-order interactions, they are often insufficient for modeling the complex, nonlinear feature interactions found in real-world datasets. Higher-order interactions are theoretically possible but are rarely used due to numerical instability and high computational complexity[1].
+
+- **Deep Neural Networks**: DNNs excel in learning sophisticated feature representations and interactions, making them a natural complement to factorization machines. By integrating DNNs, DeepFM can capture both low-order and high-order feature combinations, including nonlinear structures inherent in the input data.
+
+#### DeepFM Model Overview
+
+DeepFM combines a factorization machine component with a deep neural network component in a parallel structure:
+
+- **FM Component**: This part of the model handles low-order feature interactions, similar to traditional factorization machines. It captures interactions using a linear approach, which is effective for second-order interactions.
+
+- **Deep Component**: This is a multi-layer perceptron (MLP) that captures high-order feature interactions and nonlinearities. The deep component is responsible for learning complex patterns that the FM component cannot capture.
+
+- **Shared Inputs**: Both components share the same input embeddings, allowing the model to learn from the same set of features. The outputs from both components are summed to produce the final prediction. This shared input structure reduces the need for extensive feature engineering, which is a significant advantage over models like Google's Wide & Deep framework.
+
+#### Advantages of DeepFM
+
+- **Automatic Feature Combination**: DeepFM automatically identifies and models feature combinations without the need for manual feature engineering, which can be time-consuming and requires domain expertise.
+
+- **Improved Performance**: By capturing both low-order and high-order interactions, DeepFM often outperforms traditional factorization machines and other models in CTR prediction tasks.
+
+- **End-to-End Training**: The model can be trained end-to-end, simplifying the training process and improving efficiency compared to models that require separate pre-training stages.
+
+DeepFM represents a significant advancement in CTR prediction by effectively combining the strengths of factorization machines and deep neural networks, enabling the modeling of complex feature interactions with minimal manual intervention.
+
+### Model Architectures
+
+DeepFM is a model architecture that integrates a Factorization Machine (FM) component and a deep neural network (DNN) component in a parallel structure. This architecture is designed to capture both low-order and high-order feature interactions effectively.
+
+#### Components of DeepFM
+
+- **FM Component**: This part of the model is responsible for modeling low-order feature interactions. It operates similarly to traditional 2-way factorization machines, which are effective at capturing pairwise feature interactions through linear combinations.
+
+- **Deep Component**: The deep component is a multilayer perceptron (MLP) that captures high-order feature interactions and nonlinearities. It uses dense embeddings of input features to learn complex patterns that the FM component cannot capture.
+
+#### Shared Inputs and Outputs
+
+- Both the FM and deep components share the same input embeddings. This shared input structure allows the model to learn from the same set of features, reducing the need for extensive feature engineering.
+- The outputs from both components are summed to produce the final prediction. This integration allows DeepFM to leverage the strengths of both components, capturing a wide range of feature interactions.
+
+#### Comparison with Other Architectures
+
+- **Wide & Deep Architecture**: DeepFM is similar in spirit to Google's Wide & Deep model, which also aims to capture both memorization and generalization. However, DeepFM reduces the effort of hand-crafted feature engineering by automatically identifying feature combinations.
+- **Efficiency**: DeepFM requires no pre-training and can be trained end-to-end, making it more efficient compared to models that require separate training stages for different components.
+
+The architecture of DeepFM effectively combines the strengths of FM and DNNs to model both linear and nonlinear feature interactions, making it a powerful tool for tasks like click-through rate prediction.
+
+![NeuMF](/static/courses/Advances-in-Recomender-Systems/rec-deepfm.svg)
+
+### Implementation of DeepFM
+
+The implementation of DeepFM builds upon the structure of traditional Factorization Machines (FM) but incorporates a deep neural network (DNN) to enhance its ability to model complex feature interactions. Here are the key aspects of implementing DeepFM:
+
+#### Components of the Implementation
+
+- **FM Component**: The FM part of DeepFM remains unchanged from the traditional FM approach. It is responsible for capturing low-order interactions between features using a linear model. This component typically involves embedding layers to handle categorical features and computes interactions through dot products of these embeddings.
+
+- **Deep Component**: A multilayer perceptron (MLP) is used as the deep component to capture high-order interactions and nonlinear patterns. The MLP consists of several dense layers, which can be customized in terms of the number of neurons and layers. The activation function commonly used is ReLU, and dropout is applied to prevent overfitting.
+
+#### Model Structure
+
+- **Embedding Layer**: Both FM and deep components share an embedding layer. This layer converts sparse categorical features into dense vectors, which are then used by both components to learn feature interactions.
+
+- **MLP Configuration**: The number of neurons in each layer of the MLP can be adjusted using the `mlp_dims` hyperparameter. This flexibility allows the model to be tailored to specific datasets and tasks.
+
+- **Dropout**: A dropout layer is included in the MLP to regularize the model and mitigate overfitting. The dropout rate can be specified as a hyperparameter.
+
+#### Forward Pass
+
+- **Input Processing**: The input features are embedded and processed by both the FM and deep components. The FM component computes interactions using a linear approach, while the deep component processes the embeddings through the MLP.
+
+- **Output Combination**: The outputs of the FM and deep components are summed to produce the final prediction. A sigmoid activation function is applied to this sum to ensure the output is in the range of [0, 1], suitable for binary classification tasks like click-through rate prediction.
+
+#### Code Example
+
+Here's a simplified Python implementation using a neural network framework:
+
+```python
+import os
+from mxnet import gluon, init, np, npx
+from mxnet.gluon import nn
+from d2l import mxnet as d2l
+
+npx.set_np()
+
+class DeepFM(nn.Block):
+    def __init__(self, field_dims, num_factors, mlp_dims, drop_rate=0.1):
+        super(DeepFM, self).__init__()
+        num_inputs = int(sum(field_dims))
+        self.embedding = nn.Embedding(num_inputs, num_factors)
+        self.fc = nn.Embedding(num_inputs, 1)
+        self.linear_layer = nn.Dense(1, use_bias=True)
+        input_dim = self.embed_output_dim = len(field_dims) * num_factors
+        self.mlp = nn.Sequential()
+        for dim in mlp_dims:
+            self.mlp.add(nn.Dense(dim, 'relu', True, in_units=input_dim))
+            self.mlp.add(nn.Dropout(rate=drop_rate))
+            input_dim = dim
+        self.mlp.add(nn.Dense(in_units=input_dim, units=1))
+
+    def forward(self, x):
+        embed_x = self.embedding(x)
+        square_of_sum = np.sum(embed_x, axis=1) ** 2
+        sum_of_square = np.sum(embed_x ** 2, axis=1)
+        inputs = np.reshape(embed_x, (-1, self.embed_output_dim))
+        x = self.linear_layer(self.fc(x).sum(1)) \
+            + 0.5 * (square_of_sum - sum_of_square).sum(1, keepdims=True) \
+            + self.mlp(inputs)
+        x = npx.sigmoid(x)
+        return x
+```
+
+This implementation highlights the integration of FM and DNN components within a single model, allowing DeepFM to effectively capture both low-order and high-order feature interactions with shared embeddings and end-to-end training.
+
+### Training and Evaluating the Model
+
+The training and evaluation of the DeepFM model involve several steps, focusing on efficiently handling data and optimizing model performance. Below is a detailed explanation of the process, including a code snippet for implementation.
+
+#### Data Loading and Preparation
+
+- **Batch Size and Data Directory**: The batch size is set to 2048, and data is loaded from a specified directory. This setup ensures efficient data processing and handling of large datasets.
+
+- **Dataset and DataLoader**: The training and test datasets are loaded using a custom `CTRDataset` class. Data loaders are then created for both datasets to facilitate batch processing during training and evaluation. The data loaders shuffle the training data to ensure that the model does not learn any particular order in the data.
+
+```python
+batch_size = 2048
+data_dir = d2l.download_extract('ctr')
+
+train_data = d2l.CTRDataset(os.path.join(data_dir, 'train.csv'))
+test_data = d2l.CTRDataset(os.path.join(data_dir, 'test.csv'),
+                           feat_mapper=train_data.feat_mapper,
+                           defaults=train_data.defaults)
+
+field_dims = train_data.field_dims
+
+train_iter = gluon.data.DataLoader(
+    train_data, shuffle=True, last_batch='rollover', batch_size=batch_size,
+    num_workers=d2l.get_dataloader_workers())
+
+test_iter = gluon.data.DataLoader(
+    test_data, shuffle=False, last_batch='rollover', batch_size=batch_size,
+    num_workers=d2l.get_dataloader_workers())
+```
+
+#### Model Configuration and Initialization
+
+- **Model and Hyperparameters**: The DeepFM model is initialized with specific hyperparameters, including the number of factors and the dimensions of the MLP layers. The model uses a pyramid structure for the MLP with layers of sizes 30, 20, and 10 neurons.
+
+- **Initialization**: The model parameters are initialized using Xavier initialization, which is suitable for deep neural networks to ensure stable gradients during training.
+
+```python
+devices = d2l.try_all_gpus()
+net = DeepFM(field_dims, num_factors=10, mlp_dims=[30, 20, 10])
+net.initialize(init.Xavier(), ctx=devices)
+```
+
+#### Training Process
+
+- **Optimizer and Loss Function**: The Adam optimizer is used with a learning rate of 0.01. The loss function is the sigmoid binary cross-entropy loss, which is appropriate for binary classification tasks like CTR prediction.
+
+- **Training Loop**: The model is trained for 30 epochs using the specified optimizer and loss function. The `train_ch13` function handles the training loop, updating model parameters and evaluating performance on the test set.
+
+```python
+lr, num_epochs, optimizer = 0.01, 30, 'adam'
+trainer = gluon.Trainer(net.collect_params(), optimizer,
+                        {'learning_rate': lr})
+loss = gluon.loss.SigmoidBinaryCrossEntropyLoss()
+
+d2l.train_ch13(net, train_iter, test_iter, loss, trainer, num_epochs, devices)
+```
+
+#### Evaluation and Performance
+
+- **Performance Metrics**: The model's performance is assessed using accuracy metrics on both the training and test datasets. The results indicate that DeepFM converges faster and achieves better performance compared to traditional FM models.
+
+- **Efficiency**: The training process is efficient, processing approximately 46,234.4 examples per second on multiple GPUs, demonstrating the scalability of DeepFM for large datasets.
+
+```plaintext
+loss 0.509, train acc 0.489, test acc 0.510
+46234.4 examples/sec on [gpu(0), gpu(1)]
+```
+
+The training and evaluation of DeepFM involve a well-structured process that leverages efficient data handling, model configuration, and optimization techniques to achieve superior performance in tasks like CTR prediction. The model's ability to capture both low-order and high-order feature interactions contributes to its effectiveness and efficiency.

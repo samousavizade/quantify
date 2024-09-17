@@ -1,0 +1,132 @@
+---
+title: Characteristics of Volatility
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Characteristics of Volatility
+
+Volatility is a key concept in finance, particularly in asset pricing, portfolio selection, and risk management. It refers to the variability of asset returns over time. Understanding and modeling volatility is crucial for several reasons:
+
+1. Volatility is a measure of risk, which is fundamental to many financial theories and applications.
+2. The volatility of an asset return changes over time and appears to be predictable.
+3. Financial decisions often depend on the forecast of an asset's volatility.
+
+Before discussing volatility models, it is important to understand some key characteristics of volatility that have been observed empirically in financial time series data:
+
+### Volatility Clustering
+
+One of the most prominent features of financial return series is volatility clustering. This phenomenon was first noted by Mandelbrot (1963), who observed that "large changes tend to be followed by large changes, of either sign, and small changes tend to be followed by small changes." Mathematically, we can express this as:
+
+$$
+\text{Corr}(|r_t|, |r_{t+k}|) > 0
+$$
+
+for $k > 0$, where $r_t$ represents the return at time $t$. This positive correlation in absolute returns persists for many lags $k$.
+
+### Heavy-Tailed Distribution
+
+Financial returns often exhibit leptokurtosis, meaning they have heavier tails than a normal distribution. This can be quantified using the kurtosis:
+
+$$
+\text{Kurt}(r_t) = \frac{E[(r_t - \mu)^4]}{[E[(r_t - \mu)^2]]^2} > 3
+$$
+
+where $\mu$ is the mean of $r_t$. For a normal distribution, the kurtosis is 3. Financial returns typically have kurtosis greater than 3, indicating heavier tails.
+
+### Leverage Effect
+
+The leverage effect refers to the asymmetric relationship between returns and volatility. Typically, negative returns are associated with larger increases in future volatility compared to positive returns of the same magnitude. This can be expressed as:
+
+$$
+\text{Corr}(r_t, \sigma_{t+k}^2) < 0
+$$
+
+for $k > 0$, where $\sigma_t^2$ is the volatility at time $t$.
+
+### Long Memory
+
+Volatility often exhibits long memory, meaning that the autocorrelation of absolute or squared returns decays slowly. This can be modeled using a hyperbolic decay function:
+
+$$
+\text{Corr}(|r_t|, |r_{t+k}|) \sim k^{2d-1}
+$$
+
+as $k \to \infty$, where $0 < d < 0.5$ is the long memory parameter.
+
+### Volatility Co-movements
+
+In multivariate settings, volatilities of different assets or markets tend to move together. This can be captured by positive correlations between volatility processes of different assets:
+
+$$
+\text{Corr}(\sigma_{i,t}^2, \sigma_{j,t}^2) > 0
+$$
+
+where $\sigma_{i,t}^2$ and $\sigma_{j,t}^2$ are the volatilities of assets $i$ and $j$ at time $t$.
+
+### Mean Reversion
+
+While volatility can persist for extended periods, it tends to revert to a long-term average level. This can be modeled using a mean-reverting process:
+
+$$
+d\sigma_t^2 = \kappa(\theta - \sigma_t^2)dt + \gamma dW_t
+$$
+
+where $\theta$ is the long-term mean volatility, $\kappa$ is the speed of mean reversion, $\gamma$ is the volatility of volatility, and $W_t$ is a Wiener process.
+
+### Volatility Feedback
+
+There is evidence of a positive relationship between expected returns and volatility, often referred to as the volatility feedback effect. This can be expressed as:
+
+$$
+E[r_t | \mathcal{F}_{t-1}] = \alpha + \beta \sigma_t^2
+$$
+
+where $\mathcal{F}_{t-1}$ is the information set available at time $t-1$, and $\beta > 0$.
+
+### Volatility and Trading Volume
+
+Empirical studies have shown a positive correlation between trading volume and volatility:
+
+$$
+\text{Corr}(\sigma_t^2, V_t) > 0
+$$
+
+where $V_t$ is the trading volume at time $t$.
+
+### Non-Trading Periods
+
+Volatility tends to be lower during non-trading periods (e.g., overnight, weekends, holidays) compared to active trading periods. This can be modeled by incorporating different volatility regimes:
+
+$$
+\sigma_t^2 = \begin{cases}
+\sigma_{1,t}^2 & \text{during trading hours} \\
+\sigma_{2,t}^2 & \text{during non-trading hours}
+\end{cases}
+$$
+
+where typically $E[\sigma_{1,t}^2] > E[\sigma_{2,t}^2]$.
+
+### Volatility and Macroeconomic Factors
+
+Volatility is often influenced by macroeconomic factors and news announcements. This relationship can be modeled as:
+
+$$
+\sigma_t^2 = f(X_t) + \epsilon_t
+$$
+
+where $X_t$ is a vector of macroeconomic variables and news indicators, and $f(\cdot)$ is a function capturing their impact on volatility.
+
+Understanding these characteristics is crucial for developing effective volatility models. The models discussed in subsequent sections aim to capture one or more of these features to provide accurate descriptions and forecasts of volatility dynamics.
+
+It's important to note that while these characteristics are commonly observed, they may not be present in all financial time series or may manifest to varying degrees. The specific nature of volatility dynamics can depend on factors such as the asset class, market conditions, and time horizon under consideration.
+
+Moreover, the interplay between these characteristics can lead to complex volatility dynamics that are challenging to model. For instance, the combination of volatility clustering and the leverage effect can result in asymmetric volatility persistence, where negative shocks have a more prolonged impact on volatility than positive shocks of the same magnitude.
+
+In practice, volatility modeling often involves a trade-off between capturing these various characteristics and maintaining model parsimony and tractability. The choice of which features to prioritize in a model depends on the specific application and the properties of the financial time series being analyzed.
+
+The study of volatility characteristics has led to the development of a wide range of volatility models, from simple GARCH-type models to more complex stochastic volatility and realized volatility models. Each of these model classes aims to capture different aspects of the volatility dynamics described above, and their effectiveness can vary depending on the specific characteristics of the financial time series under consideration.

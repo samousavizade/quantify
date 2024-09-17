@@ -1,0 +1,373 @@
+---
+title: Neural Collaborative Filtering
+draft: false
+summary: Backtest statistics are essential for evaluating the efficacy of investment strategies.
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Neural Collaborative Filtering for Personalized Ranking
+
+The section on **Neural Collaborative Filtering (NCF)** for personalized ranking focuses on leveraging neural networks to enhance recommendation systems, particularly in handling implicit feedback. Implicit feedback, such as clicks, purchases, and views, is prevalent in recommender systems because it is easy to collect and indicative of user preferences, even though it lacks explicit negative feedback.
+
+### NeuMF Model
+
+The **Neural Matrix Factorization (NeuMF)** model is introduced as a solution to the personalized ranking task using implicit feedback. NeuMF combines the strengths of neural networks with traditional matrix factorization techniques to improve expressiveness and flexibility in modeling user-item interactions.
+
+- **Framework**: NeuMF replaces the traditional dot product used in matrix factorization with a more flexible neural network approach. This is achieved by incorporating two subnetworks:
+- **Generalized Matrix Factorization (GMF)**: A neural network adaptation of matrix factorization that retains the linearity of the original method.
+- **Multi-Layer Perceptron (MLP)**: Adds non-linearity and complexity, allowing the model to capture intricate user-item interactions.
+
+- **Model Architecture**: The NeuMF model structures these two subnetworks to model interactions through two pathways instead of relying solely on dot products. The outputs of GMF and MLP are concatenated to compute the final prediction scores, enhancing the model's ability to generate a ranked list of recommendations for each user based on implicit feedback.
+
+- **Training**: The model is trained using a personalized ranking loss, which is designed to optimize the ranking of items for each user rather than predicting explicit ratings. This approach aligns with the goal of generating ranked recommendation lists tailored to individual user preferences.
+
+Overall, Neural Collaborative Filtering, particularly through the NeuMF model, represents a significant advancement in recommendation systems by effectively utilizing deep learning to handle implicit feedback and improve the personalization of recommendations.
+
+## The NeuMF Model
+
+The **NeuMF (Neural Matrix Factorization)** model is a sophisticated hybrid approach that combines the strengths of Generalized Matrix Factorization (GMF) and Multi-Layer Perceptron (MLP) to improve recommendation systems by leveraging both linear and non-linear modeling capabilities. This model is particularly designed to address the challenges of personalized ranking with implicit feedback.
+
+### Generalized Matrix Factorization (GMF)
+
+- **Concept**: GMF is a neural network variant of traditional matrix factorization. It models the interaction between users and items using the element-wise product (Hadamard product) of user and item latent factors.
+- **Mathematical Representation**:
+- The GMF component can be expressed as:
+  $$ x = \mathbf{p}_u \odot \mathbf{q}\_i $$
+$$ \hat{y}_{ui} = \alpha(\mathbf{h}^\top x) $$
+- Here, $\mathbf{p}_u$ and $\mathbf{q}_i$ are the latent vectors for user $u$ and item $i$, respectively. The symbol $\odot$ denotes the Hadamard product, $\alpha$ is the activation function, and $\mathbf{h}$ represents the weights of the output layer. The prediction score $\hat{y}_{ui}$ indicates the likelihood of user $u$ interacting with item $i$.
+
+### Multi-Layer Perceptron (MLP)
+
+- **Concept**: The MLP component enhances the model's flexibility by introducing non-linearity. It does not share user and item embeddings with GMF, allowing for more complex modeling of interactions.
+- **Mathematical Representation**:
+- The MLP subnetwork is defined as:
+  $$ z^{(1)} = \phi*1([\mathbf{U}_u, \mathbf{V}_i]) $$
+$$ \phi^{(2)}(z^{(1)}) = \alpha_1(\mathbf{W}^{(2)}z^{(1)} + \mathbf{b}^{(2)}) $$
+$$ \phi^{(L)}(z^{(L-1)}) = \alpha_L(\mathbf{W}^{(L)}z^{(L-1)} + \mathbf{b}^{(L)}) $$
+$$ \hat{y}*{ui} = \alpha(\mathbf{h}^\top \phi_L(z^{(L-1)})) $$
+- Here, $\phi^*$ denotes the function of the corresponding layer, and $z^*$ is the layer's output. The MLP uses the concatenation of user and item embeddings as input, allowing it to capture intricate interactions through multiple layers.
+
+### Fusion of GMF and MLP
+
+- **Concatenation**: NeuMF combines the outputs of GMF and MLP by concatenating their second-to-last layers to form a comprehensive feature vector. This approach allows the model to capture both linear and non-linear aspects of user-item interactions.
+- **Final Prediction**: The concatenated vector is passed through further layers, and the final prediction score is computed using a sigmoid activation function:
+
+$$
+\hat{y}_{ui} = \sigma(\mathbf{h}^\top [x, \phi_L(z^{(L-1)})])
+$$
+
+> This formulation allows the model to generate a ranked list of recommendations for each user based on implicit feedback.
+
+Overall, the NeuMF model represents a significant advancement in recommendation systems by effectively combining matrix factorization and deep learning techniques to handle implicit feedback and improve the personalization of recommendations. This dual-pathway architecture enhances the model's ability to capture complex user-item interactions, making it a powerful tool for modern recommender systems.
+
+## Model Implementation
+
+The implementation of the **NeuMF (Neural Matrix Factorization)** model involves constructing a neural network that combines Generalized Matrix Factorization (GMF) and Multi-Layer Perceptron (MLP) to handle user-item interactions for recommendation systems. This section provides a detailed breakdown of the model's architecture and its components.
+
+### Model Architecture
+
+The NeuMF model is implemented using a neural network framework that supports the following features:
+
+- **Latent Factor Embeddings**:
+- The model uses separate embedding layers for GMF and MLP components.
+- GMF uses embeddings `P` for users and `Q` for items, while MLP uses `U` for users and `V` for items. Each embedding layer maps users and items to a latent space of specified dimensions (`num_factors`).
+
+- **GMF Component**:
+- The GMF part computes the element-wise product of user and item embeddings to capture linear interactions.
+- This is expressed as:
+  $$ \text{gmf} = \mathbf{p}_{mf} \odot \mathbf{q}_{mf} $$
+- Here, $\mathbf{p}_{mf}$ and $\mathbf{q}_{mf}$ are the latent vectors for a user and an item, respectively.
+
+- **MLP Component**:
+- The MLP part concatenates user and item embeddings and passes them through multiple dense layers with ReLU activation to capture non-linear interactions.
+- The architecture of the MLP is controlled by the `nums_hiddens` parameter, which defines the number of hidden units in each layer.
+
+- **Concatenation and Prediction**:
+- The outputs from the GMF and MLP pathways are concatenated into a single vector.
+- This combined representation is fed into a final dense layer with a sigmoid activation function to predict the interaction score between a user and an item.
+
+![NeuMF](/static/courses/Advances-in-Recomender-Systems/rec-neumf.svg)
+
+### Implementation Code
+
+The following code snippet provides an implementation of the NeuMF model using a deep learning framework:
+
+```python
+import random
+import mxnet as mx
+from mxnet import autograd, gluon, np, npx
+from mxnet.gluon import nn
+from d2l import mxnet as d2l
+
+npx.set_np()
+
+class NeuMF(nn.Block):
+    def __init__(self, num_factors, num_users, num_items, nums_hiddens, **kwargs):
+        super(NeuMF, self).__init__(**kwargs)
+        self.P = nn.Embedding(num_users, num_factors)
+        self.Q = nn.Embedding(num_items, num_factors)
+        self.U = nn.Embedding(num_users, num_factors)
+        self.V = nn.Embedding(num_items, num_factors)
+        self.mlp = nn.Sequential()
+        for num_hiddens in nums_hiddens:
+            self.mlp.add(nn.Dense(num_hiddens, activation='relu', use_bias=True))
+        self.prediction_layer = nn.Dense(1, activation='sigmoid', use_bias=False)
+
+    def forward(self, user_id, item_id):
+        p_mf = self.P(user_id)
+        q_mf = self.Q(item_id)
+        gmf = p_mf * q_mf
+        p_mlp = self.U(user_id)
+        q_mlp = self.V(item_id)
+        mlp = self.mlp(np.concatenate([p_mlp, q_mlp], axis=1))
+        con_res = np.concatenate([gmf, mlp], axis=1)
+        return self.prediction_layer(con_res)
+```
+
+### Customizing Dataset with Negative Sampling
+
+In recommendation systems, particularly those focused on implicit feedback, **negative sampling** is a critical technique used to generate training data. This section delves into the creation of a customized dataset for the NeuMF model, emphasizing the role of negative sampling in handling implicit feedback effectively.
+
+#### Understanding Implicit Feedback
+
+- **Implicit Feedback**: This type of feedback is derived from user interactions such as clicks, views, or purchases. Unlike explicit feedback (e.g., ratings), implicit feedback is abundant and easier to collect but provides only positive signals, lacking explicit negative examples.
+- **Challenge**: The absence of negative feedback makes it challenging to train models effectively, as they need to learn not only what users like but also what they are less likely to engage with.
+
+#### Role of Negative Sampling
+
+- **Purpose**: Negative sampling addresses the challenge of implicit feedback by generating negative examples. It involves selecting items that a user has not interacted with as negative samples, assuming these are less preferred by the user.
+- **Training Objective**: By providing both positive (interacted) and negative (non-interacted) samples, the model can learn to rank items that a user has interacted with higher than those they have not, thereby improving recommendation accuracy.
+
+#### Implementation of Negative Sampling
+
+The implementation involves creating a dataset class that performs negative sampling:
+
+- **Candidate Items**: For each user, items that the user has not interacted with are considered candidate items for negative sampling.
+- **Random Selection**: Negative items are sampled randomly from the candidate set for each user. This randomness helps in generating a diverse set of negative samples, crucial for training robust models.
+
+#### Code Implementation
+
+Here is the implementation of the dataset class using negative sampling:
+
+```python
+class PRDataset(gluon.data.Dataset):
+    def __init__(self, users, items, candidates, num_items):
+        self.users = users
+        self.items = items
+        self.cand = candidates
+        self.all = set([i for i in range(num_items)])
+
+    def __len__(self):
+        return len(self.users)
+
+    def __getitem__(self, idx):
+        neg_items = list(self.all - set(self.cand[int(self.users[idx])]))
+        indices = random.randint(0, len(neg_items) - 1)
+        return self.users[idx], self.items[idx], neg_items[indices]
+```
+
+- **User and Item Management**: The class maintains lists of users and items along with candidate items (unobserved entries) for negative sampling.
+- **Efficient Sampling**: By randomly selecting negative samples for each user, the dataset ensures that the model learns to differentiate between items a user might like and those they are less likely to interact with.
+- **Training Objective**: During training, the model aims to rank items that a user has interacted with higher than those that they have not, using the generated negative samples to provide a contrast.
+
+This approach to dataset creation with negative sampling is essential for training recommendation models like NeuMF, as it helps simulate a realistic environment where the model must discern between positive and negative interactions. This ultimately leads to more accurate and personalized recommendations.
+
+### Evaluator
+
+The evaluation of recommendation systems is crucial for assessing their effectiveness in providing personalized content. In this section, we focus on evaluating the NeuMF model using specific metrics designed to measure its performance in ranking tasks. Two primary evaluation measures are employed: **Hit Rate** and **Area Under the ROC Curve (AUC)**. These metrics help in understanding how well the model performs in recommending relevant items to users.
+
+#### Evaluation Strategy
+
+- **Splitting by Time**: The dataset is split into training and test sets based on time. This approach simulates a real-world scenario where the model is trained on past interactions and tested on future interactions, ensuring that the evaluation reflects temporal dynamics.
+
+#### Hit Rate
+
+- **Definition**: Hit Rate at a given cutoff $$\ell$$ ($$\text{Hit}@\ell$$) measures whether the recommended item is included in the top $$\ell$$ ranked list for each user.
+- **Formula**:
+  $$ \text{Hit}@\ell = \frac{1}{m} \sum*{u \in \mathcal{U}} \textbf{1}(rank*{u, g_u} \leq \ell) $$
+- Here, $$\textbf{1}$$ is an indicator function that equals one if the ground truth item $$g_u$$ is ranked within the top $$\ell$$ positions for user $$u$$, otherwise it is zero.
+- $$m$$ is the total number of users, and $$\mathcal{U}$$ is the set of users.
+
+#### Area Under the ROC Curve (AUC)
+
+- **Definition**: AUC measures the model's ability to rank a randomly chosen positive instance higher than a randomly chosen negative instance.
+- **Formula**:
+  $$ \text{AUC} = \frac{1}{m} \sum*{u \in \mathcal{U}} \frac{1}{|\mathcal{I} \setminus S_u|} \sum*{j \in \mathcal{I} \setminus S*u} \textbf{1}(rank*{u, g*u} < rank*{u, j}) $$
+- $$\mathcal{I}$$ is the item set, and $$S_u$$ represents the candidate items for user $$u$$.
+- The AUC value ranges from 0 to 1, with higher values indicating better performance.
+
+#### Implementation of Evaluation Metrics
+
+The following code snippet illustrates how to calculate Hit Rate and AUC for each user:
+
+```python
+#@save
+def hit_and_auc(rankedlist, test_matrix, k):
+    hits_k = [(idx, val) for idx, val in enumerate(rankedlist[:k]) if val in set(test_matrix)]
+    hits_all = [(idx, val) for idx, val in enumerate(rankedlist) if val in set(test_matrix)]
+    max = len(rankedlist) - 1
+    auc = 1.0 * (max - hits_all) / max if len(hits_all) > 0 else 0
+    return len(hits_k), auc
+```
+
+- **Functionality**:
+- `rankedlist`: The list of items ranked by the model for a user.
+- `test_matrix`: The set of true items for the user.
+- `k`: The cutoff for calculating Hit Rate.
+- The function returns the number of hits within the top $$k$$ items and the AUC score for the user.
+
+### Overall Evaluation Code
+
+The overall evaluation of the NeuMF model involves calculating the Hit Rate and AUC across all users to provide a comprehensive assessment of the model's performance. The following code snippet implements the evaluation process:
+
+```python
+#@save
+def evaluate_ranking(net, test_input, seq, candidates, num_users, num_items, devices):
+    ranked_list, ranked_items, hit_rate, auc = {}, {}, [], []
+    all_items = set([i for i in range(num_users)])
+
+    for u in range(num_users):
+        neg_items = list(all_items - set(candidates[int(u)]))
+        user_ids, item_ids, x, scores = [], [], [], []
+
+        [item_ids.append(i) for i in neg_items]
+        [user_ids.append(u) for _ in neg_items]
+
+        x.extend([np.array(user_ids)])
+        if seq is not None:
+            x.append(seq[user_ids, :])
+        x.extend([np.array(item_ids)])
+
+        test_data_iter = gluon.data.DataLoader(
+            gluon.data.ArrayDataset(*x),
+            shuffle=False,
+            last_batch="keep",
+            batch_size=1024
+        )
+
+        for index, values in enumerate(test_data_iter):
+            x = [gluon.utils.split_and_load(v, devices, even_split=False) for v in values]
+            scores.extend([list(net(*t).asnumpy()) for t in zip(*x)])
+
+        scores = [item for sublist in scores for item in sublist]
+        item_scores = list(zip(item_ids, scores))
+        ranked_list[u] = sorted(item_scores, key=lambda t: t[1], reverse=True)
+        ranked_items[u] = [r[0] for r in ranked_list[u]]
+
+        temp = hit_and_auc(ranked_items[u], test_input[u], 50)
+        hit_rate.append(temp[0])
+        auc.append(temp[1])
+
+    return np.mean(np.array(hit_rate)), np.mean(np.array(auc))
+```
+
+#### Explanation of the Code
+
+- **Data Preparation**: For each user, the code generates a list of negative items (items not interacted with) and prepares input data by creating arrays of user IDs and item IDs.
+
+- **DataLoader**: The `gluon.data.DataLoader` is used to iterate over the test data in batches, which is efficient for large datasets.
+
+- **Score Calculation**: The model's predictions are obtained for each batch, and the scores are stored.
+
+- **Ranking**: The items are sorted based on their predicted scores to generate a ranked list for each user.
+
+- **Hit Rate and AUC Calculation**: The `hit_and_auc` function is called to compute the Hit Rate and AUC for each user, which are then averaged across all users to provide overall metrics.
+
+This evaluation process helps in understanding the effectiveness of the NeuMF model in recommending relevant items to users, providing insights into its performance in real-world scenarios.
+
+### 21.6.5. Training and Evaluating the Model
+
+Training and evaluating the NeuMF model involves a systematic approach to ensure that the model effectively learns from the data and that its performance is accurately assessed. This section outlines the steps involved in training the NeuMF model and evaluating its performance using specific metrics.
+
+#### Training the NeuMF Model
+
+The training process for NeuMF is designed to optimize the model's ability to rank items based on implicit feedback. Key aspects of the training process include:
+
+- **Pairwise Training**: NeuMF is trained using a pairwise ranking loss, which aims to ensure that items a user interacts with are ranked higher than those they do not. This method is effective for handling implicit feedback, where explicit negative feedback is not available.
+
+- **Training Loop**: The training loop iterates over the dataset for a specified number of epochs. In each epoch, the model processes batches of user-item interactions, computes predictions, and updates its parameters based on the loss.
+
+- **Loss Function**: The pairwise ranking loss, such as Bayesian Personalized Ranking (BPR) loss, is used to optimize the model. This loss function focuses on the relative ranking of items rather than predicting exact ratings.
+
+- **Optimizer**: An optimizer, such as Adam, is used to update the model's parameters. The learning rate and weight decay are crucial hyperparameters that influence the training dynamics.
+
+#### Implementation Code for Training
+
+```python
+#@save
+def train_ranking(net, train_iter, test_iter, loss, trainer, test_seq_iter, num_users, num_items, num_epochs, devices, evaluator, candidates, eval_step=1):
+    timer, hit_rate, auc = d2l.Timer(), 0, 0
+    animator = d2l.Animator(xlabel='epoch', xlim=[1, num_epochs], ylim=[0, 1], legend=['test hit rate', 'test AUC'])
+
+    for epoch in range(num_epochs):
+        metric, l = d2l.Accumulator(3), 0.
+        for i, values in enumerate(train_iter):
+            input_data = []
+            for v in values:
+                input_data.append(gluon.utils.split_and_load(v, devices))
+
+            with autograd.record():
+                p_pos = [net(*t) for t in zip(*input_data[:-1])]
+                p_neg = [net(*t) for t in zip(*input_data[:-2], input_data[-1])]
+                ls = [loss(p, n) for p, n in zip(p_pos, p_neg)]
+                [l.backward(retain_graph=False) for l in ls]
+
+            l += sum([l.asnumpy() for l in ls]).mean() / len(devices)
+            trainer.step(values[0].shape[0])
+            metric.add(l, values[0].shape[0], values[0].size)
+
+        timer.stop()
+
+        with autograd.predict_mode():
+            if (epoch + 1) % eval_step == 0:
+                hit_rate, auc = evaluator(net, test_iter, test_seq_iter, candidates, num_users, num_items, devices)
+                animator.add(epoch + 1, (hit_rate, auc))
+
+        print(f'train loss {metric[0] / metric[1]:.3f}, test hit rate {float(hit_rate):.3f}, test AUC {float(auc):.3f}')
+        print(f'{metric[2] * num_epochs / timer.sum():.1f} examples/sec on {str(devices)}')
+```
+
+#### Evaluating the NeuMF Model
+
+Evaluation of the NeuMF model is conducted using metrics that assess its ability to rank items effectively:
+
+- **Hit Rate**: This metric measures whether the true positive item is within the top-$$k$$ recommendations. It provides insight into the model's precision in recommending relevant items.
+
+- **AUC (Area Under the ROC Curve)**: AUC evaluates the model's ability to rank a positive instance higher than a negative one. It is a robust measure of ranking performance, particularly in scenarios with imbalanced data.
+
+#### Dataset and Training Setup
+
+- **Dataset**: The MovieLens 100k dataset is used, where ratings are binarized to represent implicit feedback (1 for rated items, 0 otherwise).
+
+- **Model Initialization**: The NeuMF model is initialized with a three-layer MLP, each layer having a constant hidden size of 10. The model is trained using GPUs to leverage parallel processing capabilities.
+
+- **Training Parameters**: The learning rate, number of epochs, and weight decay are set to optimize the model's performance. The Adam optimizer is employed for parameter updates.
+
+#### Dataset and Model Initialization
+
+```python
+batch_size = 1024
+df, num_users, num_items = d2l.read_data_ml100k()
+train_data, test_data = d2l.split_data_ml100k(df, num_users, num_items, 'seq-aware')
+users_train, items_train, ratings_train, candidates = d2l.load_data_ml100k(train_data, num_users, num_items, feedback="implicit")
+users_test, items_test, ratings_test, test_iter = d2l.load_data_ml100k(test_data, num_users, num_items, feedback="implicit")
+train_iter = gluon.data.DataLoader(PRDataset(users_train, items_train, candidates, num_items), batch_size, True, last_batch="rollover", num_workers=d2l.get_dataloader_workers())
+
+devices = d2l.try_all_gpus()
+net = NeuMF(10, num_users, num_items, nums_hiddens=[10, 10, 10])
+net.initialize(ctx=devices, force_reinit=True, init=mx.init.Normal(0.01))
+```
+
+#### Training the Model
+
+```python
+lr, num_epochs, wd, optimizer = 0.01, 10, 1e-5, 'adam'
+loss = d2l.BPRLoss()
+trainer = gluon.Trainer(net.collect_params(), optimizer, {"learning_rate": lr, 'wd': wd})
+train_ranking(net, train_iter, test_iter, loss, trainer, None, num_users, num_items, num_epochs, devices, evaluate_ranking, candidates)
+```
+
+By following this structured approach to training and evaluating the NeuMF model, one can ensure that the model learns effectively from implicit feedback and provides accurate and personalized recommendations.

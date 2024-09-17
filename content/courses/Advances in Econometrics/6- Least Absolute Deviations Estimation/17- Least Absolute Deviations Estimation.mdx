@@ -1,0 +1,74 @@
+---
+title: Least Absolute Deviations Estimation
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+### **Least Absolute Deviations Estimation**
+
+Least Absolute Deviations (LAD) estimation is an alternative to the Ordinary Least Squares (OLS) method, primarily used when the assumptions of OLS are violated, particularly in the presence of outliers. Unlike OLS, which minimizes the sum of squared residuals, LAD minimizes the sum of the absolute values of residuals. This approach provides a robust estimation method that is less sensitive to outliers in the data.
+
+#### **Mathematical Formulation**
+
+Consider a linear regression model:
+
+$$
+Y_i = \beta_0 + \beta_1 X_{1i} + \beta_2 X_{2i} + \ldots + \beta_k X_{ki} + u_i
+$$
+
+where:
+
+- $$ Y_i $$ is the dependent variable,
+- $$ X*{1i}, X*{2i}, \ldots, X\_{ki} $$ are independent variables,
+- $$ \beta_0, \beta_1, \ldots, \beta_k $$ are parameters to be estimated,
+- $$ u_i $$ is the error term.
+
+The LAD estimator seeks to minimize the following objective function:
+
+$$
+\min_{\beta_0, \beta_1, \ldots, \beta_k} \sum_{i=1}^{n} |Y_i - (\beta_0 + \beta_1 X_{1i} + \ldots + \beta_k X_{ki})|
+$$
+
+This objective function focuses on reducing the absolute deviations between observed and predicted values, making it robust to large deviations caused by outliers.
+
+#### **Properties and Advantages of LAD**
+
+1. **Robustness to Outliers**:
+
+- LAD estimation is less sensitive to outliers compared to OLS because it does not square the residuals. This means that large deviations have a linear rather than quadratic impact on the objective function.
+
+2. **Efficiency**:
+
+- While LAD is robust to outliers, it may be less efficient than OLS when errors are normally distributed without outliers. This trade-off between robustness and efficiency must be considered when choosing between LAD and OLS.
+
+3. **Non-Differentiability**:
+
+- The absolute value function is not differentiable at zero, making LAD estimation more complex than OLS. Specialized algorithms like linear programming methods or iterative reweighted least squares are often used for computation.
+
+#### **Application Example**
+
+Suppose we have a dataset with observations on income ($$Y$$) and years of education ($$X$$). In a scenario where some income data points are erroneous or extreme due to data entry errors or other anomalies, using OLS might lead to biased estimates due to these outliers. Applying LAD would minimize the impact of these outliers on the estimated relationship between income and education.
+
+#### **Comparison with OLS**
+
+| Feature                  | OLS                                     | LAD                                |
+| ------------------------ | --------------------------------------- | ---------------------------------- |
+| Objective Function       | Minimize sum of squared residuals       | Minimize sum of absolute residuals |
+| Sensitivity to Outliers  | High                                    | Low                                |
+| Computational Complexity | Lower                                   | Higher                             |
+| Efficiency               | Higher with normally distributed errors | Lower if no outliers present       |
+
+### **Conclusion**
+
+Least Absolute Deviations estimation offers a robust alternative to OLS, particularly useful in datasets with outliers or non-normally distributed errors. While it provides robustness against large deviations, it may require more complex computational techniques and can be less efficient under ideal conditions where OLS assumptions hold true. Understanding when and how to apply LAD is crucial for econometricians dealing with real-world data challenges.
+
+[^1]: https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/30626316/2be59c8f-ac44-43e7-a595-38c5bea42df7/Jeffrey_M_Wooldridge_Introductory_Econometrics_A_Modern_Approach.pdf
+[^2]: https://connectjournals.com/file_full_text/372702H_5_355-372.pdf
+[^3]: https://dspace.cuni.cz/bitstream/handle/20.500.11956/91418/130215341.pdf?isAllowed=y&sequence=1
+[^4]: https://gurobi-optimods.readthedocs.io/en/latest/mods/lad-regression.html
+[^5]: https://mpra.ub.uni-muenchen.de/1781/1/MPRA_paper_1781.pdf
+[^6]: https://en.wikipedia.org/wiki/Least_absolute_deviations

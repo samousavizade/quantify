@@ -1,0 +1,147 @@
+---
+title: Modeling
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Modeling
+
+After detecting nonlinearity in a time series, the next step is to build a nonlinear model for the data. This modeling step consists of three parts:
+
+1. Specify a nonlinear model
+2. Estimate the parameters of the model
+3. Evaluate the adequacy of the fitted model
+
+### Model Specification
+
+The specification of a nonlinear model depends on the particular application and the characteristics of the data. Some general guidelines include:
+
+1. Use graphical tools such as scatter plots of $r_t$ versus $r_{t-1}$, $r_{t-2}$, etc. to visualize potential nonlinear relationships.
+
+2. Consider the results of nonlinearity tests to inform model choice. For example, if the TAR test is significant, a threshold model may be appropriate.
+
+3. Incorporate domain knowledge about the underlying process generating the data.
+
+4. Start with simpler models and gradually increase complexity as needed.
+
+Some common nonlinear model specifications include:
+
+- Threshold Autoregressive (TAR) model:
+
+$$
+r_t = \begin{cases}
+\phi_{10} + \phi_{11}r_{t-1} + \cdots + \phi_{1p}r_{t-p} + \sigma_1 \epsilon_t & \text{if } r_{t-d} \leq r_0 \\
+\phi_{20} + \phi_{21}r_{t-1} + \cdots + \phi_{2p}r_{t-p} + \sigma_2 \epsilon_t & \text{if } r_{t-d} > r_0
+\end{cases}
+$$
+
+- Smooth Transition Autoregressive (STAR) model:
+
+$$
+r_t = (\phi_{10} + \phi_{11}r_{t-1} + \cdots + \phi_{1p}r_{t-p})(1-G(s_t)) +
+(\phi_{20} + \phi_{21}r_{t-1} + \cdots + \phi_{2p}r_{t-p})G(s_t) + \sigma \epsilon_t
+$$
+
+where $G(s_t)$ is a smooth transition function.
+
+- Markov Switching model:
+
+$$
+r_t = \mu_{S_t} + \phi_{1,S_t}r_{t-1} + \cdots + \phi_{p,S_t}r_{t-p} + \sigma_{S_t} \epsilon_t
+$$
+
+where $S_t$ is an unobserved state variable following a Markov chain.
+
+- Bilinear model:
+
+$$
+r_t = \phi_0 + \sum_{i=1}^p \phi_i r_{t-i} + \sum_{j=1}^q \theta_j \epsilon_{t-j} + \sum_{i=1}^m \sum_{j=1}^n \beta_{ij} r_{t-i} \epsilon_{t-j} + \epsilon_t
+$$
+
+### Parameter Estimation
+
+Once a model is specified, the next step is to estimate its parameters. The choice of estimation method depends on the model structure:
+
+1. **Least Squares**: For models that can be written in a regression form, such as TAR models, least squares estimation can be used. This involves minimizing the sum of squared residuals:
+
+$$
+\text{SSR} = \sum_{t=1}^T (r_t - \hat{r}_t)^2
+$$
+
+where $\hat{r}_t$ is the fitted value from the model.
+
+2. **Maximum Likelihood**: For models with specific distributional assumptions, maximum likelihood estimation is often preferred. This involves maximizing the log-likelihood function:
+
+$$
+\ell(\theta) = \sum_{t=1}^T \log f(r_t | r_{t-1}, \ldots, r_1; \theta)
+$$
+
+where $f$ is the conditional density function and $\theta$ is the parameter vector.
+
+3. **Nonlinear Least Squares**: For models that cannot be linearized, such as STAR models, nonlinear least squares methods are used. This involves minimizing:
+
+$$
+\text{SSR}(\theta) = \sum_{t=1}^T (r_t - g(r_{t-1}, \ldots, r_{t-p}; \theta))^2
+$$
+
+where $g$ is the nonlinear function specified by the model.
+
+4. **Bayesian Methods**: For complex models like Markov switching models, Bayesian estimation techniques such as Markov Chain Monte Carlo (MCMC) are often employed. These methods estimate the posterior distribution of parameters:
+
+$$
+p(\theta | r_1, \ldots, r_T) \propto p(r_1, \ldots, r_T | \theta) p(\theta)
+$$
+
+where $p(\theta)$ is the prior distribution of parameters.
+
+5. **Two-Step Procedures**: For some models, like TAR models, a two-step procedure may be used:
+
+a) Grid search over potential threshold values
+b) Conditional on each threshold, estimate other parameters by least squares
+c) Choose the threshold that minimizes overall SSR
+
+### Model Evaluation
+
+After estimating the model, it's crucial to evaluate its adequacy. This involves several steps:
+
+1. **Residual Analysis**: Examine the residuals $\hat{\epsilon}_t = r_t - \hat{r}_t$ for any remaining structure. This can include:
+
+- Plotting the ACF and PACF of residuals and squared residuals
+- Conducting Ljung-Box tests on residuals and squared residuals
+- Checking for normality of residuals using Q-Q plots and formal tests
+
+2. **Parameter Significance**: Assess the statistical significance of estimated parameters using t-tests or likelihood ratio tests.
+
+3. **Model Comparison**: Compare the fitted model with alternative specifications using information criteria such as AIC or BIC:
+
+$$
+\text{AIC} = -2\log L + 2k
+$$
+
+$$
+\text{BIC} = -2\log L + k\log T
+$$
+
+where $L$ is the likelihood, $k$ is the number of parameters, and $T$ is the sample size.
+
+4. **Forecast Evaluation**: Assess the out-of-sample forecast performance of the model using metrics like Mean Squared Error (MSE) or Mean Absolute Error (MAE):
+
+$$
+\text{MSE} = \frac{1}{h} \sum_{i=1}^h (r_{T+i} - \hat{r}_{T+i})^2
+$$
+
+where $h$ is the forecast horizon and $\hat{r}_{T+i}$ is the $i$-step ahead forecast.
+
+5. **Stability Analysis**: Check the stability of the model over different subsamples or under different initial conditions (for models estimated via iterative procedures).
+
+6. **Diagnostic Checks**: Conduct model-specific diagnostic checks. For example, for TAR models, verify that the number of observations in each regime is sufficient.
+
+7. **Interpretability**: Assess whether the fitted model provides meaningful insights into the underlying process generating the data.
+
+If the model fails to pass these evaluation criteria, the modeler should return to the specification step and consider alternative models or refinements to the current specification.
+
+It's important to note that nonlinear modeling often involves a trade-off between model complexity and interpretability. While more complex models may provide better in-sample fit, they may also be prone to overfitting and poor out-of-sample performance. Therefore, the principle of parsimony should be kept in mind throughout the modeling process.

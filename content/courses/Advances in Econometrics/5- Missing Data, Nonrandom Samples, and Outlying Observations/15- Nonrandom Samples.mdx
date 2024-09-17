@@ -1,0 +1,63 @@
+---
+title: Nonrandom Samples
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+### **Nonrandom Samples**
+
+In econometric analysis, nonrandom samples occur when the sample data are not representative of the population from which they are drawn due to systematic selection biases. This can lead to biased and inconsistent estimates, as the sample does not accurately reflect the population characteristics. Understanding and addressing nonrandom samples is crucial for ensuring that econometric models provide reliable insights.
+
+#### **Causes of Nonrandom Sampling**
+
+1. **Self-Selection**: Individuals or units choose whether to participate in a study or survey, leading to a sample that may not be representative of the population. For example, a survey on income might attract more responses from higher-income individuals who are more interested in financial topics.
+
+2. **Survey Design**: The way a survey is designed and distributed can lead to nonrandom sampling. If certain groups are more likely to be reached or respond, this can bias the sample.
+
+3. **Data Collection Methods**: Methods that inherently exclude certain segments of the population (e.g., online surveys excluding those without internet access) can lead to nonrandom samples.
+
+#### **Implications of Nonrandom Sampling**
+
+- **Selection Bias**: When certain groups are overrepresented or underrepresented in the sample, leading to biased parameter estimates. This bias occurs because the sample does not accurately reflect the population distribution.
+
+- **Endogeneity**: If the selection process is correlated with the error term in a regression model, it can lead to endogeneity issues, complicating causal inference.
+
+#### **Addressing Nonrandom Sampling**
+
+1. **Weighting**:
+
+- Applying weights to observations based on their probability of selection can help correct for nonrandom sampling. This approach adjusts the sample to better reflect the population distribution.
+- For example, if a particular demographic is underrepresented in a sample, weights can be applied to increase their influence in the analysis.
+
+2. **Sample Selection Models**:
+
+- Models like Heckman's two-step procedure can be used to correct for selection bias by modeling the selection process explicitly.
+- The first step involves estimating a selection equation to model the probability of inclusion in the sample.
+- The second step adjusts the main regression model using information from the selection equation.
+
+3. **Instrumental Variables (IV)**:
+
+- IV methods can be employed when there is concern about endogeneity due to nonrandom sampling. An instrument must be correlated with the endogenous explanatory variable but uncorrelated with the error term.
+
+4. **Randomized Controlled Trials (RCTs)**:
+
+- When feasible, RCTs can help ensure random sampling by randomly assigning subjects to treatment and control groups, thereby eliminating selection bias.
+
+5. **Post-Stratification**:
+
+- Adjusting sample estimates based on known population totals for certain subgroups can help mitigate bias introduced by nonrandom sampling.
+
+By recognizing and addressing nonrandom sampling issues, econometricians can improve the accuracy and validity of their analyses, ensuring that conclusions drawn from statistical models reflect true underlying relationships rather than artifacts of biased data collection processes.
+
+[^1]: https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/30626316/2be59c8f-ac44-43e7-a595-38c5bea42df7/Jeffrey_M_Wooldridge_Introductory_Econometrics_A_Modern_Approach.pdf
+[^2]: https://www.diw.de/documents/publikationen/73/diw_01.c.500068.de/dp1465.pdf
+[^3]: https://www.econstor.eu/bitstream/10419/180895/1/Clougherty_2016_Correcting-Self-Selection_mS.pdf
+[^4]: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6089543/
+[^5]: https://projecteuclid.org/journals/statistics-surveys/volume-14/issue-none/Can-p-values-be-meaningfully-interpreted-without-random-sampling/10.1214/20-SS129.pdf
+[^6]: https://onlinelibrary.wiley.com/doi/full/10.1002/jae.3029
+[^7]: https://bmcmedresmethodol.biomedcentral.com/articles/10.1186/s12874-024-02262-x
+[^8]: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11179247/

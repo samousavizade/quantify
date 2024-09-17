@@ -1,0 +1,60 @@
+---
+title: Weighted Least Squares Estimation
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Weighted Least Squares Estimation
+
+### The Heteroskedasticity Is Known up to a Multiplicative Constant\*\*
+
+Weighted Least Squares (WLS) is an estimation technique used in econometrics to handle heteroskedasticity, which occurs when the variance of the error terms in a regression model is not constant across observations. When heteroskedasticity is known up to a multiplicative constant, WLS can be applied to obtain efficient and unbiased estimates.
+
+#### **Understanding the Known Heteroskedasticity**
+
+When heteroskedasticity is known up to a multiplicative constant, it means that the variance of the error term for each observation is proportional to a known function of the independent variable(s). Mathematically, if the variance of the error term $$ u_i $$ is $$ \sigma_i^2 = \sigma^2 h(x_i) $$, where $$ h(x_i) $$ is a known function, then the errors are heteroskedastic.
+
+#### **Weighted Least Squares Estimation**
+
+To perform WLS, each observation in the regression model is weighted by the inverse of its variance. This process transforms the model into one with homoskedastic errors, allowing for efficient estimation.
+
+1. **Model Transformation**:
+
+- Start with the original model:
+  $$
+  y_i = \beta_0 + \beta_1 x_i + u_i
+  $$
+- Given that $$ \text{Var}(u_i) = \sigma^2 h(x_i) $$, transform the model by dividing each term by $$ \sqrt{h(x_i)} $$:
+  $$
+  \frac{y_i}{\sqrt{h(x_i)}} = \beta_0 \frac{1}{\sqrt{h(x_i)}} + \beta_1 \frac{x_i}{\sqrt{h(x_i)}} + \frac{u_i}{\sqrt{h(x_i)}}
+  $$
+- This transformation ensures that the transformed error term has constant variance.
+
+2. **Weighted Regression**:
+
+- Perform OLS on the transformed model. The weights used in WLS are typically $$ w_i = 1/h(x_i) $$.
+- The WLS estimator minimizes the weighted sum of squared residuals:
+  $$
+  \sum_{i=1}^{n} w_i (y_i - \beta_0 - \beta_1 x_i)^2
+  $$
+
+3. **Efficiency and Consistency**:
+
+- WLS provides efficient and consistent estimates of the regression coefficients under heteroskedasticity when the form of heteroskedasticity is correctly specified.
+
+### **Example Application**
+
+Suppose you are analyzing household expenditure data where expenditure variability increases with income. If it is known that $$ \text{Var}(u_i) = \sigma^2 x_i^2 $$, where $$ x_i $$ represents income, then WLS can be applied with weights $$ w_i = 1/x_i^2 $$. This transformation will stabilize the variance across observations, allowing for more reliable inference from the regression model.
+
+By using WLS when heteroskedasticity is known up to a multiplicative constant, econometricians can obtain more reliable estimates and make valid inferences about economic relationships.
+
+[^1]: https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/30626316/2be59c8f-ac44-43e7-a595-38c5bea42df7/Jeffrey_M_Wooldridge_Introductory_Econometrics_A_Modern_Approach.pdf
+[^2]: https://ms.mcmaster.ca/canty/teaching/stat3a03/Lectures7.pdf
+[^3]: https://gregorygundersen.com/blog/2022/08/09/weighted-ols/
+[^4]: https://en.wikipedia.org/wiki/Weight_matrix
+[^5]: https://bookdown.org/ccolonescu/RPoE4/heteroskedasticity.html
+[^6]: https://www.youtube.com/watch?v=wCJ8I-MtJdQ

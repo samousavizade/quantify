@@ -1,0 +1,1008 @@
+---
+title: Optimal Transport
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+# Efficient Distribution
+
+## Synopsis
+
+The **distribution** or **efficient distribution** challenge is noteworthy due to its numerous applications and its significant role in the evolution of economic theory.
+
+In this discussion, we'll outline the problem, explain how **linear programming** is a crucial tool for solving it, and then provide some examples.
+
+We'll explore additional applications in subsequent discussions.
+
+The efficient distribution problem was examined in early work on linear programming, as summarized by [[Dorfman _et al._, 1958](/courses/Introduction-to-Quantitative-Economics/References#id40)]. A contemporary reference for economic applications is [[Galichon, 2016](/courses/Introduction-to-Quantitative-Economics/References#id41)].
+
+Below, we demonstrate how to solve the efficient distribution problem using several linear programming implementations, including:
+
+1. The [linprog](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.linprog.html) solver from SciPy,
+2. The [linprog_simplex](https://quanteconpy.readthedocs.io/en/latest/optimize/linprog_simplex.html) solver from QuantEcon, and
+3. The simplex-based solvers included in the [Python Optimal Transport](https://pythonot.github.io/) package.
+
+```python
+!pip install --upgrade quantecon
+!pip install --upgrade POT
+```
+
+Let's begin with some necessary imports.
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.optimize import linprog
+from quantecon.optimize.linprog_simplex import linprog_simplex
+import ot
+from scipy.stats import betabinom
+import networkx as nx
+```
+
+    OMP: Info #276: omp_set_nested routine deprecated, please use omp_set_max_active_levels instead.
+
+## The Efficient Distribution Challenge
+
+Consider a scenario where $ m $ factories produce goods that must be transported to $ n $ locations.
+
+Let
+
+- $ x\_{ij} $ represent the quantity shipped from factory $ i $ to location $ j $
+- $ c\_{ij} $ denote the cost of shipping one unit from factory $ i $ to location $ j $
+- $ p_i $ represent the capacity of factory $ i $ and $ q_j $ represent the amount required at location $ j $.
+- $ i = 1, 2, \dots, m $ and $ j = 1, 2, \dots, n $.
+
+A planner aims to minimize total transportation costs subject to these constraints:
+
+- The amount shipped **from** each factory must equal its capacity....
+- The amount shipped **to** each location must equal the quantity required there.
+
+The image below illustrates this concept when factories and target locations are distributed in a plane.
+
+![https://python.quantecon.org/_static/lecture_specific/opt_transport/optimal_transport_splitting_experiment.png](https://python.quantecon.org/_static/lecture_specific/opt_transport/optimal_transport_splitting_experiment.png)
+
+The size of the vertices in the image is proportional to
+
+- capacity, for the factories, and
+- demand (amount required) for the target locations.
+
+The arrows depict one possible transport plan that adheres to the stated constraints.
+
+The planner's challenge can be expressed as the following constrained minimization problem:
+
+$$
+\begin{aligned}
+\min_{x_{ij}} \ & \sum_{i=1}^m \sum_{j=1}^n c_{ij} x_{ij} \\
+\text{subject to} \ & \sum_{j=1}^n x_{ij} = p_i, & i = 1, 2, \dots, m \\
+& \sum_{i=1}^m x_{ij} = q_j, & j = 1, 2, \dots, n \\
+& x_{ij} \ge 0 \\
+\end{aligned} \tag{17.1}
+$$
+
+This is an **efficient distribution problem** with
+
+- $ mn $ decision variables, namely, the entries $ x\_{ij} $ and
+- $ m+n $ constraints.
+
+Summing the $ q_j $'s across all $ j $'s and the $ p_i $'s across all $ i $'s indicates that the total capacity of all the factories equals total requirements at all locations:
+
+$$
+\sum_{j=1}^n q_j
+= \sum_{j=1}^n \sum_{i=1}^m x_{ij}
+= \sum_{i=1}^m \sum_{j=1}^n x_{ij}
+= \sum_{i=1}^m p_i \tag{17.2}
+$$
+
+The presence of the restrictions in [(17.2)](#equation-sumconstraints) will result in one redundancy in the complete set of restrictions that we'll describe later.
+
+We'll discuss this further in the following sections.
+
+## The Linear Programming Method
+
+In this section, we'll explore using standard linear programming solvers to address the efficient distribution problem.
+
+### Transforming a Matrix of Decision Variables
+
+A _matrix_ of decision variables $ x\_{ij} $ appears in problem [(17.1)](#equation-plannerproblem).
+
+The SciPy function `linprog` expects a _vector_ of decision variables.
+
+This situation requires us to reformulate our problem in terms of a _vector_ of decision variables.
+
+Let
+
+- $ X, C $ be $ m \times n $ matrices with entries $ x*{ij}, c*{ij} $,
+- $ p $ be $ m $-dimensional vector with entries $ p_i $,
+- $ q $ be $ n $-dimensional vector with entries $ q_j $.
+
+With $ \mathbf{1}\_n $ denoting the $ n $-dimensional column vector $ (1, 1, \dots, 1)' $, our problem can now be expressed concisely as:
+
+$$
+\begin{aligned}
+\min_{X} \ & \operatorname{tr} (C' X) \\
+\text{subject to } \ & X \ \mathbf{1}_n = p \\
+& X' \ \mathbf{1}_m = q \\
+& X \ge 0 \\
+\end{aligned}
+$$
+
+We can convert the matrix $ X $ into a vector by stacking all of its columns into a column vector.
+
+This process is called **vectorization**, which we denote as $ \operatorname{vec}(X) $.
+
+Similarly, we convert the matrix $ C $ into an $ mn $-dimensional vector $ \operatorname{vec}(C) $.
+
+The objective function can be expressed as the inner product between $ \operatorname{vec}(C) $ and $ \operatorname{vec}(X) $:
+
+$$
+\operatorname{vec}(C)' \cdot \operatorname{vec}(X).
+$$
+
+To express the constraints in terms of $ \operatorname{vec}(X) $, we use a **Kronecker product** denoted by $ \otimes $ and defined as follows.
+
+Suppose $ A $ is an $ m \times s $ matrix with entries $ (a\_{ij}) $ and that $ B $ is an $ n \times t $ matrix.
+
+The **Kronecker product** of $ A $ and $ B $ is defined, in block matrix form, by
+
+$$
+A \otimes B =
+\begin{pmatrix}
+a_{11}B & a_{12}B & \dots & a_{1s}B \\
+a_{21}B & a_{22}B & \dots & a_{2s}B \\
+& & \vdots & \\
+a_{m1}B & a_{m2}B & \dots & a_{ms}B \\
+\end{pmatrix}.
+$$
+
+$ A \otimes B $ is an $ mn \times st $ matrix.
+
+It has the property that for any $ m \times n $ matrix $ X $
+
+$$
+\operatorname{vec}(A'XB) = (B' \otimes A') \operatorname{vec}(X). \tag{17.3}
+$$
+
+We can now express our constraints in terms of $ \operatorname{vec}(X) $.
+
+Let $ A = \mathbf{I}\_m',... B = \mathbf{1}\_n $.
+
+By equation [(17.3)](#equation-kroneckerprop)
+
+$$
+X \ \mathbf{1}_n
+= \operatorname{vec}(X \ \mathbf{1}_n)
+= \operatorname{vec}(\mathbf{I}_m X \ \mathbf{1}_n)
+= (\mathbf{1}_n' \otimes \mathbf{I}_m) \operatorname{vec}(X).
+$$
+
+where $ \mathbf{I}\_m $ denotes the $ m \times m $ identity matrix.
+
+Constraint $ X \ \mathbf{1}\_n = p $ can now be written as:
+
+$$
+(\mathbf{1}_n' \otimes \mathbf{I}_m) \operatorname{vec}(X) = p.
+$$
+
+Similarly, the constraint $ X' \ \mathbf{1}\_m = q $ can be rewritten as:
+
+$$
+(\mathbf{I}_n \otimes \mathbf{1}_m') \operatorname{vec}(X) = q.
+$$
+
+With $ z := \operatorname{vec}(X) $, our problem can now be expressed in terms of an $ mn $-dimensional vector of decision variables:
+
+$$
+\begin{aligned}
+\min_{z} \ & \operatorname{vec}(C)' z \\
+\text{subject to } \ & A z = b \\
+& z \ge 0 \\
+\end{aligned} \tag{17.4}
+$$
+
+where
+
+$$
+A =
+\begin{pmatrix}
+\mathbf{1}_n' \otimes \mathbf{I}_m \\
+\mathbf{I}_n \otimes \mathbf{1}_m' \\
+\end{pmatrix}
+\quad \text{and} \quad
+b = \begin{pmatrix}
+p \\
+q \\
+\end{pmatrix}
+$$
+
+### A Practical Example
+
+We'll now present an example that takes the form [(17.4)](#equation-decisionvars) which we'll solve using the `linprog` function.
+
+The table below provides figures for the requirements vector $ q $, the capacity vector $ p $, and entries $ c\_{ij} $ of the cost-of-shipping matrix $ C $.
+
+The figures in the above table instruct us to set $ m = 3 $, $ n = 5 $, and construct the following objects:
+
+$$
+p = \begin{pmatrix}
+50 \\
+100 \\
+150
+\end{pmatrix},
+\quad
+q =
+\begin{pmatrix}
+25 \\
+115 \\
+60 \\
+30 \\
+70
+\end{pmatrix}
+\quad \text{and} \quad
+C =
+\begin{pmatrix}
+10 &15 &20 &20 &40 \\
+20 &40 &15 &30 &30 \\
+30 &35 &40 &55 &25
+\end{pmatrix}.
+$$
+
+Let's write Python code to set up the problem and solve it.
+
+```python
+# Define parameters
+m = 3
+n = 5
+
+p = np.array([50, 100, 150])
+q = np.array([25, 115, 60, 30, 70])
+
+C = np.array([[10, 15, 20, 20, 40],
+              [20, 40, 15, 30, 30],
+              [30, 35, 40, 55, 25]])
+
+# Vectorize matrix C
+C_vec = C.reshape((m*n, 1), order='F')
+
+# Construct matrix A by Kronecker product
+A1 = np.kron(np.ones((1, n)), np.identity(m))
+A2 = np.kron(np.identity(n), np.ones((1, m)))
+A = np.vstack([A1, A2])
+
+# Construct vector b
+b = np.hstack([p, q])
+
+# Solve the primal problem
+res = linprog(C_vec, A_eq=A, b_eq=b)
+
+# Print results
+print("message:", res.message)
+print("nit:", res.nit)
+print("fun:", res.fun)
+print("z:", res.x)
+print("X:", res.x.reshape((m,n), order='F'))
+```
+
+    message: Optimization terminated successfully. (HiGHS Status 7: Optimal)
+    nit: 8
+    fun: 7225.0
+    z: [ 0. 10. 15. 50.  0. 65.  0. 60.  0.  0. 30.  0.  0.  0. 70.]
+    X: [[ 0. 50.  0.  0.  0.]
+     [10.  0. 60. 30.  0.]
+     [15. 65.  0.  0. 70.]]
+
+Note how, in the line `C_vec = C.reshape((m*n, 1), order='F')`, we are careful to vectorize using the flag `order='F'`.
+
+This aligns with converting $ C $ into a vector by stacking all of its columns into a column vector.
+
+Here `'F'` stands for "Fortran", and we are using Fortran style column-major order.
+
+(For an alternative approach, using Python's default row-major ordering,... see [this lecture by Alfred Galichon](https://www.math-econ-code.org/dynamic-programming).)
+
+**Understanding the warning:**
+
+The above warning message from SciPy indicates that A is not full rank.
+
+This suggests that the linear program has been set up to include one or more redundant constraints.
+
+In this case, the source of the redundancy is the structure of restrictions [(17.2)](#equation-sumconstraints).
+
+Let's investigate this further by printing out $ A $ and examining it closely.
+
+```python
+A
+```
+
+    array([[1., 0., 0., 1., 0., 0., 1., 0., 0., 1., 0., 0., 1., 0., 0.],
+           [0., 1., 0., 0., 1., 0., 0., 1., 0., 0., 1., 0., 0., 1., 0.],
+           [0., 0., 1., 0., 0., 1., 0., 0., 1., 0., 0., 1., 0., 0., 1.],
+           [1., 1., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+           [0., 0., 0., 1., 1., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+           [0., 0., 0., 0., 0., 0., 1., 1., 1., 0., 0., 0., 0., 0., 0.],
+           [0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 1., 1., 0., 0., 0.],
+           [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 1., 1.]])
+
+The singularity of $ A $ reflects that both the first three constraints and the last five constraints require that "total requirements equal total capacities" as expressed in [(17.2)](#equation-sumconstraints).
+
+One equality constraint here is redundant.
+
+Below we remove one of the equality constraints, using only 7 of them.
+
+After doing this, we achieve the same minimized cost.
+
+However, we find a different distribution plan.
+
+Although it's a different plan, it achieves the same cost!
+
+```python
+linprog(C_vec, A_eq=A[:-1], b_eq=b[:-1])
+```
+
+            message: Optimization terminated successfully. (HiGHS Status 7: Optimal)
+            success: True
+             status: 0
+                fun: 7225.0
+                  x: [ 0.000e+00  1.000e+01 ...  0.000e+00  7.000e+01]
+                nit: 8
+              lower:  residual: [ 0.000e+00  1.000e+01 ...  0.000e+00
+                                  7.000e+01]
+                     marginals: [ 0.000e+00  0.000e+00 ...  1.500e+01
+                                  0.000e+00]
+              upper:  residual: [       inf        inf ...        inf
+                                        inf]
+                     marginals: [ 0.000e+00  0.000e+00 ...  0.000e+00
+                                  0.000e+00]
+              eqlin:  residual: [ 0.000e+00  0.000e+00  0.000e+00  0.000e+00
+                                  0.000e+00  0.000e+00  0.000e+00]
+                     marginals: [ 5.000e+00  1.500e+01  2.500e+01  5.000e+00
+                                  1.000e+01 -0.000e+00  1.500e+01]
+            ineqlin:  residual: []
+                     marginals: []
+     mip_node_count: 0
+     mip_dual_bound: 0.0
+            mip_gap: 0.0
+
+```python
+%time linprog(C_vec, A_eq=A[:-1], b_eq=b[:-1])
+```
+
+    CPU times: user 570 μs, sys: 85 μs, total: 655 μs
+    Wall time: 619 μs
+
+
+
+
+
+            message: Optimization terminated successfully. (HiGHS Status 7: Optimal)
+            success: True
+             status: 0
+                fun: 7225.0
+                  x: [ 0.000e+00  1.000e+01 ...  0.000e+00  7.000e+01]
+                nit: 8
+              lower:  residual: [ 0.000e+00  1.000e+01 ...  0.000e+00
+                                  7.000e+01]
+                     marginals: [ 0.000e+00  0.000e+00 ...  1.500e+01
+                                  0.000e+00]
+              upper:  residual: [       inf        inf ...        inf
+                                        inf]
+                     marginals: [ 0.000e+00  0.000e+00 ...  0.000e+00
+                                  0.000e+00]
+              eqlin:  residual: [ 0.000e+00  0.000e+00  0.000e+00  0.000e+00
+                                  0.000e+00  0.000e+00  0.000e+00]
+                     marginals: [ 5.000e+00  1.500e+01  2.500e+01  5.000e+00
+                                  1.000e+01 -0.000e+00  1.500e+01]
+            ineqlin:  residual: []
+                     marginals: []
+     mip_node_count: 0
+     mip_dual_bound: 0.0
+            mip_gap: 0.0
+
+```python
+%time linprog(C_vec, A_eq=A, b_eq=b)
+```
+
+    CPU times: user 648 μs, sys: 82 μs, total: 730 μs
+    Wall time: 704 μs
+
+
+
+
+
+            message: Optimization terminated successfully. (HiGHS Status 7: Optimal)
+            success: True
+             status: 0
+                fun: 7225.0
+                  x: [ 0.000e+00  1.000e+01 ...  0.000e+00  7.000e+01]
+                nit: 8
+              lower:  residual: [ 0.000e+00  1.000e+01 ...  0.000e+00
+                                  7.000e+01]
+                     marginals: [ 0.000e+00  0.000e+00 ...  1.500e+01
+                                  0.000e+00]
+              upper:  residual: [       inf        inf ...        inf
+                                        inf]
+                     marginals: [ 0.000e+00  0.000e+00 ...  0.000e+00
+                                  0.000e+00]
+              eqlin:  residual: [ 0.000e+00  0.000e+00  0.000e+00  0.000e+00
+                                  0.000e+00  0.000e+00  0.000e+00  0.000e+00]
+                     marginals: [ 1.000e+01  2.000e+01  3.000e+01 -0.000e+00
+                                  5.000e+00 -5.000e+00  1.000e+01 -5.000e+00]
+            ineqlin:  residual: []
+                     marginals: []
+     mip_node_count: 0
+     mip_dual_bound: 0.0
+            mip_gap: 0.0
+
+Clearly, it's slightly faster to work with the system that removed a redundant constraint.
+
+Let's delve deeper and perform more calculations to help us understand whether finding **two** different optimal distribution plans is a result of dropping a redundant equality constraint.
+
+### Clue
+
+It will become apparent that dropping a redundant equality isn't really what mattered.
+
+To confirm our clue, we'll simply use **all** of the original equality constraints (including a redundant one), but we'll just rearrange the order of the constraints.
+
+```python
+arr = np.arange(m+n)
+```
+
+```python
+sol_found = []
+cost = []
+
+# simulate 1000 times
+for i in range(1000):
+
+    np.random.shuffle(arr)
+    res_shuffle = linprog(C_vec, A_eq=A[arr], b_eq=b[arr])
+
+    # if find a new solution
+    sol = tuple(res_shuffle.x)
+    if sol not in sol_found:
+        sol_found.append(sol)
+        cost.append(res_shuffle.fun)
+```
+
+```python
+for i in range(len(sol_found)):
+    print(f"transportation plan {i}: ", sol_found[i])
+    print(f"     minimized cost {i}: ", cost[i])
+```
+
+    transportation plan 0:  (0.0, 10.0, 15.0, 50.0, 0.0, 65.0, 0.0, 60.0, 0.0, 0.0, 30.0, 0.0, 0.0, 0.0, 70.0)
+         minimized cost 0:  7225.0
+
+**Eureka!** As you can see, arranging constraints in different orders in this case reveals two optimal distribution plans that achieve the same minimized cost.
+
+These are the same two plans we computed earlier.
+
+Next, we'll show that omitting the first constraint "coincidentally" leads to the initial plan we computed.
+
+```python
+linprog(C_vec, A_eq=A[1:], b_eq=b[1:])
+```
+
+            message: Optimization terminated successfully. (HiGHS Status 7: Optimal)
+            success: True
+             status: 0
+                fun: 7225.0
+                  x: [ 0.000e+00  1.000e+01 ...  0.000e+00  7.000e+01]
+                nit: 8
+              lower:  residual: [ 0.000e+00  1.000e+01 ...  0.000e+00
+                                  7.000e+01]
+                     marginals: [ 0.000e+00  0.000e+00 ...  1.500e+01
+                                  0.000e+00]
+              upper:  residual: [       inf        inf ...        inf
+                                        inf]
+                     marginals: [ 0.000e+00  0.000e+00 ...  0.000e+00
+                                  0.000e+00]
+              eqlin:  residual: [ 0.000e+00  0.000e+00  0.000e+00  0.000e+00
+                                  0.000e+00  0.000e+00  0.000e+00]
+                     marginals: [ 1.000e+01  2.000e+01  1.000e+01  1.500e+01
+                                  5.000e+00  2.000e+01  5.000e+00]
+            ineqlin:  residual: []
+                     marginals: []
+     mip_node_count: 0
+     mip_dual_bound: 0.0
+            mip_gap: 0.0
+
+Let's compare this distribution plan with
+
+```python
+res.x
+```
+
+    array([ 0., 10., 15., 50.,  0., 65.,  0., 60.,  0.,  0., 30.,  0.,  0.,
+            0., 70.])
+
+Here the matrix $ X $ contains entries $ x\_{ij} $ that indicate amounts shipped **from** factory $ i = 1, 2, 3 $ **to** location $ j=1,2, \ldots, 5 $.
+
+The vector $ z $ clearly equals $ \operatorname{vec}(X) $.
+
+The minimized cost from the optimal distribution plan is given by the $ fun $ variable.
+
+### Employing a Just-in-Time Compiler
+
+We can also solve efficient distribution problems using a powerful tool from QuantEcon, namely, `quantecon.optimize.linprog_simplex`.
+
+While this routine uses the same simplex algorithm as `scipy.optimize.linprog`, the code is accelerated by using a just-in-time compiler provided by the `numba` library.
+
+As you'll soon see, by using `scipy.optimize.linprog` the time required to solve an efficient distribution problem can be significantly reduced.
+
+```python
+# construct matrices/vectors for linprog_simplex
+c = C.flatten()
+
+# Equality constraints
+A_eq = np.zeros((m+n, m*n))
+for i in range(m):
+    for j in range(n):
+        A_eq[i, i*n+j] = 1
+        A_eq[m+j, i*n+j] = 1
+
+b_eq = np.hstack([p, q])
+```
+
+Since `quantecon.optimize.linprog_simplex` performs maximization rather than minimization, we need to prepend a negative sign to the vector `c`.
+
+```python
+res_qe = linprog_simplex(-c, A_eq=A_eq, b_eq=b_eq)
+```
+
+Given that both LP solvers employ the same simplex algorithm, we anticipate obtaining identical solutions.
+
+```python
+res_qe.x.reshape((m, n), order='C')
+```
+
+    array([[15., 35.,  0.,  0.,  0.],
+           [10.,  0., 60., 30.,  0.],
+           [ 0., 80.,  0.,  0., 70.]])
+
+```python
+res.x.reshape((m, n), order='F')
+```
+
+    array([[ 0., 50.,  0.,  0.,  0.],
+           [10.,  0., 60., 30.,  0.],
+           [15., 65.,  0.,  0., 70.]])
+
+Let's conduct a speed comparison between `scipy.optimize.linprog` and `quantecon.optimize.linprog_simplex`.
+
+```python
+# scipy.optimize.linprog
+%time res = linprog(C_vec, A_eq=A[:-1, :], b_eq=b[:-1])
+```
+
+    CPU times: user 585 μs, sys: 50 μs, total: 635 μs
+    Wall time: 602 μs
+
+```python
+# quantecon.optimize.linprog_simplex
+%time out = linprog_simplex(-c, A_eq=A_eq, b_eq=b_eq)
+```
+
+    CPU times: user 23 μs, sys: 0 ns, total: 23 μs
+    Wall time: 25 μs
+
+As observed, `quantecon.optimize.linprog_simplex` is considerably faster.
+
+(Note, however, that the SciPy version is likely more stable than the QuantEcon version, having undergone more extensive testing over a longer duration.)
+
+## The Dual Problem
+
+Let $ u, v $ represent vectors of dual decision variables with entries $ (u_i), (v_j) $.
+
+The **dual** to the **minimization** problem [(17.1)](#equation-plannerproblem) is the **maximization** problem:
+
+$$
+\begin{aligned}
+\max_{u_i, v_j} \ & \sum_{i=1}^m p_i u_i + \sum_{j=1}^n q_j v_j \\
+\text{subject to } \ & u_i + v_j \le c_{ij}, \ i = 1, 2, \dots, m;\ j = 1, 2, \dots, n \\
+\end{aligned} \tag{17.5}
+$$
+
+The dual problem is also a linear programming problem.
+
+It consists of $ m+n $ dual variables and $ mn $ constraints.
+
+Vectors $ u $ and $ v $ of **values** are linked to the first and second sets of primal constraints, respectively.
+
+Thus, $ u $ is associated with the constraints
+
+- $ (\mathbf{1}\_n' \otimes \mathbf{I}\_m) \operatorname{vec}(X) = p $
+
+and $ v $ is linked to constraints
+
+- $ (\mathbf{I}\_n \otimes \mathbf{1}\_m') \operatorname{vec}(X) = q.... $
+
+Components of the vectors $ u $ and $ v $ of per unit **values** are **shadow prices** of the quantities on the right sides of those constraints.
+
+We can express the dual problem as
+
+$$
+\begin{aligned}
+\max_{u_i, v_j} \ & p u + q v \\
+\text{subject to } \ & A' \begin{pmatrix} u \\ v \\ \end{pmatrix} = \operatorname{vec}(C) \\
+\end{aligned} \tag{17.6}
+$$
+
+For the same numerical example described earlier, let's solve the dual problem.
+
+```python
+# Solve the dual problem
+res_dual = linprog(-b, A_ub=A.T, b_ub=C_vec,
+                   bounds=[(None, None)]*(m+n))
+
+#Print results
+print("message:", res_dual.message)
+print("nit:", res_dual.nit)
+print("fun:", res_dual.fun)
+print("u:", res_dual.x[:m])
+print("v:", res_dual.x[-n:])
+```
+
+    message: Optimization terminated successfully. (HiGHS Status 7: Optimal)
+    nit: 9
+    fun: -7225.0
+    u: [-20. -10.   0.]
+    v: [30. 35. 25. 40. 25.]
+
+We can also solve the dual problem using [quantecon.optimize.linprog_simplex](https://quanteconpy.readthedocs.io/en/latest/optimize/linprog_simplex.html).
+
+```python
+res_dual_qe = linprog_simplex(b_eq, A_ub=A_eq.T, b_ub=c)
+```
+
+And the shadow prices computed by both programs are identical.
+
+```python
+res_dual_qe.x
+```
+
+    array([ 5., 15., 25.,  5., 10.,  0., 15.,  0.])
+
+```python
+res_dual.x
+```
+
+    array([-20., -10.,   0.,  30.,  35.,  25.,  40.,  25.])
+
+We can compare computational times between our two tools.
+
+```python
+%time linprog(-b, A_ub=A.T, b_ub=C_vec, bounds=[(None, None)]*(m+n))
+```
+
+    CPU times: user 603 μs, sys: 54 μs, total: 657 μs
+    Wall time: 622 μs
+
+
+
+
+
+            message: Optimization terminated successfully. (HiGHS Status 7: Optimal)
+            success: True
+             status: 0
+                fun: -7225.0
+                  x: [-2.000e+01 -1.000e+01  0.000e+00  3.000e+01  3.500e+01
+                       2.500e+01  4.000e+01  2.500e+01]
+                nit: 9
+              lower:  residual: [       inf        inf        inf        inf
+                                        inf        inf        inf        inf]
+                     marginals: [ 0.000e+00  0.000e+00  0.000e+00  0.000e+00
+                                  0.000e+00  0.000e+00  0.000e+00  0.000e+00]
+              upper:  residual: [       inf        inf        inf        inf
+                                        inf        inf        inf        inf]
+                     marginals: [ 0.000e+00  0.000e+00  0.000e+00  0.000e+00
+                                  0.000e+00  0.000e+00  0.000e+00  0.000e+00]
+              eqlin:  residual: []
+                     marginals: []
+            ineqlin:  residual: [ 0.000e+00  0.000e+00 ...  1.500e+01
+                                  0.000e+00]
+                     marginals: [-0.000e+00 -1.000e+01 ... -0.000e+00
+                                 -7.000e+01]
+     mip_node_count: 0
+     mip_dual_bound: 0.0
+            mip_gap: 0.0
+
+```python
+%time linprog_simplex(b_eq, A_ub=A_eq.T, b_ub=c)
+```
+
+    CPU times: user 137 μs, sys: 0 ns, total: 137 μs
+    Wall time: 138 μs
+
+
+
+
+
+    SimplexResult(x=array([ 5., 15., 25.,  5., 10.,  0., 15.,  0.]), lambd=array([ 0., 35.,  0., 15.,  0., 25.,  0., 60., 15.,  0.,  0., 80.,  0.,
+            0., 70.]), fun=7225.0, success=True, status=0, num_iter=24)
+
+`quantecon.optimize.linprog_simplex` solves the dual problem 10 times faster.
+
+For completeness, let's solve the dual problems with nonsingular $ A $ matrices that we create by removing a redundant equality constraint.
+
+Try first leaving out the first constraint:
+
+```python
+linprog(-b[1:], A_ub=A[1:].T, b_ub=C_vec,
+        bounds=[(None, None)]*(m+n-1))
+```
+
+            message: Optimization terminated successfully. (HiGHS Status 7: Optimal)
+            success: True
+             status: 0
+                fun: -7225.0
+                  x: [ 1.000e+01  2.000e+01  1.000e+01  1.500e+01  5.000e+00
+                       2.000e+01  5.000e+00]
+                nit: 12
+              lower:  residual: [       inf        inf        inf        inf
+                                        inf        inf        inf]
+                     marginals: [ 0.000e+00  0.000e+00  0.000e+00  0.000e+00
+                                  0.000e+00  0.000e+00  0.000e+00]
+              upper:  residual: [       inf        inf        inf        inf
+                                        inf        inf        inf]
+                     marginals: [ 0.000e+00  0.000e+00  0.000e+00  0.000e+00
+                                  0.000e+00  0.000e+00  0.000e+00]
+              eqlin:  residual: []
+                     marginals: []
+            ineqlin:  residual: [ 0.000e+00  0.000e+00 ...  1.500e+01
+                                  0.000e+00]
+                     marginals: [-1.500e+01 -1.000e+01 ... -0.000e+00
+                                 -7.000e+01]
+     mip_node_count: 0
+     mip_dual_bound: 0.0
+            mip_gap: 0.0
+
+Now let's instead omit the last constraint:
+
+```python
+linprog(-b[:-1], A_ub=A[:-1].T, b_ub=C_vec,
+        bounds=[(None, None)]*(m+n-1))
+```
+
+            message: Optimization terminated successfully. (HiGHS Status 7: Optimal)
+            success: True
+             status: 0
+                fun: -7225.0
+                  x: [ 5.000e+00  1.500e+01  2.500e+01  5.000e+00  1.000e+01
+                      -0.000e+00  1.500e+01]
+                nit: 9
+              lower:  residual: [       inf        inf        inf        inf
+                                        inf        inf        inf]
+                     marginals: [ 0.000e+00  0.000e+00  0.000e+00  0.000e+00
+                                  0.000e+00  0.000e+00  0.000e+00]
+              upper:  residual: [       inf        inf        inf        inf
+                                        inf        inf        inf]
+                     marginals: [ 0.000e+00  0.000e+00  0.000e+00  0.000e+00
+                                  0.000e+00  0.000e+00  0.000e+00]
+              eqlin:  residual: []
+                     marginals: []
+            ineqlin:  residual: [ 0.000e+00  0.000e+00 ...  1.500e+01
+                                  0.000e+00]
+                     marginals: [-0.000e+00 -1.000e+01 ... -0.000e+00
+                                 -7.000e+01]
+     mip_node_count: 0
+     mip_dual_bound: 0.0
+            mip_gap: 0.0
+
+### Interpretation of the Dual Problem
+
+By **strong duality** (please refer to this lecture
+**Linear Programming**, we know that:
+
+$$
+\sum_{i=1}^m \sum_{j=1}^n c_{ij} x_{ij} = \sum_{i=1}^m p_i u_i + \sum_{j=1}^n q_j v_j
+$$
+
+One additional unit of capacity in factory $ i $, i.e., $ p_i $, results in $ u_i $ more transportation costs.
+
+Thus, $ u_i $ represents the cost of shipping one unit **from** factory $ i $.
+
+This is the ship-out cost of one unit shipped from factory $ i $.
+
+Similarly, $ v_j $ is the cost of shipping one unit **to** location $ j $.
+
+This is the ship-in cost of one unit to location $ j $.
+
+Strong duality implies that total transportation costs equal total ship-out costs **plus** total ship-in costs.
+
+It is reasonable that, for one unit of a product, the ship-out cost $ u*i $ **plus** the ship-in cost $ v_j $ should equal the transportation cost $ c*{ij} $.
+
+This equality is ensured by **complementary slackness** conditions that state that whenever $ x*{ij} > 0 $, meaning positive shipments from factory $ i $ to location $ j $, it must be true that $ u_i + v_j = c*{ij} $.
+
+## The Python Optimal Transport Package
+
+An excellent [Python package](https://pythonot.github.io/) for optimal transport exists that simplifies some of the steps we took earlier.
+
+Specifically, the package handles the vectorization steps before passing the data to a linear programming routine.
+
+(Nevertheless, the previous discussion on vectorization remains crucial, as we want to comprehend what's happening behind the scenes.)
+
+### Reproducing Previous Results
+
+The following code solves the example application discussed earlier using linear programming.
+
+```python
+X = ot.emd(p, q, C)
+X
+```
+
+    /var/folders/zj/sz5g50055l9gj8nhh_6md1cw0000gn/T/ipykernel_30985/1617639716.py:1: UserWarning: Input histogram consists of integer. The transport plan will be casted accordingly, possibly resulting in a loss of precision. If this behaviour is unwanted, please make sure your input histogram consists of floating point elements.
+      X = ot.emd(p, q, C)
+
+
+
+
+
+    array([[15, 35,  0,  0,  0],
+           [10,  0, 60, 30,  0],
+           [ 0, 80,  0,  0, 70]])
+
+Indeed, we've obtained the same solution and cost
+
+```python
+total_cost = np.sum(X * C)
+total_cost
+```
+
+    7225
+
+### A More Extensive Application
+
+Let's now attempt to use the same package on a slightly larger application.
+
+The application maintains the same interpretation as before, but we'll also assign each node (i.e., vertex) a location in the plane.
+
+This will enable us to visualize the resulting transport plan as edges in a graph.
+
+The following class defines a node by
+
+- its location $ (x, y) \in \mathbb R^2 $,
+- its group (factory or location, denoted by `p` or `q`) and
+- its mass (e.g., $ p_i $ or $ q_j $).
+
+```python
+class Node:
+
+    def __init__(self, x, y, mass, group, name):
+
+        self.x, self.y = x, y
+        self.mass, self.group = mass, group
+        self.name = name
+```
+
+Next, we'll create a function that repeatedly invokes the class above to construct instances.
+
+It assigns locations, masses, and groups to the nodes it creates.
+
+Locations are allocated randomly.
+
+```python
+def build_nodes_of_one_type(group='p', n=100, seed=123):
+
+    nodes = []
+    np.random.seed(seed)
+
+    for i in range(n):
+
+        if group == 'p':
+            m = 1/n
+            x = np.random.uniform(-2, 2)
+            y = np.random.uniform(-2, 2)
+        else:
+            m = betabinom.pmf(i, n-1, 2, 2)
+            x = 0.6 * np.random.uniform(-1.5, 1.5)
+            y = 0.6 * np.random.uniform(-1.5, 1.5)
+
+        name = group + str(i)
+        nodes.append(Node(x, y, m, group, name))
+
+    return nodes
+```
+
+Now we'll generate two lists of nodes, each containing one type (factories or locations)
+
+```python
+n_p = 32
+n_q = 32
+p_list = build_nodes_of_one_type(group='p', n=n_p)
+q_list = build_nodes_of_one_type(group='q', n=n_q)
+
+p_probs = [p.mass for p in p_list]
+q_probs = [q.mass for q in q_list]
+```
+
+For the cost matrix $ C $, we'll use the Euclidean distance between each factory and location.
+
+```python
+c = np.empty((n_p, n_q))
+for i in range(n_p):
+    for j in range(n_q):
+        x0, y0 = p_list[i].x, p_list[i].y
+        x1, y1 = q_list[j].x, q_list[j].y
+        c[i, j] = np.sqrt((x0-x1)**2 + (y0-y1)**2)
+```
+
+We're now prepared to apply the solver
+
+```python
+%time pi = ot.emd(p_probs, q_probs, c)
+```
+
+    CPU times: user 203 μs, sys: 60 μs, total: 263 μs
+    Wall time: 175 μs
+
+Lastly, let's visualize the results using `networkx`.
+
+In the plot below,
+
+- node size corresponds to probability mass
+- an edge (arrow) from $ i $ to $ j $ is drawn when a positive transfer occurs from $ i $ to $ j $ under the optimal transport plan.
+
+```python
+g = nx.DiGraph()
+g.add_nodes_from([p.name for p in p_list])
+g.add_nodes_from([q.name for q in q_list])
+
+for i in range(n_p):
+    for j in range(n_q):
+        if pi[i, j] > 0:
+            g.add_edge(p_list[i].name, q_list[j].name, weight=pi[i, j])
+
+node_pos_dict={}
+for p in p_list:
+    node_pos_dict[p.name] = (p.x, p.y)
+
+for q in q_list:
+    node_pos_dict[q.name] = (q.x, q.y)
+
+node_color_list = []
+node_size_list = []
+scale = 8_000
+for p in p_list:
+    node_color_list.append('blue')
+    node_size_list.append(p.mass * scale)
+for q in q_list:
+    node_color_list.append('red')
+    node_size_list.append(q.mass * scale)
+
+
+fig, ax = plt.subplots(figsize=(7, 10))
+plt.axis('off')
+
+nx.draw_networkx_nodes(g,
+                       node_pos_dict,
+                       node_color=node_color_list,
+                       node_size=node_size_list,
+                       edgecolors='grey',
+                       linewidths=1,
+                       alpha=0.5,
+                       ax=ax)
+
+nx.draw_networkx_edges(g,
+                       node_pos_dict,
+                       arrows=True,
+                       connectionstyle='arc3,rad=0.1',
+                       alpha=0.6)
+plt.show()
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/17.%20Optimal%20Transport_files/17.%20Optimal%20Transport_68_0.png)
+</div>

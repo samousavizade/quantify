@@ -1,0 +1,112 @@
+---
+title: Application
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Application
+
+In this section, we apply some of the volatility models discussed in this chapter to analyze the monthly excess returns of stocks. The data used are monthly simple returns of stocks in excess of the 3-month Treasury bill rate from January 1926 to December 2008. The data are obtained from the Center for Research in Security Prices (CRSP) of the University of Chicago. We consider three stock portfolios: (a) value-weighted index, (b) equal-weighted index, and (c) IBM stock. The sample size is 996 observations.
+
+### Data Analysis
+
+The statistics confirm some well-known stylized facts of asset returns:
+
+1. The mean excess returns are positive, indicating that, on average, stocks outperform the risk-free asset (i.e., 3-month Treasury bills).
+2. The distributions of excess returns are not normal as the sample kurtosis is much greater than 3 for all three series.
+3. The excess returns of the equal-weighted index are more volatile than those of the value-weighted index.
+4. The excess returns of IBM stock are more volatile than those of the two indexes.
+
+### Model Fitting
+
+We consider four volatility models for each return series: (a) GARCH(1,1), (b) EGARCH(1,1), (c) GJR-GARCH(1,1), and (d) APARCH(1,1). The mean equation of each model is simply
+
+$$r_t = \mu + a_t,$$
+
+where $r_t$ is the excess return at time $t$, $\mu$ is the unconditional mean, and $a_t$ is the shock at time $t$. We assume that the standardized shock $\epsilon_t = a_t/\sigma_t$ follows a standardized Student-$t$ distribution with $\nu$ degrees of freedom. The four volatility equations are:
+
+1. GARCH(1,1):
+
+$$\sigma_t^2 = \alpha_0 + \alpha_1 a_{t-1}^2 + \beta_1 \sigma_{t-1}^2$$
+
+2. EGARCH(1,1):
+
+$$\ln(\sigma_t^2) = \alpha_0 + \alpha_1 \left|\frac{a_{t-1}}{\sigma_{t-1}}\right| + \gamma_1 \frac{a_{t-1}}{\sigma_{t-1}} + \beta_1 \ln(\sigma_{t-1}^2)$$
+
+3. GJR-GARCH(1,1):
+
+$$\sigma_t^2 = \alpha_0 + \alpha_1 a_{t-1}^2 + \gamma_1 S_{t-1}^- a_{t-1}^2 + \beta_1 \sigma_{t-1}^2$$
+
+where $S_t^- = 1$ if $a_t < 0$ and $S_t^- = 0$ if $a_t \geq 0$.
+
+4. APARCH(1,1):
+
+$$\sigma_t^\delta = \alpha_0 + \alpha_1(|a_{t-1}| - \gamma_1 a_{t-1})^\delta + \beta_1 \sigma_{t-1}^\delta$$
+
+### Model Comparison
+
+To compare the performance of different models, we use three criteria:
+
+1. Log-likelihood: A higher log-likelihood value indicates better in-sample fit.
+2. Akaike Information Criterion (AIC): A lower AIC value suggests a better model.
+3. Schwarz Information Criterion (SIC): Similar to AIC, a lower SIC value indicates a better model.
+
+The AIC and SIC are defined as:
+
+$$\text{AIC} = -2 \ln(L) + 2k$$
+$$\text{SIC} = -2 \ln(L) + k \ln(T)$$
+
+where $L$ is the maximized likelihood value, $k$ is the number of parameters, and $T$ is the sample size.
+
+### Model Diagnostics
+
+To check the adequacy of the fitted models, we examine the standardized residuals $\hat{\epsilon}_t = \hat{a}_t / \hat{\sigma}_t$, where $\hat{a}_t$ is the estimated shock and $\hat{\sigma}_t$ is the estimated conditional standard deviation. If the model is adequate, the standardized residuals should behave like an i.i.d. sequence.
+
+We use the Ljung-Box statistics of $\hat{\epsilon}_t$ and $\hat{\epsilon}_t^2$ to test for serial correlation and remaining ARCH effects, respectively.
+
+The results show that:
+
+1. For the value-weighted index, the EGARCH(1,1) model adequately captures the serial correlation and conditional heteroscedasticity in the data.
+2. For the equal-weighted index, the APARCH(1,1) model performs well in modeling both the mean and volatility dynamics.
+3. For IBM stock, the APARCH(1,1) model successfully removes the serial correlation and ARCH effects in the data.
+
+### Asymmetric Effects
+
+The estimation results provide evidence of asymmetric effects in volatility for all three return series:
+
+1. In the EGARCH models, the leverage effect parameter $\gamma_1$ is negative and statistically significant for all three series, indicating that negative shocks tend to increase volatility more than positive shocks of the same magnitude.
+
+2. In the GJR-GARCH models, the asymmetry parameter $\gamma_1$ is positive and significant for all series, confirming the presence of leverage effects.
+
+3. In the APARCH models, the asymmetry parameter $\gamma_1$ is positive and significant, further supporting the existence of asymmetric volatility responses.
+
+### Persistence of Volatility
+
+The persistence of volatility can be measured by:
+
+- GARCH(1,1): $\alpha_1 + \beta_1$
+- EGARCH(1,1): $\beta_1$
+- GJR-GARCH(1,1): $\alpha_1 + \gamma_1/2 + \beta_1$
+- APARCH(1,1): $\beta_1$
+
+For all models and return series, the persistence measures are close to 1, indicating high persistence in volatility. This suggests that shocks to volatility have long-lasting effects.
+
+### Degrees of Freedom
+
+The estimated degrees of freedom $\nu$ of the Student-$t$ distribution are relatively low (between 4 and 8) for all models and series. This confirms the heavy-tailed nature of the return distributions and justifies the use of the Student-$t$ distribution instead of the normal distribution.
+
+### Conclusion
+
+In summary, this application demonstrates that:
+
+1. Volatility models are necessary and effective in capturing the conditional heteroscedasticity in stock returns.
+2. Asymmetric effects are present in the volatility of stock returns, with negative shocks having a larger impact on future volatility than positive shocks.
+3. Volatility is highly persistent for all three return series.
+4. The standardized Student-$t$ distribution is appropriate for modeling the innovation distribution of stock returns.
+5. More flexible models like EGARCH and APARCH often outperform the simple GARCH model in fitting financial return data.
+
+These findings have important implications for financial risk management, option pricing, and portfolio allocation strategies.

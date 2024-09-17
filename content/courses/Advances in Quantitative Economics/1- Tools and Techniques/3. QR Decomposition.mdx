@@ -1,0 +1,500 @@
+---
+title: QR Decomposition
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+# QR Factorization
+
+## Overview
+
+This part delves into QR factorization and its links to:
+
+- Orthogonal projection and least squares analysis
+- The Gram-Schmidt method
+- Calculating eigenvalues and eigenvectors
+
+We'll write Python code to deepen our grasp of these ideas.
+
+## Matrix Decomposition
+
+QR decomposition, also called QR factorization, divides a matrix into an orthogonal matrix and a triangular matrix.
+
+For a real matrix $ A $, the QR decomposition is represented as:
+
+$$
+A=QR
+$$
+
+where:
+
+- $ Q $ is an orthogonal matrix (meaning $ Q^TQ = I $)
+- $ R $ is an upper triangular matrix
+
+We'll use the **Gram-Schmidt process** to perform a QR decomposition.
+
+To enhance our understanding, we'll develop our own Python implementation for this task.
+
+## Gram-Schmidt Method
+
+We'll start with a **square** matrix $ A $.
+
+For a non-singular square matrix $ A $, the $ QR $ factorization is unique.
+
+We'll address rectangular matrices $ A $ later.
+
+Our algorithm will also handle non-square rectangular matrices $ A $.
+
+### Gram-Schmidt Process for Square $ A $
+
+Here, we apply the Gram-Schmidt process to the **columns** of matrix $ A $.
+
+Specifically, let
+
+$$
+A= \left[ \begin{array}{c|c|c|c} a_1 & a_2 & \cdots & a_n \end{array} \right]
+$$
+
+Let $ || · || $ represent the L2 norm.
+
+The Gram-Schmidt algorithm alternates between two main steps in a specific sequence:
+
+- **normalizing** a vector to unit length
+- **orthogonalizing** the next vector
+
+We start by setting $ u_1 = a_1 $ and then **normalize**:
+
+$$
+u_1=a_1, \ \ \ e_1=\frac{u_1}{||u_1||}
+$$
+
+We first **orthogonalize** to compute $ u_2 $ and then **normalize** to create $ e_2 $:
+
+$$
+u_2=a_2-(a_2· e_1)e_1, \ \ \ e_2=\frac{u_2}{||u_2||}
+$$
+
+Readers are encouraged to verify that $ e_1 $ is perpendicular to $ e_2 $ by checking that
+$ e_1 \cdot e_2 = 0 $.
+
+The Gram-Schmidt method continues iteratively.
+
+For $ k= 2, \ldots, n-1 $ we construct:
+
+$$
+u_{k+1}=a_{k+1}-(a_{k+1} \cdots e_1)e_1-\cdots-(a_{k+1}· e_k)e_k, e_{k+1}=\frac{u_{k+1}}{|u_{k+1}|}
+$$
+
+Here, $ (a_j \cdot e_i) $ can be seen as the linear least squares **regression coefficient** of $ a_j $ on $ e_i $
+
+- It's the dot product of $ a_j $ and $ e_i $ divided by the dot product of $ e_i $ with itself, where
+  $ e_i \cdot e_i = 1 $, as ensured by _normalization_.
+- This regression coefficient can be viewed as a **covariance** divided by a **variance**
+
+It can be shown that
+
+$$
+A= \left[ \begin{array}{c|c|c|c} a_1 & a_2 & \cdots & a_n \end{array} \right]=
+\left[ \begin{array}{c|c|c|c} e_1 & e_2 & \cdots & e_n \end{array} \right]
+\left[ \begin{matrix} a_1·e_1 & a_2·e_1 & \cdots & a_n·e_1\\ 0 & a_2·e_2 & \cdots & a_n·e_2
+\\ \vdots & \vdots & \ddots & \vdots \\ 0 & 0 & \cdots & a_n·e_n \end{matrix} \right]
+$$
+
+Thus, we have derived the decomposition
+
+$$
+A = Q R
+$$
+
+where
+
+$$
+Q = \left[ \begin{array}{c|c|c|c} a_1 & a_2 & \cdots & a_n \end{array} \right]=
+\left[ \begin{array}{c|c|c|c} e_1 & e_2 & \cdots & e_n \end{array} \right]
+$$
+
+and
+
+$$
+R = \left[ \begin{matrix} a_1·e_1 & a_2·e_1 & \cdots & a_n·e_1\\ 0 & a_2·e_2 & \cdots & a_n·e_2
+\\ \vdots & \vdots & \ddots & \vdots \\ 0 & 0 & \cdots & a_n·e_n \end{matrix} \right]
+$$
+
+### Non-square $ A $
+
+Now consider $ A $ as an $ n \times m $ matrix where $ m > n $.
+
+In this case, a $ QR $ decomposition is
+
+$$
+A= \left[ \begin{array}{c|c|c|c} a_1 & a_2 & \cdots & a_m \end{array} \right]=\left[ \begin{array}{c|c|c|c} e_1 & e_2 & \cdots & e_n \end{array} \right]
+\left[ \begin{matrix} a_1·e_1 & a_2·e_1 & \cdots & a_n·e_1 & a_{n+1}\cdot e_1 & \cdots & a_{m}\cdot e_1 \\
+0 & a_2·e_2 & \cdots & a_n·e_2 & a_{n+1}\cdot e_2 & \cdots & a_{m}\cdot e_2 \\ \vdots & \vdots & \ddots & \quad \vdots & \vdots & \ddots & \vdots
+\\ 0 & 0 & \cdots & a_n·e_n & a_{n+1}\cdot e_n & \cdots & a_{m}\cdot e_n \end{matrix} \right]
+$$
+
+which implies that
+
+$$
+\begin{align*}
+a_1 & = (a_1\cdot e_1) e_1 \cr
+a_2 & = (a_2\cdot e_1) e_1 + (a_2\cdot e_2) e_2 \cr
+\vdots & \quad \vdots \cr
+a_n & = (a_n\cdot e_1) e_1 + (a_n\cdot e_2) e_2 + \cdots + (a_n \cdot e_n) e_n \cr
+a_{n+1} & = (a_{n+1}\cdot e_1) e_1 + (a_{n+1}\cdot e_2) e_2 + \cdots + (a_{n+1}\cdot e_n) e_n \cr
+\vdots & \quad \vdots \cr
+a_m & = (a_m\cdot e_1) e_1 + (a_m\cdot e_2) e_2 + \cdots + (a_m \cdot e_n) e_n \cr
+\end{align*}
+$$
+
+## Python Implementation
+
+Let's now develop our own Python code to carry out a QR decomposition using the Gram-Schmidt method described earlier.
+
+```python
+import numpy as np
+from scipy.linalg import qr
+```
+
+```python
+def QR_Decomposition(A):
+    n, m = A.shape # get the shape of A
+
+    Q = np.empty((n, n)) # initialize matrix Q
+    u = np.empty((n, n)) # initialize matrix u
+
+    u[:, 0] = A[:, 0]
+    Q[:, 0] = u[:, 0] / np.linalg.norm(u[:, 0])
+
+    for i in range(1, n):
+
+        u[:, i] = A[:, i]
+        for j in range(i):
+            u[:, i] -= (A[:, i] @ Q[:, j]) * Q[:, j] # get each u vector
+
+        Q[:, i] = u[:, i] / np.linalg.norm(u[:, i]) # compute each e vetor
+
+    R = np.zeros((n, m))
+    for i in range(n):
+        for j in range(i, m):
+            R[i, j] = A[:, j] @ Q[:, i]
+
+    return Q, R
+```
+
+The code above functions correctly but could be improved for better clarity.
+
+We aim to do this because we'll later compare the outcomes from our custom code with the QR implementation provided by Python's `scipy` package.
+
+Different numerical algorithms may produce sign differences in the $ Q $ and $ R $ matrices.
+
+All these are valid QR decompositions due to how the sign differences cancel out when computing $ QR $.
+
+However, to make our custom function's results comparable with the `scipy` QR module, we'll ensure that $ Q $ has positive diagonal entries.
+
+We'll achieve this by adjusting the signs of $ Q $'s columns and $ R $'s rows accordingly.
+
+To accomplish this, we'll define two helper functions.
+
+```python
+def diag_sign(A):
+    "Compute the signs of the diagonal of matrix A"
+
+    D = np.diag(np.sign(np.diag(A)))
+
+    return D
+
+def adjust_sign(Q, R):
+    """
+    Adjust the signs of the columns in Q and rows in R to
+    impose positive diagonal of Q
+    """
+
+    D = diag_sign(Q)
+
+    Q[:, :] = Q @ D
+    R[:, :] = D @ R
+
+    return Q, R
+```
+
+## Demonstration
+
+Let's now work through an example.
+
+```python
+A = np.array([[1.0, 1.0, 0.0], [1.0, 0.0, 1.0], [0.0, 1.0, 1.0]])
+# A = np.array([[1.0, 0.5, 0.2], [0.5, 0.5, 1.0], [0.0, 1.0, 1.0]])
+# A = np.array([[1.0, 0.5, 0.2], [0.5, 0.5, 1.0]])
+
+A
+```
+
+    array([[1., 1., 0.],
+           [1., 0., 1.],
+           [0., 1., 1.]])
+
+```python
+Q, R = adjust_sign(*QR_Decomposition(A))
+```
+
+```python
+Q
+```
+
+    array([[ 0.70710678, -0.40824829, -0.57735027],
+           [ 0.70710678,  0.40824829,  0.57735027],
+           [ 0.        , -0.81649658,  0.57735027]])
+
+```python
+R
+```
+
+    array([[ 1.41421356,  0.70710678,  0.70710678],
+           [ 0.        , -1.22474487, -0.40824829],
+           [ 0.        ,  0.        ,  1.15470054]])
+
+Now let's compare our outcomes with those generated by the `scipy` library.
+
+```python
+Q_scipy, R_scipy = adjust_sign(*qr(A))
+```
+
+```python
+print('Our Q: \n', Q)
+print('\n')
+print('Scipy Q: \n', Q_scipy)
+```
+
+    Our Q:
+     [[ 0.70710678 -0.40824829 -0.57735027]
+     [ 0.70710678  0.40824829  0.57735027]
+     [ 0.         -0.81649658  0.57735027]]
+
+
+    Scipy Q:
+     [[ 0.70710678 -0.40824829 -0.57735027]
+     [ 0.70710678  0.40824829  0.57735027]
+     [ 0.         -0.81649658  0.57735027]]
+
+```python
+print('Our R: \n', R)
+print('\n')
+print('Scipy R: \n', R_scipy)
+```
+
+    Our R:
+     [[ 1.41421356  0.70710678  0.70710678]
+     [ 0.         -1.22474487 -0.40824829]
+     [ 0.          0.          1.15470054]]
+
+
+    Scipy R:
+     [[ 1.41421356  0.70710678  0.70710678]
+     [ 0.         -1.22474487 -0.40824829]
+     [ 0.          0.          1.15470054]]
+
+The results above show that our custom function matches the output of scipy.
+
+Next, we'll perform a QR decomposition on a rectangular matrix $ A $ that is $ n \times m $ with $ m > n $.
+
+```python
+A = np.array([[1, 3, 4], [2, 0, 9]])
+```
+
+```python
+Q, R = adjust_sign(*QR_Decomposition(A))
+Q, R
+```
+
+    (array([[ 0.4472136 , -0.89442719],
+            [ 0.89442719,  0.4472136 ]]),
+     array([[ 2.23606798,  1.34164079,  9.8386991 ],
+            [ 0.        , -2.68328157,  0.4472136 ]]))
+
+```python
+Q_scipy, R_scipy = adjust_sign(*qr(A))
+Q_scipy, R_scipy
+```
+
+    (array([[ 0.4472136 , -0.89442719],
+            [ 0.89442719,  0.4472136 ]]),
+     array([[ 2.23606798,  1.34164079,  9.8386991 ],
+            [ 0.        , -2.68328157,  0.4472136 ]]))
+
+## Calculating Eigenvalues Using QR Decomposition
+
+Here's an intriguing application of the QR method.
+
+The following iterative process using QR decomposition can be utilized to find **eigenvalues** of a **square** matrix $ A $.
+
+Here's the procedure:
+
+1. Start with $ A_0 = A $ and perform $ A_0 = Q_0 R_0 $
+2. Create $ A_1 = R_0 Q_0 $. Note that $ A_1 $ is similar to $ A_0 $ (easy to verify) and thus shares the same eigenvalues.
+3. Execute $ A_1 = Q_1 R_1 $ (i.e., perform the $ QR $ decomposition of $ A_1 $).
+4. Form $ A_2 = R_1 Q_1 $ and then $ A_2 = Q_2 R_2 $.
+5. Continue iterating until convergence.
+6. Determine eigenvalues of $ A $ and compare them with the diagonal elements of the final $ A_n $ obtained from this process.
+
+## Tasks
+
+@mmcky to transition this to use [sphinx-proof](https://sphinx-proof.readthedocs.io/en/latest/syntax.html#algorithms)
+
+**Note:** This algorithm is close to one of the most efficient methods for computing eigenvalues!
+
+Let's implement this algorithm in Python.
+
+```python
+def QR_eigvals(A, tol=1e-12, maxiter=1000):
+    "Find the eigenvalues of A using QR decomposition."
+
+    A_old = np.copy(A)
+    A_new = np.copy(A)
+
+    diff = np.inf
+    i = 0
+    while (diff > tol) and (i < maxiter):
+        A_old[:, :] = A_new
+        Q, R = QR_Decomposition(A_old)
+
+        A_new[:, :] = R @ Q
+
+        diff = np.abs(A_new - A_old).max()
+        i += 1
+
+    eigvals = np.diag(A_new)
+
+    return eigvals
+```
+
+Now let's test the code and compare the results with those from `scipy.linalg.eigvals`.
+
+Here we go.
+
+```python
+# experiment this with one random A matrix
+A = np.random.random((3, 3))
+```
+
+```python
+sorted(QR_eigvals(A))
+```
+
+    [0.16821505739082512, 0.4396796026955877, 1.4351546304087892]
+
+Let's make a comparison with the `scipy` package.
+
+```python
+sorted(np.linalg.eigvals(A))
+```
+
+    [0.16821505739112955, 0.4396796026952864, 1.4351546304087903]
+
+## QR and Principal Component Analysis
+
+There are intriguing connections between the $ QR $ decomposition and principal component analysis (PCA).
+
+Here are some essential points:
+
+1. Consider $ X' $ as a $ k \times n $ random matrix where each column is a random sample from $ {\mathcal N}(\mu, \Sigma) $, with $ \mu $ being a $ k \times 1 $ mean vector and $ \Sigma $ a $ k \times k $ covariance matrix. We assume $ n >> k $, which is typical in econometrics.
+2. Perform $ X' = Q R $ where $ Q $ is $ k \times k $ and $ R $ is $ k \times n $.
+3. Calculate the eigenvalues of $ R R' $, i.e., compute $ R R' = \tilde P \Lambda \tilde P' $.
+4. Form $ X' X = Q \tilde P \Lambda \tilde P' Q' $ and compare it with the eigendecomposition $ X'X = P \hat \Lambda P' $.
+5. We'll find that $ \Lambda = \hat \Lambda $ and $ P = Q \tilde P $.
+
+Let's verify the fifth point using Python.
+
+We'll start by generating a random $ \left(n, k\right) $ matrix $ X $.
+
+```python
+k = 5
+n = 1000
+
+# generate some random moments
+𝜇 = np.random.random(size=k)
+C = np.random.random((k, k))
+Σ = C.T @ C
+```
+
+```python
+# X is random matrix where each column follows multivariate normal dist.
+X = np.random.multivariate_normal(𝜇, Σ, size=n)
+```
+
+```python
+X.shape
+```
+
+    (1000, 5)
+
+Now, let's apply the QR decomposition to $ X^{\prime} $.
+
+```python
+Q, R = adjust_sign(*QR_Decomposition(X.T))
+```
+
+Let's verify the dimensions of $ Q $ and $ R $.
+
+```python
+Q.shape, R.shape
+```
+
+    ((5, 5), (5, 1000))
+
+We can now construct $ R R^{\prime}=\tilde{P} \Lambda \tilde{P}^{\prime} $ and perform an eigendecomposition.
+
+```python
+RR = R @ R.T
+
+𝜆, P_tilde = np.linalg.eigh(RR)
+Λ = np.diag(𝜆)
+```
+
+We'll also apply the decomposition to $ X^{\prime} X=P \hat{\Lambda} P^{\prime} $.
+
+```python
+XX = X.T @ X
+
+𝜆_hat, P = np.linalg.eigh(XX)
+Λ_hat = np.diag(𝜆_hat)
+```
+
+Let's compare the eigenvalues on the diagonals of $ \Lambda $ and $ \hat{\Lambda} $.
+
+```python
+𝜆, 𝜆_hat
+```
+
+    (array([4.73596646e+00, 6.97556540e+01, 7.98534064e+02, 8.91906716e+02,
+            6.50359796e+03]),
+     array([4.73596646e+00, 6.97556540e+01, 7.98534064e+02, 8.91906716e+02,
+            6.50359796e+03]))
+
+Now, let's compare $ P $ and $ Q \tilde{P} $.
+
+We need to be cautious about potential sign differences between the columns of $ P $ and $ Q\tilde{P} $.
+
+```python
+QP_tilde = Q @ P_tilde
+
+np.abs(P @ diag_sign(P) - QP_tilde @ diag_sign(QP_tilde)).max()
+```
+
+    1.1407541578023483e-14
+
+Finally, let's confirm that $ X^{\prime}X $ can be decomposed as $ Q \tilde{P} \Lambda \tilde{P}^{\prime} Q^{\prime} $.
+
+```python
+QPΛPQ = Q @ P_tilde @ Λ @ P_tilde.T @ Q.T
+```
+
+```python
+np.abs(QPΛPQ - XX).max()
+```
+
+    3.410605131648481e-12

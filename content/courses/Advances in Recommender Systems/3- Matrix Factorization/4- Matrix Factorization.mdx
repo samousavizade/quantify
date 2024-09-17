@@ -1,0 +1,136 @@
+---
+title: Matrix Factorization
+draft: false
+summary: Backtest statistics are essential for evaluating the efficacy of investment strategies.
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Matrix Factorization
+
+Matrix Factorization is a well-established algorithm in the field of recommender systems. It gained significant attention during the Netflix Prize competition in 2006, where Netflix challenged participants to improve its recommendation system, Cinematch, by 10%. The competition highlighted the effectiveness of matrix factorization techniques, which played a crucial role in the winning solution by BellKor’s Pragmatic Chaos team.
+
+### The Matrix Factorization Model
+
+Matrix factorization is a type of collaborative filtering model that factorizes the user-item interaction matrix into two lower-rank matrices. This process captures the low-rank structure of the interactions between users and items. The interaction matrix $R \in \mathbb{R}^{m \times n}$, where $m$ is the number of users and $n$ is the number of items, is decomposed into a user latent matrix $P \in \mathbb{R}^{m \times k}$ and an item latent matrix $Q \in \mathbb{R}^{n \times k}$. Here, $k$ is the latent factor size, which is much smaller than $m$ and $n$. Latent features in matrix factorization are abstract dimensions that capture the underlying characteristics of items and user preferences. These features are not directly observable but are inferred from the data. Latent features represent hidden patterns in the data. For example, in a movie recommendation system, latent features might correspond to genres, actors, or directors. Users and items are mapped into a latent space where their interactions can be predicted based on proximity in this space. The idea is to reduce the complexity of the data by focusing on these underlying factors.
+
+The predicted ratings are estimated by the dot product of these matrices:
+
+$$
+\hat{R} = PQ^T
+$$
+
+This model can be extended to include user and item biases, which account for systematic differences in rating behavior. The predicted rating for user $$u$$ and item $$i$$ is given by:
+
+$$
+\hat{R}_{ui} = p_u q_i^T + b_u + b_i
+$$
+
+where $b_u$ and $b_i$ are the bias terms for user $u$ and item $i$, respectively.
+
+The model is trained by minimizing the mean squared error between the predicted and actual ratings, with a regularization term to prevent overfitting:
+
+$$
+\arg\min_{P,Q,b} \sum_{(u,i) \in K} \| R_{ui} - \hat{R}_{ui} \|^2 + \lambda (\| P \|_F^2 + \| Q \|_F^2 + b_u^2 + b_i^2)
+$$
+
+where $K$ is the set of known ratings and $\lambda$ is the regularization rate.
+
+![](/static/courses/Advances-in-Recomender-Systems/mat_fac.png)
+
+> Illustration of Matrix Factorization usage
+
+### Model Implementation
+
+The matrix factorization model can be implemented using deep learning frameworks like MXNet. The latent factors for users and items are represented using embeddings, and the biases are also implemented as embeddings with a single output dimension.
+
+```python
+class MF(nn.Block):
+    def __init__(self, num_factors, num_users, num_items, **kwargs):
+        super(MF, self).__init__(**kwargs)
+        self.P = nn.Embedding(input_dim=num_users, output_dim=num_factors)
+        self.Q = nn.Embedding(input_dim=num_items, output_dim=num_factors)
+        self.user_bias = nn.Embedding(num_users, 1)
+        self.item_bias = nn.Embedding(num_items, 1)
+
+    def forward(self, user_id, item_id):
+        P_u = self.P(user_id)
+        Q_i = self.Q(item_id)
+        b_u = self.user_bias(user_id)
+        b_i = self.item_bias(item_id)
+        outputs = (P_u * Q_i).sum(axis=1) + np.squeeze(b_u) + np.squeeze(b_i)
+        return outputs.flatten()
+```
+
+### Evaluation Measures
+
+The performance of the matrix factorization model is typically evaluated using Root Mean Square Error (RMSE), which measures the differences between predicted and actual ratings:
+
+$$
+\text{RMSE} = \sqrt{\frac{1}{|T|} \sum_{(u,i) \in T} (R_{ui} - \hat{R}_{ui})^2}
+$$
+
+where $T$ is the set of user-item pairs for evaluation.
+
+```python
+def evaluator(net, test_iter, devices):
+    rmse = mx.metric.RMSE()  # Get the RMSE
+    rmse_list = []
+    for idx, (users, items, ratings) in enumerate(test_iter):
+        u = gluon.utils.split_and_load(users, devices, even_split=False)
+        i = gluon.utils.split_and_load(items, devices, even_split=False)
+        r_ui = gluon.utils.split_and_load(ratings, devices, even_split=False)
+        r_hat = [net(u, i) for u, i in zip(u, i)]
+        rmse.update(labels=r_ui, preds=r_hat)
+        rmse_list.append(rmse.get()[1])
+    return float(np.mean(np.array(rmse_list)))
+
+```
+
+### Training and Evaluating the Model
+
+The training process involves minimizing the $ℓ2$ loss with weight decay, which acts as a regularization term. The model is trained using optimization algorithms such as Stochastic Gradient Descent or Adam.
+
+```python
+def train_recsys_rating(net, train_iter, test_iter, loss, trainer, num_epochs, devices=d2l.try_all_gpus(), evaluator=None, **kwargs):
+    timer = d2l.Timer()
+    animator = d2l.Animator(xlabel='epoch', xlim=[1, num_epochs], ylim=[0, 2], legend=['train loss', 'test RMSE'])
+    for epoch in range(num_epochs):
+        metric, l = d2l.Accumulator(3), 0.
+        for i, values in enumerate(train_iter):
+            timer.start()
+            input_data = []
+            values = values if isinstance(values, list) else [values]
+            for v in values:
+                input_data.append(gluon.utils.split_and_load(v, devices))
+            train_feat = input_data[:-1] if len(values) > 1 else input_data
+            train_label = input_data[-1]
+            with autograd.record():
+                preds = [net(*t) for t in zip(*train_feat)]
+                ls = [loss(p, s) for p, s in zip(preds, train_label)]
+                [l.backward() for l in ls]
+            l += sum([l.asnumpy() for l in ls]).mean() / len(devices)
+            trainer.step(values[0].shape[0])
+            metric.add(l, values[0].shape[0], values[0].size)
+            timer.stop()
+        test_rmse = evaluator(net, test_iter, devices)
+        train_l = l / (i + 1)
+        animator.add(epoch + 1, (train_l, test_rmse))
+        print(f'train loss {metric[0] / metric[1]:.3f}, test RMSE {test_rmse:.3f}')
+        print(f'{metric[2] * num_epochs / timer.sum():.1f} examples/sec on {str(devices)}')
+
+```
+
+## Benefits of Matrix Factorization
+
+Matrix factorization is widely used in recommendation systems due to its ability to address various challenges and improve prediction accuracy. Here’s a detailed explanation of why it's used:
+
+- **Data Sparsity Reduction**: Many recommendation systems deal with sparse data, where users have rated only a few items. Matrix factorization compresses this data into lower-dimensional spaces, making it easier to handle and analyze.
+
+- **Latent Feature Extraction**: It identifies hidden patterns or latent features that influence user preferences and item characteristics. These features can include aspects like movie genres or product types, which are not explicitly provided.
+
+- **Scalability**: Matrix factorization techniques are scalable and can handle large datasets efficiently. This makes them suitable for applications like Netflix or Amazon, where the volume of user-item interactions is massive.
+
+- **Improved Accuracy**: By capturing complex and nonlinear patterns in the data, matrix factorization can improve the accuracy of predictions compared to simpler methods like nearest-neighbor algorithms.

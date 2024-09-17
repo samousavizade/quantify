@@ -1,0 +1,100 @@
+---
+title: Heteroskedasticity-Robust Inference After OLS Estimation
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Heteroskedasticity-Robust Inference After OLS Estimation
+
+### **Heteroskedasticity-Robust Inference**
+
+Heteroskedasticity in a regression model implies that the variance of the error terms is not constant across observations. This can lead to inefficient OLS estimates and biased standard errors, which affect hypothesis testing and confidence intervals. To address these issues, heteroskedasticity-robust standard errors are used to provide valid inference even when heteroskedasticity is present.
+
+The heteroskedasticity-robust variance-covariance matrix for the OLS estimator is given by:
+
+$$
+\hat{V}_{\text{robust}} = (X'X)^{-1} \left( \sum_{i=1}^{n} \hat{u}_i^2 x_i x_i' \right) (X'X)^{-1}
+$$
+
+where:
+
+- $$ X $$ is the matrix of independent variables,
+- $$ \hat{u}\_i $$ is the OLS residual for observation $$ i $$,
+- $$ x_i $$ is the vector of independent variables for observation $$ i $$.
+
+This adjustment ensures that the standard errors are consistent even when heteroskedasticity is present, allowing for reliable hypothesis tests and confidence intervals.
+
+### **Computing Heteroskedasticity-Robust LM Tests**
+
+The Lagrange Multiplier (LM) test, also known as the score test, can be adapted to be robust to heteroskedasticity. This involves using robust standard errors in calculating the test statistic. The LM test is used to test hypotheses about the parameters in a regression model, particularly when testing for omitted variables or incorrect functional form.
+
+To compute a heteroskedasticity-robust LM test:
+
+1. **Estimate the restricted model**: Estimate the model under the null hypothesis and obtain the residuals.
+
+2. **Auxiliary regression**: Regress these residuals on all variables in both the restricted and unrestricted models.
+
+3. **Compute the test statistic**: The robust LM statistic is given by:
+
+$$
+LM_{\text{robust}} = n R^2_{\text{aux}}
+$$
+
+where $$ R^2\_{\text{aux}} $$ is the R-squared from the auxiliary regression and $$ n $$ is the sample size.
+
+4. **Inference**: The robust LM statistic follows a chi-square distribution with degrees of freedom equal to the number of restrictions under the null hypothesis.
+
+These robust methods ensure that inference remains valid even when heteroskedasticity is present in the data, allowing researchers to draw reliable conclusions from their econometric analyses[^1].
+
+## Example of Heteroskedasticity-Robust Inference
+
+To illustrate heteroskedasticity-robust inference, consider a simple linear regression model where we want to examine the relationship between individuals' income and their expenditure on luxury goods. Suppose we have collected data on income and expenditure for a sample of individuals.
+
+### **Model Specification**
+
+The model can be specified as:
+
+$$
+\text{Expenditure}_i = \beta_0 + \beta_1 \text{Income}_i + u_i
+$$
+
+where:
+
+- $$ \text{Expenditure}\_i $$ is the expenditure on luxury goods for individual $$ i $$,
+- $$ \text{Income}\_i $$ is the income of individual $$ i $$,
+- $$ u_i $$ is the error term.
+
+### **Presence of Heteroskedasticity**
+
+In this context, heteroskedasticity might arise if the variability of expenditure increases with income. For example, wealthier individuals might have more varied spending habits, leading to larger deviations from the average expenditure as income increases.
+
+### **Consequences for OLS**
+
+If heteroskedasticity is present, the ordinary least squares (OLS) estimates of the coefficients ($$ \beta_0 $$ and $$ \beta_1 $$) remain unbiased, but the standard errors are biased. This bias in standard errors can lead to incorrect conclusions in hypothesis testing, such as underestimating or overestimating the significance of income on expenditure.
+
+[^1]: https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/30626316/2be59c8f-ac44-43e7-a595-38c5bea42df7/Jeffrey_M_Wooldridge_Introductory_Econometrics_A_Modern_Approach.pdf
+[^2]: https://www.wolframalpha.com/input?input=Define+heteroskedasticity+and+its+significance+in+econometric+analysis.
+[^3]: https://www.wolframalpha.com/input?input=Explain+why+heteroskedasticity+matters+in+regression+models.
+[^4]: https://www.wolframalpha.com/input?input=Importance+of+addressing+heteroskedasticity+in+econometric+studies.
+[^5]: https://www.wolframalpha.com/input?input=Explain+consequences+of+heteroskedasticity+on+OLS+estimators.
+[^6]: https://www.wolframalpha.com/input?input=Impact+of+heteroskedasticity+on+hypothesis+testing+in+econometrics.
+[^7]: https://www.wolframalpha.com/input?input=How+does+heteroskedasticity+affect+the+efficiency+of+OLS+estimators%3F
+[^8]: https://www.wolframalpha.com/input?input=Explain+heteroskedasticity-robust+inference+methods.
+[^9]: https://www.wolframalpha.com/input?input=How+do+heteroskedasticity-robust+standard+errors+improve+OLS+results%3F
+[^10]: https://www.wolframalpha.com/input?input=Methods+to+handle+heteroskedasticity+in+econometric+analysis.
+[^11]: https://www.wolframalpha.com/input?input=Define+heteroskedasticity-robust+LM+tests+in+econometrics.
+[^12]: https://www.wolframalpha.com/input?input=Steps+to+compute+heteroskedasticity-robust+LM+tests.
+[^13]: https://www.wolframalpha.com/input?input=Detailed+process+for+performing+heteroskedasticity-robust+LM+tests.
+[^14]: https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/30626316/2be59c8f-ac44-43e7-a595-38c5bea42df7/Jeffrey_M_Wooldridge_Introductory_Econometrics_A_Modern_Approach.pdf
+[^15]: https://www.tandfonline.com/doi/full/10.1080/01621459.2020.1831924
+[^16]: https://www.statlect.com/glossary/heteroskedasticity-robust-standard-errors
+[^17]: http://www2.kobe-u.ac.jp/~kawabat/ch08.pdf
+[^18]: https://www.reed.edu/economics/parker/s12/312/notes/Notes8.pdf
+[^19]: https://www.sciencedirect.com/science/article/pii/S016517651200047X
+[^20]: https://www.econ.queensu.ca/sites/econ.queensu.ca/files/qed_wp_1268.pdf
+[^21]: https://economics.mit.edu/sites/default/files/2022-09/Heteroskedasticity-Robust%20Inference%20In%20Finite%20Samples.pdf
+[^22]: https://bookdown.org/ccolonescu/RPoE4/heteroskedasticity.html

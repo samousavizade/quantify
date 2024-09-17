@@ -14,8 +14,6 @@ export default async function About() {
   if (!session) return <div>Not authenticated</div>;
   if (!session?.user) return null;
 
-  console.log('session', session);
-
   const author = allAuthors.find((p) => p.slug === 'about');
 
   if (!author) {

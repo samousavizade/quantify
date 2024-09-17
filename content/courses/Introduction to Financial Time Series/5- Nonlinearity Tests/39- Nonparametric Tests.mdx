@@ -1,0 +1,149 @@
+---
+title: Nonparametric Tests
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Nonparametric Tests
+
+Nonparametric tests for nonlinearity do not assume any specific form of nonlinear dependence. Instead, they test the null hypothesis that the conditional mean of a time series is independent of its past history against a general nonlinear alternative. Two commonly used nonparametric tests are discussed here.
+
+### BDS Test
+
+The BDS test, proposed by Brock, Dechert, and Scheinkman (1987), is based on the correlation integral of the time series. Let $\{r_t\}_{t=1}^T$ be a time series of interest. The $m$-dimensional vector of $r_t$ with time delay $\tau$ is defined as:
+
+$$
+r_t^m = (r_t, r_{t-\tau}, \ldots, r_{t-(m-1)\tau})
+$$
+
+The correlation integral is then defined as:
+
+$$
+C_{m,T}(\epsilon) = \frac{2}{T_m(T_m-1)} \sum_{t<s} I(||r_t^m - r_s^m|| < \epsilon)
+$$
+
+where $T_m = T - (m-1)\tau$, $I(\cdot)$ is the indicator function, and $||\cdot||$ denotes the supremum norm. The BDS statistic is:
+
+$$
+W_{m,T}(\epsilon) = \sqrt{T_m} \frac{C_{m,T}(\epsilon) - [C_{1,T-m+1}(\epsilon)]^m}{\sigma_{m,T}(\epsilon)}
+$$
+
+where $\sigma_{m,T}(\epsilon)$ is a consistent estimator of the asymptotic standard deviation of the numerator.
+
+Under the null hypothesis that $\{r_t\}$ is independently and identically distributed (iid), $W_{m,T}(\epsilon)$ is asymptotically distributed as a standard normal random variable. The test rejects the null hypothesis of iid if $|W_{m,T}(\epsilon)|$ is large.
+
+In practice, one often uses $m = 2, 3, 4, 5$ and $\epsilon = 0.5\sigma, 1.0\sigma, 1.5\sigma, 2.0\sigma$, where $\sigma$ is the sample standard deviation of $\{r_t\}$. The BDS test is sensitive to many types of departures from iid, including nonlinearity and chaos.
+
+### McLeod-Li Test
+
+The McLeod-Li test (McLeod and Li, 1983) is based on the autocorrelation function of squared residuals. Let $\{a_t\}$ be the residual series of a fitted linear model (e.g., an ARMA model) for $\{r_t\}$. Define:
+
+$$
+\hat{\rho}(k) = \frac{\sum_{t=k+1}^T (a_t^2 - \bar{a}^2)(a_{t-k}^2 - \bar{a}^2)}{\sum_{t=1}^T (a_t^2 - \bar{a}^2)^2}
+$$
+
+where $\bar{a}^2 = T^{-1} \sum_{t=1}^T a_t^2$. Under the null hypothesis that $\{a_t\}$ is iid, $\sqrt{T}\hat{\rho}(k)$ is asymptotically normally distributed with mean zero and variance 1 for $k > 0$.
+
+The McLeod-Li test statistic is:
+
+$$
+Q(m) = T(T+2) \sum_{k=1}^m \frac{\hat{\rho}^2(k)}{T-k}
+$$
+
+which is asymptotically distributed as $\chi^2(m)$ under the null hypothesis. The test rejects the null hypothesis of linearity if $Q(m)$ is large.
+
+### Tsay Test
+
+The Tsay test (Tsay, 1986) is based on the idea that if a time series is linear, then the conditional expectation of the series given its past values should be a linear function of those past values. The test proceeds as follows:
+
+1. Fit an AR(k) model to $\{r_t\}$ and obtain the residuals $\{e_t\}$.
+
+2. Regress $r_t$ on all distinct pairs, triples, etc., of past values $r_{t-i}r_{t-j}$, $r_{t-i}r_{t-j}r_{t-l}$, etc., up to a certain order, say p. Denote the fitted value from this regression as $\hat{v}_t$.
+
+3. Regress $e_t$ on $\hat{v}_t$ and test whether the coefficient of $\hat{v}_t$ is zero.
+
+The test statistic is:
+
+$$
+F = \frac{(SSR_0 - SSR_1) / p}{SSR_1 / (T - k - p - 1)}
+$$
+
+where $SSR_0$ is the sum of squared residuals from the AR(k) model, $SSR_1$ is the sum of squared residuals from the regression of $e_t$ on $\hat{v}_t$, and $p$ is the number of regressors in the auxiliary regression.
+
+Under the null hypothesis of linearity, $F$ follows an $F(p, T-k-p-1)$ distribution. The test rejects the null hypothesis if $F$ is large.
+
+### Keenan Test
+
+The Keenan test (Keenan, 1985) is similar to the Tsay test but uses only quadratic terms in the auxiliary regression. The steps are:
+
+1. Fit an AR(k) model to $\{r_t\}$ and obtain the residuals $\{e_t\}$.
+
+2. Regress $r_t^2$ on $1, r_{t-1}, \ldots, r_{t-k}$ and obtain the residuals $\{\hat{u}_t\}$.
+
+3. Regress $e_t$ on $\hat{u}_t$ and denote the regression coefficient as $\hat{\eta}$.
+
+The test statistic is:
+
+$$
+F = \frac{\hat{\eta}^2 \sum_{t=k+1}^T \hat{u}_t^2}{SSR / (T-2k-2)}
+$$
+
+where $SSR$ is the sum of squared residuals from the AR(k) model.
+
+Under the null hypothesis of linearity, $F$ follows an $F(1, T-2k-2)$ distribution. The test rejects the null hypothesis if $F$ is large.
+
+### RESET Test
+
+The Ramsey Regression Equation Specification Error Test (RESET) (Ramsey, 1969) is a general test for misspecification of functional form. In the context of testing for nonlinearity, it proceeds as follows:
+
+1. Fit a linear model (e.g., an AR(k) model) to $\{r_t\}$ and obtain the fitted values $\{\hat{r}_t\}$.
+
+2. Augment the original model with powers of $\hat{r}_t$ up to order q:
+
+$$
+r_t = \beta_0 + \sum_{i=1}^k \beta_i r_{t-i} + \gamma_2 \hat{r}_t^2 + \gamma_3 \hat{r}_t^3 + \cdots + \gamma_q \hat{r}_t^q + \epsilon_t
+$$
+
+3. Test the joint significance of $\gamma_2, \ldots, \gamma_q$.
+
+The test statistic is:
+
+$$
+F = \frac{(SSR_0 - SSR_1) / (q-1)}{SSR_1 / (T-k-q)}
+$$
+
+where $SSR_0$ is the sum of squared residuals from the original linear model and $SSR_1$ is the sum of squared residuals from the augmented model.
+
+Under the null hypothesis of linearity, $F$ follows an $F(q-1, T-k-q)$ distribution. The test rejects the null hypothesis if $F$ is large.
+
+### White Neural Network Test
+
+White's neural network test (White, 1989) is based on the idea that a single hidden layer feedforward neural network with a sufficient number of hidden units can approximate any nonlinear function arbitrarily well. The test proceeds as follows:
+
+1. Fit a linear model (e.g., an AR(k) model) to $\{r_t\}$ and obtain the residuals $\{e_t\}$.
+
+2. Construct $q$ hidden units:
+
+$$
+h_{jt} = \psi(\alpha_{j0} + \sum_{i=1}^k \alpha_{ji} r_{t-i}), \quad j=1,\ldots,q
+$$
+
+where $\psi(\cdot)$ is an activation function (e.g., logistic or hyperbolic tangent) and $\alpha_{ji}$ are randomly generated weights.
+
+3. Regress $e_t$ on $h_{1t}, \ldots, h_{qt}$ and test the joint significance of the coefficients.
+
+The test statistic is:
+
+$$
+\chi^2 = T R^2
+$$
+
+where $R^2$ is the coefficient of determination from the regression in step 3.
+
+Under the null hypothesis of linearity, $\chi^2$ follows a $\chi^2(q)$ distribution. The test rejects the null hypothesis if $\chi^2$ is large.
+
+These nonparametric tests provide powerful tools for detecting nonlinearity in time series data without specifying a particular form of nonlinear dependence. They are particularly useful in exploratory data analysis and as diagnostic checks for linear models. However, they do not provide guidance on the specific type of nonlinearity present in the data, which is where parametric tests and model-building techniques become important.

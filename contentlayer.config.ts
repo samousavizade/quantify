@@ -20,6 +20,14 @@ const computedFields: ComputedFields = {
     resolve: (doc) => doc._raw.flattenedPath.replace(/^.+?(\/)/, ''),
   },
   toc: { type: 'string', resolve: (doc) => extractTocHeadings(doc.body.raw) },
+  courseName: {
+    type: 'string',
+    resolve: (doc) => doc._raw.sourceFileDir.split('/')[1],
+  },
+  courseSection: {
+    type: 'string',
+    resolve: (doc) => doc._raw.sourceFileDir.split('/')[2],
+  },
 };
 
 export const Blog = defineDocumentType(() => ({
@@ -61,9 +69,21 @@ export const Authors = defineDocumentType(() => ({
   computedFields,
 }));
 
+export const Courses = defineDocumentType(() => ({
+  name: 'Courses',
+  filePathPattern: 'courses/**/**/*.mdx',
+  contentType: 'mdx',
+  fields: {
+    title: { type: 'string', required: true },
+    draft: { type: 'boolean' },
+    summary: { type: 'string' },
+  },
+  computedFields,
+}));
+
 export default makeSource({
   contentDirPath: 'content',
-  documentTypes: [Blog, Authors],
+  documentTypes: [Blog, Authors, Courses],
   mdx: {
     cwd: process.cwd(),
     rehypePlugins: [

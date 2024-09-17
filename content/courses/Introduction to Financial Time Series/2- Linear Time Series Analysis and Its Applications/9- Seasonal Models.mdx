@@ -1,0 +1,101 @@
+---
+title: Seasonal Models
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Seasonal Models
+
+Seasonal time series exhibit patterns that repeat at regular intervals, such as monthly or quarterly data that show similar behavior each year. These patterns can significantly impact the analysis and forecasting of financial time series. This section explores seasonal models, focusing on techniques to handle seasonality effectively.
+
+### Seasonal Differencing
+
+Seasonal differencing is a technique used to remove seasonal patterns from a time series, making it easier to analyze and model the underlying non-seasonal components.
+
+#### Definition
+
+For a time series $\{r_t\}$ with a seasonal period $s$, the seasonal difference of order $s$ is defined as:
+
+$$
+\nabla_s r_t = r_t - r_{t-s}
+$$
+
+This operation removes the seasonal component by subtracting the value from the same season in the previous cycle.
+
+#### Example
+
+Consider monthly data with a seasonal period of $s = 12$. The seasonal difference is:
+
+$$
+\nabla_{12} r_t = r_t - r_{t-12}
+$$
+
+This transformation removes annual seasonality by comparing each month with the same month in the previous year.
+
+#### Properties
+
+1. **Stationarity**: Seasonal differencing can help achieve stationarity by removing periodic fluctuations.
+2. **Variance Stabilization**: It often stabilizes variance, making it easier to identify and model other components.
+3. **ACF and PACF**: After seasonal differencing, the autocorrelation function (ACF) and partial autocorrelation function (PACF) can be used to identify non-seasonal ARMA models for the differenced series.
+
+### Multiplicative Seasonal Models
+
+Multiplicative seasonal models combine non-seasonal ARMA components with seasonal components to capture both types of dependencies in a time series.
+
+#### Definition
+
+A multiplicative seasonal ARMA model, denoted as SARMA$(p,d,q) \times (P,D,Q)_s$, is defined by:
+
+$$
+\Phi(B^s) \phi(B) (1 - B)^d (1 - B^s)^D r_t = \Theta(B^s) \theta(B) a_t
+$$
+
+where:
+
+- $\phi(B)$ and $\theta(B)$ are polynomials representing non-seasonal AR and MA components.
+- $\Phi(B^s)$ and $\Theta(B^s)$ are polynomials representing seasonal AR and MA components.
+- $(1 - B)^d$ is the non-seasonal differencing operator.
+- $(1 - B^s)^D$ is the seasonal differencing operator.
+- $a_t$ is a white noise error term.
+
+#### Example
+
+Consider monthly sales data with $s = 12$. A SARIMA$(0,1,1) \times (0,1,1)_{12}$ model can be expressed as:
+
+$$
+(1 - B)(1 - B^{12}) r_t = (1 - \theta_1 B)(1 - \Theta_1 B^{12}) a_t
+$$
+
+This model captures both regular and seasonal moving average components after differencing.
+
+#### Identification
+
+Identifying multiplicative seasonal models involves examining ACF and PACF plots for both non-seasonal and seasonal patterns:
+
+1. **Seasonal ACF**: Peaks at multiples of the seasonal period suggest potential seasonal MA terms.
+2. **Seasonal PACF**: Peaks at multiples of the seasonal period suggest potential seasonal AR terms.
+
+#### Estimation and Forecasting
+
+Parameters of multiplicative seasonal models can be estimated using maximum likelihood or other estimation techniques suitable for ARMA models. Forecasting involves predicting future values while accounting for both non-seasonal and seasonal dynamics.
+
+### Example: Airline Passenger Data
+
+Consider monthly airline passenger data exhibiting strong seasonality with $s = 12$:
+
+- **Plot**: The time plot shows clear annual cycles.
+- **Differencing**: Apply $\nabla_{12}$ to remove seasonality.
+- **Modeling**: Fit a SARIMA$(0,1,1) \times (0,1,1)_{12}$ model to capture remaining dependencies.
+
+### Summary
+
+Seasonal models are essential for analyzing time series data with periodic patterns:
+
+- **Seasonal Differencing**: Removes periodic fluctuations to stabilize the series.
+- **Multiplicative Seasonal Models**: Capture both non-seasonal and seasonal dependencies efficiently.
+
+Understanding these models helps improve forecasting accuracy in financial applications where seasonality plays a significant role.

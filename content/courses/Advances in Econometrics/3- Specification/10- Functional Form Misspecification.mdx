@@ -1,0 +1,122 @@
+---
+title: Functional Form Misspecification
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+### **Functional Form Misspecification**
+
+Functional form misspecification occurs when the specified model does not accurately represent the true relationship between the dependent and independent variables. This can lead to biased and inconsistent estimates, which affect the validity of the model's predictions and inferences. Common issues include omitting nonlinear terms or interaction effects, or using incorrect transformations of variables.
+
+#### **Common Types of Misspecification**
+
+1. **Omitting Nonlinear Terms**: If the true relationship is nonlinear but modeled linearly, this can lead to bias. For example, if the relationship between income and expenditure is quadratic, a linear model will not capture this curvature.
+
+2. **Omitting Interaction Terms**: When the effect of one variable depends on another, interaction terms are necessary. Omitting these terms can misrepresent the individual effects.
+
+3. **Incorrect Functional Form**: Using an incorrect transformation (e.g., levels instead of logs) can lead to misspecification.
+
+### **RESET as a General Test for Functional Form Misspecification**
+
+The Ramsey Regression Equation Specification Error Test (RESET) is a general test for detecting functional form misspecification. It assesses whether higher-order terms of the fitted values significantly improve model fit, indicating potential nonlinearity or omitted variables.
+
+#### **Steps to Perform RESET**
+
+1. **Estimate the Original Model**: Use OLS to estimate your initial regression model and obtain fitted values ($$\hat{y}_i$$).
+
+2. **Augment the Model**: Add higher-order terms (e.g., squares or cubes) of the fitted values to the original model:
+
+$$
+y_i = \beta_0 + \beta_1 x_{1i} + \beta_2 x_{2i} + \ldots + \beta_k x_{ki} + \gamma_1 \hat{y}_i^2 + \gamma_2 \hat{y}_i^3 + u_i
+$$
+
+3. **Test for Significance**: Conduct an F-test to determine if the coefficients on the added terms ($$\gamma_1, \gamma_2$$) are jointly significant. A significant result suggests that the original model may be misspecified.
+
+### **Tests against Nonnested Alternatives**
+
+When comparing models that are not nested within each other (i.e., one model cannot be derived from another by imposing restrictions), traditional tests like the F-test are not applicable. Specific tests for nonnested models are used instead.
+
+#### **Common Tests for Nonnested Models**
+
+1. **Davidson-MacKinnon J-Test**: Estimate each model separately, then include the fitted values from one model as an additional regressor in the other model. If these fitted values are significant, it suggests that the alternative model provides additional explanatory power.
+
+2. **Encompassing Tests**: These tests assess whether one model can account for results of another by including variables from both models in a combined regression.
+
+3. **Vuong Test**: A likelihood ratio-based test that compares nonnested models based on their predictive power.
+
+#### **Example Application**
+
+Consider two competing models for predicting housing prices:
+
+- Model A: Linear function of square footage and number of bedrooms.
+- Model B: Log-linear function of square footage with interaction between square footage and number of bedrooms.
+
+To determine which model better fits the data, nonnested tests like the Vuong test can compare their predictive capabilities without assuming one is nested within the other.
+
+By addressing functional form misspecification and testing against nonnested alternatives, econometricians ensure their models accurately capture underlying relationships, providing reliable inference.
+
+## Intuition Behind the RESET Test
+
+### **Understanding the RESET Test**
+
+The Ramsey Regression Equation Specification Error Test (RESET) is a diagnostic tool used in econometrics to detect functional form misspecification in a regression model. It is particularly useful when there is suspicion that the model may be missing nonlinear relationships or interaction terms among variables. The test is named after James B. Ramsey, who developed it.
+
+### **Intuition Behind the RESET Test**
+
+The fundamental idea behind the RESET test is to check whether adding nonlinear transformations of the fitted values from a regression model significantly improves the model's explanatory power. If these additional terms are statistically significant, it suggests that the original model might be misspecified, potentially missing important nonlinear relationships or interactions.
+
+#### **Key Steps and Concepts**
+
+1. **Estimate the Original Model**:
+
+- Start with a linear regression model:
+  $$
+  y_i = \beta_0 + \beta_1 x_{1i} + \beta_2 x_{2i} + \ldots + \beta_k x_{ki} + u_i
+  $$
+- Obtain the fitted values ($$\hat{y}_i$$) from this regression.
+
+2. **Augment the Model**:
+
+- Add higher-order powers of the fitted values ($$\hat{y}_i$$) as additional regressors to the original model:
+  $$
+  y_i = \beta_0 + \beta_1 x_{1i} + \beta_2 x_{2i} + \ldots + \beta_k x_{ki} + \gamma_1 \hat{y}_i^2 + \gamma_2 \hat{y}_i^3 + v_i
+  $$
+- The added terms ($$\hat{y}_i^2$$, $$\hat{y}_i^3$$, etc.) capture potential nonlinear patterns that were not included in the original specification.
+
+3. **Conduct an F-Test**:
+
+- Perform an F-test to determine if the coefficients on these new terms ($$\gamma_1, \gamma_2$$) are jointly significant.
+- A significant result indicates that these nonlinear terms add explanatory power, suggesting that the original model might be misspecified.
+
+### **Why Use RESET?**
+
+- **Flexibility**: The RESET test does not require specifying a particular alternative hypothesis about what form the misspecification takes. It broadly tests for any omitted nonlinear relationships.
+- **Simplicity**: It is relatively straightforward to implement using standard regression software.
+- **Diagnostic Power**: By identifying potential misspecifications, it helps improve model accuracy and reliability.
+
+### **Limitations**
+
+- **Non-specificity**: While RESET can indicate a problem with functional form, it does not specify what the correct form should be.
+- **Overfitting Risk**: Adding too many powers of fitted values can lead to overfitting, especially in small samples.
+- **Assumption Dependence**: Like all statistical tests, its validity depends on certain assumptions being met, such as no multicollinearity among regressors.
+
+In summary, the RESET test provides a useful diagnostic check for functional form misspecification by testing whether adding nonlinear transformations of fitted values significantly improves model fit. This helps ensure that econometric models accurately capture underlying relationships between variables.
+
+[^1]: https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/30626316/2be59c8f-ac44-43e7-a595-38c5bea42df7/Jeffrey_M_Wooldridge_Introductory_Econometrics_A_Modern_Approach.pdf
+[^2]: https://www.aptech.com/resources/tutorials/econometrics/ols-diagnostics-model-specification/
+[^3]: https://www.youtube.com/watch?v=23exwl0_QKA
+[^4]: https://www.uvic.ca/socialsciences/economics/assets/docs/freset.pdf
+[^5]: http://fmwww.bc.edu/ec-c/F2007/228/EC228.f2005.nn09.pdf
+[^6]: https://www.youtube.com/watch?v=vCtC7QgPVXk
+[^7]: https://en.wikipedia.org/wiki/Ramsey_RESET_test
+[^8]: http://fmwww.bc.edu/EC-C/F2014/2228/ECON2228_2014_8.slides.pdf
+[^9]: https://economics.mit.edu/sites/default/files/2022-09/Heteroskedasticity-Robust%20Inference%20In%20Finite%20Samples.pdf
+[^10]: https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/30626316/2be59c8f-ac44-43e7-a595-38c5bea42df7/Jeffrey_M_Wooldridge_Introductory_Econometrics_A_Modern_Approach.pdf
+[^11]: https://www.youtube.com/watch?v=23exwl0_QKA
+[^12]: http://fmwww.bc.edu/ec-c/F2007/228/EC228.f2005.nn09.pdf
+[^13]: http://fmwww.bc.edu/EC-C/F2014/2228/ECON2228_2014_8.slides.pdf
+[^14]: http://lipas.uwasa.fi/~bepa/ecmc8.pdf

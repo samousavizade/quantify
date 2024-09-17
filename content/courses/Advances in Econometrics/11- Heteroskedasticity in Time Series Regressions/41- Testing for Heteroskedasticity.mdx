@@ -1,0 +1,91 @@
+---
+title: Testing for Heteroskedasticity
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+### Testing for Heteroskedasticity
+
+#### Introduction
+
+In time series econometrics, heteroskedasticity refers to the condition where the variance of the error terms in a regression model is not constant across observations. This can lead to inefficient estimates and invalid inference if not properly addressed. Testing for heteroskedasticity is an essential step in ensuring that the assumptions of the classical linear regression model hold, allowing for reliable statistical inference.
+
+#### Understanding Heteroskedasticity
+
+In a typical linear regression model, the assumption of homoskedasticity implies constant variance of the error terms:
+
+$$
+\text{Var}(u_t) = \sigma^2 \quad \text{for all } t.
+$$
+
+However, when heteroskedasticity is present, this assumption is violated, and the variance of the error terms changes over time:
+
+$$
+\text{Var}(u_t) = \sigma_t^2.
+$$
+
+This variability can arise due to structural changes in the data-generating process or economic events affecting volatility.
+
+#### Consequences of Heteroskedasticity
+
+1. **Inefficiency**: OLS estimators remain unbiased but become inefficient when heteroskedasticity is present because they do not account for varying error variances.
+
+2. **Invalid Inference**: Standard errors computed under homoskedasticity assumptions are biased in the presence of heteroskedasticity, leading to incorrect hypothesis tests and confidence intervals.
+
+3. **Model Misinterpretation**: Ignoring heteroskedasticity can result in misinterpretation of regression results, particularly when assessing the significance of coefficients.
+
+#### Testing for Heteroskedasticity
+
+Several tests are available to detect heteroskedasticity in time series regression models:
+
+###### 1. **Breusch-Pagan Test**
+
+The Breusch-Pagan test is a widely used method to test for heteroskedasticity. It involves regressing the squared residuals from an OLS regression on the original regressors.
+
+- **Procedure**:
+
+1. Estimate the original regression model using OLS and obtain residuals $$ \hat{u}\_t $$.
+2. Compute squared residuals $$ \hat{u}\_t^2 $$.
+3. Regress $$ \hat{u}\_t^2 $$ on the original regressors (or a subset thereof).
+4. Perform an F-test or LM test on the coefficients of this auxiliary regression to determine if they are jointly significant.
+
+- **Hypothesis**:
+- Null hypothesis ($$ H_0 $$): Homoskedasticity exists (all coefficients are zero).
+- Alternative hypothesis ($$ H_a $$): Heteroskedasticity exists (at least one coefficient is non-zero).
+
+###### 2. **White Test**
+
+The White test is a more general test for heteroskedasticity that does not rely on any specific form of heteroskedasticity.
+
+- **Procedure**:
+
+1. Estimate the original regression model using OLS and obtain residuals $$ \hat{u}\_t $$.
+2. Compute squared residuals $$ \hat{u}\_t^2 $$.
+3. Regress $$ \hat{u}\_t^2 $$ on all possible cross-products and powers of the original regressors.
+4. Perform an F-test or LM test on this auxiliary regression.
+
+- **Advantages**:
+- The White test can detect any form of heteroskedasticity, making it more flexible than other tests.
+
+###### 3. **Goldfeld-Quandt Test**
+
+The Goldfeld-Quandt test involves splitting the data into two groups and comparing variances between them.
+
+- **Procedure**:
+
+1. Order data by an independent variable or another criterion.
+2. Split data into two groups, omitting a central portion to ensure independent samples.
+3. Estimate separate regressions for each group and compute their residual variances.
+4. Use an F-test to compare these variances.
+
+- **Hypothesis**:
+- Null hypothesis ($$ H_0 $$): Homoskedasticity (equal variances).
+- Alternative hypothesis ($$ H_a $$): Heteroskedasticity (unequal variances).
+
+#### Conclusion
+
+Testing for heteroskedasticity is crucial in time series regressions to ensure valid inference and efficient estimates. By employing tests such as Breusch-Pagan, White, and Goldfeld-Quandt, researchers can detect and address heteroskedasticity effectively. Understanding and addressing this issue is vital for accurate econometric analysis and interpretation in time series data.

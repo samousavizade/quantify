@@ -1,0 +1,101 @@
+---
+title: Properties of OLS under Measurement Error
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+### **Properties of OLS under Measurement Error**
+
+Measurement error occurs when the observed values of variables differ from their true values. In econometric models, measurement error can lead to biased and inconsistent estimates, particularly when it affects the explanatory variables. Understanding how measurement error impacts Ordinary Least Squares (OLS) estimation is crucial for interpreting regression results accurately.
+
+#### **General Impact of Measurement Error**
+
+Measurement error can be classified into two types: classical and non-classical. In classical measurement error, the errors are assumed to be independent of the true values and other variables in the model. Non-classical errors do not satisfy these conditions and can be more problematic.
+
+### **Measurement Error in the Dependent Variable**
+
+When measurement error occurs in the dependent variable, it is generally less problematic for OLS estimation than when it occurs in the explanatory variables.
+
+#### **Mathematical Representation**
+
+Consider a regression model:
+
+$$
+Y^*_i = \beta_0 + \beta_1 X_i + u_i
+$$
+
+where:
+
+- $$ Y^\*\_i $$ is the true but unobserved dependent variable.
+- $$ Y_i = Y^\*\_i + e_i $$ is the observed dependent variable, with $$ e_i $$ representing measurement error.
+
+The observed model becomes:
+
+$$
+Y_i = \beta_0 + \beta_1 X_i + u_i + e_i
+$$
+
+Here, the composite error term is $$ v_i = u_i + e_i $$.
+
+#### **Impact on OLS Estimates**
+
+- **Unbiasedness**: The OLS estimates of $$ \beta_0 $$ and $$ \beta_1 $$ remain unbiased under classical measurement error in the dependent variable because the measurement error is absorbed into the error term.
+- **Efficiency**: The presence of measurement error increases the variance of the error term, leading to less efficient estimates. The standard errors will be larger, making hypothesis tests less powerful.
+
+### **Measurement Error in an Explanatory Variable**
+
+Measurement error in an explanatory variable is more problematic and leads to biased and inconsistent OLS estimates.
+
+#### **Mathematical Representation**
+
+Suppose we have:
+
+$$
+X^*_i = X_i + w_i
+$$
+
+where:
+
+- $$ X^\*\_i $$ is the true but unobserved explanatory variable.
+- $$ X_i $$ is the observed explanatory variable with measurement error $$ w_i $$.
+
+The model becomes:
+
+$$
+Y_i = \beta_0 + \beta_1 X^*_i + u_i = \beta_0 + \beta_1 (X_i - w_i) + u_i
+$$
+
+Rearranging gives:
+
+$$
+Y_i = \beta_0 + \beta_1 X_i + (\underbrace{u_i - \beta_1 w_i}_{\text{new error term}})
+$$
+
+#### **Impact on OLS Estimates**
+
+- **Bias**: The OLS estimator for $$ \beta_1 $$ is biased towards zero, a phenomenon known as attenuation bias. This bias arises because the measurement error in the explanatory variable introduces a correlation between the regressor and the new composite error term.
+
+- **Inconsistency**: The bias does not diminish as sample size increases, making OLS estimates inconsistent.
+
+### **Addressing Measurement Error**
+
+1. **Instrumental Variables (IV)**: Instrumental variables can be used to obtain consistent estimates when there is measurement error in explanatory variables. An instrument must be correlated with the true explanatory variable but uncorrelated with the error term.
+
+2. **Errors-in-Variables Models**: These models explicitly account for measurement errors and provide alternative estimation techniques that adjust for these errors.
+
+3. **Validation Data**: If data on true values are available for a subset of observations, they can be used to correct for measurement errors in a larger dataset.
+
+Understanding and addressing measurement error is critical for ensuring that econometric models provide reliable insights into economic relationships.
+
+[^1]: https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/30626316/2be59c8f-ac44-43e7-a595-38c5bea42df7/Jeffrey_M_Wooldridge_Introductory_Econometrics_A_Modern_Approach.pdf
+[^2]: https://link.springer.com/article/10.1007/s00181-020-01942-z
+[^3]: http://home.iitk.ac.in/~shalab/econometrics/Chapter16-Econometrics-Measurement%20Error%20Models.pdf
+[^4]: https://www.albert.io/blog/ultimate-properties-of-ols-estimators-guide/
+[^5]: http://personal.rhul.ac.uk/uhte/006/ec2203/Lecture%20Handout_measurement%20error.pdf
+[^6]: http://fmwww.bc.edu/EC-C/F2014/2228/ECON2228_2014_8.slides.pdf
+[^7]: https://people.stfx.ca/tleo/econ370term2lec4.pdf
+[^8]: https://web.ics.purdue.edu/~bvankamm/Files/360%20Notes/08%20-%20Specification%20and%20Data%20Issues.pdf

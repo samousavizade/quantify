@@ -1,0 +1,830 @@
+---
+title: Two Meanings of Probability
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+# Dual Interpretations of Probability
+
+## Synopsis
+
+This lesson demonstrates two distinct views of a **probability distribution**
+
+- A frequentist perspective as **expected frequencies** in a large independent and identically distributed sample
+- A Bayesian viewpoint as a **subjective belief** (about one or more parameters) after observing a set of data
+
+We suggest viewing this video about **hypothesis testing** in the frequentist approach
+
+After watching that, please view the following video on the Bayesian method for creating **coverage intervals**
+
+Once you're acquainted with the content in these videos, this lesson uses the Socratic technique to reinforce your understanding of the different questions addressed by
+
+- a frequentist confidence interval
+- a Bayesian coverage interval
+
+We accomplish this by asking you to compose some Python code.
+
+It would be particularly beneficial if you attempted this after each question we pose, before
+moving on to the rest of the lesson.
+
+We provide our own solutions as the lesson progresses, but you'll gain more by trying to write your own code before reading and executing ours.
+
+**Code for responding to questions:**
+
+Beyond what's included in Anaconda, this lesson will utilize the following library:
+
+```python
+pip install prettytable
+```
+
+    Requirement already satisfied: prettytable in /Users/s.alirezamousavizade/anaconda3/lib/python3.11/site-packages (3.11.0)
+    Requirement already satisfied: wcwidth in /Users/s.alirezamousavizade/anaconda3/lib/python3.11/site-packages (from prettytable) (0.2.13)
+
+
+    Note: you may need to restart the kernel to use updated packages.
+
+To answer our coding questions, we'll begin with some imports
+
+```python
+import numpy as np
+import pandas as pd
+import prettytable as pt
+import matplotlib.pyplot as plt
+from scipy.stats import binom
+import scipy.stats as st
+```
+
+Armed with these Python tools, we'll now explore the two interpretations described above.
+
+## Frequentist Interpretation
+
+Let's consider the following classic example.
+
+The random variable $ X $ assumes possible values $ k = 0, 1, 2, \ldots, n $ with probabilities
+
+$$
+\textrm{Prob}(X = k | \theta) =
+\left(\frac{n!}{k! (n-k)!} \right) \theta^k (1-\theta)^{n-k}
+$$
+
+where the fixed parameter $ \theta \in (0,1) $.
+
+This is known as the **binomial distribution**.
+
+Here
+
+- $ \theta $ is the likelihood that a single coin toss will result in heads,... an outcome we denote as $ Y = 1 $.
+- $ 1 -\theta $ is the likelihood that a single coin toss will result in tails, an outcome we denote as $ Y = 0 $.
+- $ X $ represents the total number of heads obtained after flipping the coin $ n $ times.
+
+Consider the following experiment:
+
+Perform $ I $ **independent** sequences of $ n $ **independent** coin flips
+
+Note the repeated use of the term **independent**:
+
+- we use it once to describe that we are sampling $ n $ independent times from a **Bernoulli** distribution with parameter $ \theta $ to obtain one sample from a **Binomial** distribution with parameters
+  $ \theta,n $.
+- we use it again to describe that we are then sampling $ I $ sequences of $ n $ coin tosses.
+
+Let $ y_h^i \in \{0, 1\} $ be the observed value of $ Y $ on the $ h $th flip during the $ i $th sequence of flips.
+
+Let $ \sum\_{h=1}^n y_h^i $ denote the total number of heads obtained during the $ i $th sequence of $ n $ independent coin flips.
+
+Let $ f*k $ record the proportion of samples of length $ n $ for which $ \sum*{h=1}^n y_h^i = k $:
+
+$$
+f_k^I = \frac{\textrm{number of samples of length n for which } \sum_{h=1}^n y_h^i = k}{
+I}
+$$
+
+The probability $ \textrm{Prob}(X = k | \theta) $ addresses the following question:
+
+- As $ I $ grows large, in what proportion of $ I $ independent sets of $ n $ coin flips should we expect $ k $ heads to occur?
+
+As usual, a law of large numbers supports this answer.
+
+## Problem 10.1
+
+1. Please create a Python class to calculate $ f_k^I $
+1. Please use your code to determine $ f_k^I, k = 0, \ldots , n $ and compare them to
+   $ \textrm{Prob}(X = k | \theta) $ for various values of $ \theta, n $ and $ I $
+1. With the Law of Large numbers in mind, use your code to comment on
+
+## Answer to Problem 10.1
+
+Here's one possible solution:
+
+```python
+class frequentist:
+
+    def __init__(self, θ, n, I):
+
+        '''
+        initialization
+        -----------------
+        parameters:
+        θ : probability that one toss of a coin will be a head with Y = 1
+        n : number of independent flips in each independent sequence of draws
+        I : number of independent sequence of draws
+
+        '''
+
+        self.θ, self.n, self.I = θ, n, I
+
+    def binomial(self, k):
+
+        '''compute the theoretical probability for specific input k'''
+
+        θ, n = self.θ, self.n
+        self.k = k
+        self.P = binom.pmf(k, n, θ)
+
+    def draw(self):
+
+        '''draw n independent flips for I independent sequences'''
+
+        θ, n, I = self.θ, self.n, self.I
+        sample = np.random.rand(I, n)
+        Y = (sample <= θ) * 1
+        self.Y = Y
+
+    def compute_fk(self, kk):
+
+        '''compute f_{k}^I for specific input k'''
+
+        Y, I = self.Y, self.I
+        K = np.sum(Y, 1)
+        f_kI = np.sum(K == kk) / I
+        self.f_kI = f_kI
+        self.kk = kk
+
+    def compare(self):
+
+        '''compute and print the comparison'''
+
+        n = self.n
+        comp = pt.PrettyTable()
+        comp.field_names = ['k', 'Theoretical', 'Frequentist']
+        self.draw()
+        for i in range(n):
+            self.binomial(i+1)
+            self.compute_fk(i+1)
+            comp.add_row([i+1, self.P, self.f_kI])
+        print(comp)
+```
+
+```python
+θ, n, k, I = 0.7, 20, 10, 1_000_000
+
+freq = frequentist(θ, n, I)
+
+freq.compare()
+```
+
+    +----+------------------------+-------------+
+    | k  |      Theoretical       | Frequentist |
+    +----+------------------------+-------------+
+    | 1  | 1.6271660538000039e-09 |     0.0     |
+    | 2  | 3.6068847525900024e-08 |     0.0     |
+    | 3  | 5.049638653626012e-07  |    1e-06    |
+    | 4  | 5.0075583315124565e-06 |    6e-06    |
+    | 5  | 3.738976887529304e-05  |   3.1e-05   |
+    | 6  | 0.0002181069851058756  |   0.000221  |
+    | 7  | 0.0010178325971607542  |   0.00102   |
+    | 8  | 0.0038592819309011856  |   0.003823  |
+    | 9  |  0.012006654896137014  |   0.011709  |
+    | 10 |  0.03081708090008503   |   0.030704  |
+    | 11 |  0.06536956554563479   |   0.065033  |
+    | 12 |  0.11439673970486113   |   0.114586  |
+    | 13 |  0.16426198521723653   |   0.164389  |
+    | 14 |   0.1916389827534426   |   0.191445  |
+    | 15 |  0.17886305056987975   |   0.179305  |
+    | 16 |  0.13042097437387049   |   0.130422  |
+    | 17 |  0.07160367220526213   |   0.071909  |
+    | 18 |  0.027845872524268653  |   0.027751  |
+    | 19 |  0.006839337111223899  |   0.006832  |
+    | 20 | 0.0007979226629761189  |   0.000813  |
+    +----+------------------------+-------------+
+
+From the table above,... can you observe the law of large numbers in action?
+
+Let's perform some additional calculations.
+
+**Comparison with different $ \theta $**
+
+Now we set
+
+$$
+n=20, k=10, I=1,000,000
+$$
+
+We'll adjust $ \theta $ from $ 0.01 $ to $ 0.99 $ and graph results against $ \theta $.
+
+```python
+θ_low, θ_high, npt = 0.01, 0.99, 50
+thetas = np.linspace(θ_low, θ_high, npt)
+P = []
+f_kI = []
+for i in range(npt):
+    freq = frequentist(thetas[i], n, I)
+    freq.binomial(k)
+    freq.draw()
+    freq.compute_fk(k)
+    P.append(freq.P)
+    f_kI.append(freq.f_kI)
+```
+
+```python
+fig, ax = plt.subplots(figsize=(8, 6))
+ax.grid()
+ax.plot(thetas, P, 'k-.', label='Theoretical')
+ax.plot(thetas, f_kI, 'r--', label='Fraction')
+plt.title(r'Comparison with different $\theta$', fontsize=16)
+plt.xlabel(r'$\theta$', fontsize=15)
+plt.ylabel('Fraction', fontsize=15)
+plt.tick_params(labelsize=13)
+plt.legend()
+plt.show()
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/10.%20Two%20Meanings%20of%20Probability_files/10.%20Two%20Meanings%20of%20Probability_13_0.png)
+</div>
+
+**Comparison with different $ n $**
+
+Now we set $ \theta=0.7, k=10, I=1,000,000 $ and adjust $ n $ from $ 1 $ to $ 100 $.
+
+Then we'll graph the results.
+
+```python
+n_low, n_high, nn = 1, 100, 50
+ns = np.linspace(n_low, n_high, nn, dtype='int')
+P = []
+f_kI = []
+for i in range(nn):
+    freq = frequentist(θ, ns[i], I)
+    freq.binomial(k)
+    freq.draw()
+    freq.compute_fk(k)
+    P.append(freq.P)
+    f_kI.append(freq.f_kI)
+```
+
+```python
+fig, ax = plt.subplots(figsize=(8, 6))
+ax.grid()
+ax.plot(ns, P, 'k-.', label='Theoretical')
+ax.plot(ns, f_kI, 'r--', label='Frequentist')
+plt.title(r'Comparison with different $n$', fontsize=16)
+plt.xlabel(r'$n$', fontsize=15)
+plt.ylabel('Fraction', fontsize=15)
+plt.tick_params(labelsize=13)
+plt.legend()
+plt.show()
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/10.%20Two%20Meanings%20of%20Probability_files/10.%20Two%20Meanings%20of%20Probability_16_0.png)
+</div>
+
+**Comparison with different $ I $**
+
+Now we set $ \theta=0.7, n=20, k=10 $ and adjust $ \log(I) $ from $ 2 $ to $ 7 $.
+
+```python
+I_log_low, I_log_high, nI = 2, 6, 200
+log_Is = np.linspace(I_log_low, I_log_high, nI)
+Is = np.power(10, log_Is).astype(int)
+P = []
+f_kI = []
+for i in range(nI):
+    freq = frequentist(θ, n, Is[i])
+    freq.binomial(k)
+    freq.draw()
+    freq.compute_fk(k)
+    P.append(freq.P)
+    f_kI.append(freq.f_kI)
+```
+
+```python
+fig, ax = plt.subplots(figsize=(8, 6))
+ax.grid()
+ax.plot(Is, P, 'k-.', label='Theoretical')
+ax.plot(Is, f_kI, 'r--', label='Fraction')
+plt.title(r'Comparison with different $I$', fontsize=16)
+plt.xlabel(r'$I$', fontsize=15)
+plt.ylabel('Fraction', fontsize=15)
+plt.tick_params(labelsize=13)
+plt.legend()
+plt.show()
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/10.%20Two%20Meanings%20of%20Probability_files/10.%20Two%20Meanings%20of%20Probability_19_0.png)
+</div>
+
+From the graphs above, we can observe that **$ I $, the number of independent sequences,** plays a crucial role.
+
+As $ I $ increases, the gap between theoretical probability and frequentist estimate narrows.
+
+Moreover, provided $ I $ is sufficiently large, altering $ \theta $ or $ n $ doesn't significantly affect the accuracy of the observed fraction
+as an approximation of $ \theta $.
+
+The Law of Large Numbers is evident here.
+
+For each sample of an independent sequence, $ \textrm{Prob}(X*i = k | \theta) $ remains constant, so aggregating all samples forms an i.i.d sequence of a binary random variable $ \rho*{k,i},i=1,2,...I $, with an expected value of $ \textrm{Prob}(X = k | \theta) $ and a variance of
+
+$$
+n \cdot \textrm{Prob}(X = k | \theta) \cdot (1-\textrm{Prob}(X = k | \theta)).
+$$
+
+Thus, by the LLN, the mean of $ P\_{k,i} $ converges to:
+
+$$
+E[\rho_{k,i}] = \textrm{Prob}(X = k | \theta) = \left(\frac{n!}{k! (n-k)!} \right) \theta^k (1-\theta)^{n-k}
+$$
+
+as $ I $ approaches infinity.
+
+## Bayesian Interpretation
+
+We again employ a binomial distribution.
+
+However, we no longer consider $ \theta $ as a fixed value.
+
+Instead, we view it as a **random variable**.
+
+$ \theta $ is characterized by a probability distribution.
+
+But now this probability distribution has a different meaning than a relative frequency we can expect to occur in a large i.i.d. sample.
+
+Rather,... the probability distribution of $ \theta $ is now a summary of our beliefs about likely values of $ \theta $ either
+
+- **before** we have observed **any** data at all, or
+- **before** we have observed **more** data, after we have observed **some** data
+
+Thus, imagine that, prior to seeing any data, you have a personal prior probability distribution stating that
+
+$$
+P(\theta) = \frac{\theta^{\alpha-1}(1-\theta)^{\beta -1}}{B(\alpha, \beta)}
+$$
+
+where $ B(\alpha, \beta) $ is a **beta function** , so that $ P(\theta) $ is
+a **beta distribution** with parameters $ \alpha, \beta $.
+
+## Problem 10.2
+
+**a)** Please write out the **likelihood function** for a sample of size $ n $ from a binomial distribution with parameter $ \theta $.
+
+**b)** Please write out the **posterior** distribution for $ \theta $ after observing one coin flip.
+
+**c)** Now assume that the true value of $ \theta = .4 $ and that someone unaware of this has a beta prior distribution with parameters $ \beta = \alpha = .5 $. Please create a Python class to simulate this person's personal posterior distribution for $ \theta $ for a _single_ sequence of $ n $ samples.
+
+**d)** Please graph the posterior distribution for $ \theta $ as a function of $ \theta $ as $ n $ increases from $ 1, 2, \ldots $.
+
+**e)** For various $ n $'s, please describe and compute a Bayesian coverage interval for the range $ [.45, .55] $.
+
+**f)** Please explain what question a Bayesian coverage interval addresses.
+
+**g)** Please calculate the Posterior probability that $ \theta \in [.45, .55] $ for various values of sample size $ n $.
+
+**h)** Please use your Python class to examine what happens to the posterior distribution as $ n \rightarrow + \infty $, again assuming that the true value of $ \theta = .4 $, though it is unknown to the person performing the updating via Bayes' Law.
+
+## Answer to Problem 10.2
+
+**a)** Please write out the **likelihood function** and the **posterior** distribution for $ \theta $ after observing one flip of our coin.
+
+Suppose the outcome is **Y**.
+
+The likelihood function is:
+
+$$
+L(Y|\theta)= \textrm{Prob}(X = Y | \theta) =
+\theta^Y (1-\theta)^{1-Y}
+$$
+
+**b)** Please write the **posterior** distribution for $ \theta $ after observing one flip of our coin.
+
+The prior distribution is
+
+$$
+\textrm{Prob}(\theta) = \frac{\theta^{\alpha - 1} (1 - \theta)^{\beta - 1}}{B(\alpha, \beta)}
+$$
+
+We can derive the posterior distribution for $ \theta $ via
+
+$$
+\begin{align*}
+\textrm{Prob}(\theta | Y) &= \frac{\textrm{Prob}(Y | \theta) \textrm{Prob}(\theta)}{\textrm{Prob}(Y)} \\
+&=\frac{\textrm{Prob}(Y | \theta) \textrm{Prob}(\theta)}{\int_{0}^{1} \textrm{Prob}(Y | \theta) \textrm{Prob}(\theta) d \theta }\\
+&= \frac{\theta^Y (1-\theta)^{1-Y}\frac{\theta^{\alpha - 1} (1 - \theta)^{\beta - 1}}{B(\alpha, \beta)}}{\int_{0}^{1}\theta^Y (1-\theta)^{1-Y}\frac{\theta^{\alpha - 1} (1 - \theta)^{\beta - 1}}{B(\alpha, \beta)} d \theta } \\
+&= \frac{ \theta^{Y+\alpha - 1} (1 - \theta)^{1-Y+\beta - 1}}{\int_{0}^{1}\theta^{Y+\alpha - 1} (1 - \theta)^{1-Y+\beta - 1} d \theta}
+\end{align*}
+$$
+
+which implies that
+
+$$
+\textrm{Prob}(\theta | Y) \sim \textrm{Beta}(\alpha + Y, \beta + (1-Y))
+$$
+
+Now please assume that the true value of $ \theta = .4 $ and that someone unaware of this has a beta prior with $ \beta = \alpha = .5 $.
+
+**c)** Now assume that the true value of $ \theta = .4 $ and that someone unaware of this has a beta prior distribution with parameters $ \beta = \alpha = .5 $. Please create a Python class to simulate this person's personal posterior distribution for $ \theta $ for a _single_ sequence of $ n $ samples.
+
+```python
+class Bayesian:
+
+    def __init__(self, θ=0.4, n=1_000_000, α=0.5, β=0.5):
+        """
+        Parameters:
+        ----------
+        θ : float, ranging from [0,1].
+           probability that one toss of a coin will be a head with Y = 1
+
+        n : int.
+           number of independent flips in an independent sequence of draws
+
+        α&β : int or float.
+             parameters of the prior distribution on θ
+
+        """
+        self.θ, self.n, self.α, self.β = θ, n, α, β
+        self.prior = st.beta(α, β)
+
+    def draw(self):
+        """
+        simulate a single sequence of draws of length n, given probability θ
+
+        """
+        array = np.random.rand(self.n)
+        self.draws = (array < self.θ).astype(int)
+
+    def form_single_posterior(self, step_num):
+        """
+        form a posterior distribution after observing the first step_num elements of the draws
+
+        Parameters
+        ----------
+        step_num: int.
+               number of steps observed to form a posterior distribution
+
+        Returns
+        ------
+        the posterior distribution for sake of plotting in the subsequent steps
+
+        """
+        heads_num = self.draws[:step_num].sum()
+        tails_num = step_num - heads_num
+
+        return st.beta(self.α+heads_num, self.β+tails_num)
+
+    def form_posterior_series(self,num_obs_list):
+        """
+        form a series of posterior distributions that form after observing different number of draws.
+
+        Parameters
+        ----------
+        num_obs_list: a list of int.
+               a list of the number of observations used to form a series of posterior distributions.
+
+        """
+        self.posterior_list = []
+        for num in num_obs_list:
+            self.posterior_list.append(self.form_single_posterior(num))
+```
+
+**d)** Please graph the posterior distribution for $ \theta $ as a function of $ \theta $ as $ n $ increases from $ 1, 2, \ldots $.
+
+```python
+Bay_stat = Bayesian()
+Bay_stat.draw()
+
+num_list = [1, 2, 3, 4, 5, 10, 20, 30, 50, 70, 100, 300, 500, 1000, # this line for finite n
+            5000, 10_000, 50_000, 100_000, 200_000, 300_000]  # this line for approximately infinite n
+
+Bay_stat.form_posterior_series(num_list)
+
+θ_values = np.linspace(0.01, 1, 100)
+
+fig, ax = plt.subplots(figsize=(10, 6))
+
+ax.plot(θ_values, Bay_stat.prior.pdf(θ_values), label='Prior Distribution', color='k', linestyle='--')
+
+for ii, num in enumerate(num_list[:14]):
+    ax.plot(θ_values, Bay_stat.posterior_list[ii].pdf(θ_values), label='Posterior with n = %d' % num)
+
+ax.set_title('P.D.F of Posterior Distributions', fontsize=15)
+ax.set_xlabel(r"$\theta$", fontsize=15)
+
+ax.legend(fontsize=11)
+plt.show()
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/10.%20Two%20Meanings%20of%20Probability_files/10.%20Two%20Meanings%20of%20Probability_26_0.png)
+</div>
+
+**e)** For various $ n $'s, please describe and compute $ .05 $ and $ .95 $ quantiles for posterior probabilities.
+
+```python
+upper_bound = [ii.ppf(0.05) for ii in Bay_stat.posterior_list[:14]]
+lower_bound = [ii.ppf(0.95) for ii in Bay_stat.posterior_list[:14]]
+
+interval_df = pd.DataFrame()
+interval_df['upper'] = upper_bound
+interval_df['lower'] = lower_bound
+interval_df.index = num_list[:14]
+interval_df = interval_df.T
+interval_df
+```
+
+| \*\*\*\*  | **1**    | **2**    | **3**    | **4**   | **5**    | **10**   | **20**   | **30**   | **50**   | **70**   | **100**  | **300**  | **500**  | **1000** |
+| --------- | -------- | -------- | -------- | ------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- |
+| **upper** | 0.228520 | 0.097308 | 0.062413 | 0.16528 | 0.127776 | 0.117329 | 0.121508 | 0.127460 | 0.220799 | 0.229671 | 0.247715 | 0.338126 | 0.360533 | 0.378704 |
+| **lower** | 0.998457 | 0.902692 | 0.764466 | 0.83472 | 0.739366 | 0.558127 | 0.428620 | 0.375605 | 0.434206 | 0.410037 | 0.399882 | 0.430196 | 0.432354 | 0.429705 |
+
+As $ n $ grows,... we can observe that Bayesian coverage intervals narrow and shift toward $ 0.4 $.
+
+**f)** Please explain what question a Bayesian coverage interval addresses.
+
+The Bayesian coverage interval indicates the range of $ \theta $ that corresponds to the [$ p_1 $, $ p_2 $] quantiles of the cumulative probability distribution (CDF) of the posterior distribution.
+
+To construct the coverage interval we first determine a posterior distribution of the unknown parameter $ \theta $.
+
+If the CDF is $ F(\theta) $, then the Bayesian coverage interval $ [a,b] $ for the interval $ [p_1,p_2] $ is defined by
+
+$$
+F(a)=p_1,F(b)=p_2
+$$
+
+**g)** Please calculate the Posterior probability that $ \theta \in [.45, .55] $ for various values of sample size $ n $.
+
+```python
+left_value, right_value = 0.45, 0.55
+
+posterior_prob_list=[ii.cdf(right_value)-ii.cdf(left_value) for ii in Bay_stat.posterior_list]
+
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.plot(posterior_prob_list)
+ax.set_title('Posterior Probabililty that '+ r"$\theta$" +' Ranges from %.2f to %.2f'%(left_value, right_value),
+             fontsize=13)
+ax.set_xticks(np.arange(0, len(posterior_prob_list), 3))
+ax.set_xticklabels(num_list[::3])
+ax.set_xlabel('Number of Observations', fontsize=11)
+
+plt.show()
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/10.%20Two%20Meanings%20of%20Probability_files/10.%20Two%20Meanings%20of%20Probability_30_0.png)
+</div>
+
+Note that in the graph above the posterior probability that $ \theta \in [.45, .55] $ typically exhibits a hump shape as $ n $ increases.
+
+Two opposing forces are at play.
+
+The first force is that the individual adjusts his belief as he observes new outcomes, so his posterior probability distribution becomes more and more realistic, which explains the rise of the posterior probability.
+
+However, $ [.45, .55] $ actually excludes the true $ \theta =.4 $ that generates the data.
+
+As a result, the posterior probability drops as larger and larger samples refine his posterior probability distribution of $ \theta $.
+
+The descent seems precipitous only because of the scale of the graph that has the number of observations increasing disproportionately.
+
+When the number of observations becomes large enough, our Bayesian becomes so confident about $ \theta $ that he considers $ \theta \in [.45, .55] $ very unlikely.
+
+That is why we see a nearly horizontal line when the number of observations exceeds 500.
+
+**h)** Please use your Python class to study what happens to the posterior distribution as $ n \rightarrow + \infty $, again assuming that the true value of $ \theta = .4 $, though it is unknown to the person doing the updating via Bayes' Law.
+
+Using the Python class we made above, we can see the evolution of posterior distributions as $ n $ approaches infinity.
+
+```python
+fig, ax = plt.subplots(figsize=(10, 6))
+
+for ii, num in enumerate(num_list[14:]):
+    ii += 14
+    ax.plot(θ_values, Bay_stat.posterior_list[ii].pdf(θ_values),
+            label='Posterior with n=%d thousand' % (num/1000))
+
+ax.set_title('P.D.F of Posterior Distributions', fontsize=15)
+ax.set_xlabel(r"$\theta$", fontsize=15)
+ax.set_xlim(0.3, 0.5)
+
+ax.legend(fontsize=11)
+plt.show()
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/10.%20Two%20Meanings%20of%20Probability_files/10.%20Two%20Meanings%20of%20Probability_32_0.png)
+</div>
+
+As $ n $ increases,... we can observe that the probability density functions _concentrate_ on $ 0.4 $, the true value of $ \theta $.
+
+Here the posterior means converge to $ 0.4 $ while the posterior standard deviations converge to $ 0 $ from above.
+
+To demonstrate this, we calculate the means and variances statistics of the posterior distributions.
+
+```python
+mean_list = [ii.mean() for ii in Bay_stat.posterior_list]
+std_list = [ii.std() for ii in Bay_stat.posterior_list]
+
+fig, ax = plt.subplots(1, 2, figsize=(14, 5))
+
+ax[0].plot(mean_list)
+ax[0].set_title('Mean Values of Posterior Distribution', fontsize=13)
+ax[0].set_xticks(np.arange(0, len(mean_list), 3))
+ax[0].set_xticklabels(num_list[::3])
+ax[0].set_xlabel('Number of Observations', fontsize=11)
+
+ax[1].plot(std_list)
+ax[1].set_title('Standard Deviations of Posterior Distribution', fontsize=13)
+ax[1].set_xticks(np.arange(0, len(std_list), 3))
+ax[1].set_xticklabels(num_list[::3])
+ax[1].set_xlabel('Number of Observations', fontsize=11)
+
+plt.show()
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/10.%20Two%20Meanings%20of%20Probability_files/10.%20Two%20Meanings%20of%20Probability_34_0.png)
+</div>
+
+How should we interpret the patterns above?
+
+The answer is encoded in the Bayesian updating formulas.
+
+It is natural to extend the one-step Bayesian update to an $ n $-step Bayesian update.
+
+$$
+\textrm{Prob}(\theta|k) = \frac{\textrm{Prob}(\theta,k)}{\textrm{Prob}(k)}=\frac{\textrm{Prob}(k|\theta)*\textrm{Prob}(\theta)}{\textrm{Prob}(k)}=\frac{\textrm{Prob}(k|\theta)*\textrm{Prob}(\theta)}{\int_0^1 \textrm{Prob}(k|\theta)*\textrm{Prob}(\theta) d\theta}
+$$
+
+$$
+=\frac{{N \choose k} (1 - \theta)^{N-k} \theta^k*\frac{\theta^{\alpha - 1} (1 - \theta)^{\beta - 1}}{B(\alpha, \beta)}}{\int_0^1 {N \choose k} (1 - \theta)^{N-k} \theta^k*\frac{\theta^{\alpha - 1} (1 - \theta)^{\beta - 1}}{B(\alpha, \beta)} d\theta}
+$$
+
+$$
+=\frac{(1 -\theta)^{\beta+N-k-1}* \theta^{\alpha+k-1}}{\int_0^1 (1 - \theta)^{\beta+N-k-1}* \theta^{\alpha+k-1} d\theta}
+$$
+
+$$
+={Beta}(\alpha + k, \beta+N-k)
+$$
+
+A beta distribution with $ \alpha $ and $ \beta $ has the following mean and variance.
+
+The mean is $ \frac{\alpha}{\alpha + \beta} $
+
+The variance is $ \frac{\alpha \beta}{(\alpha + \beta)^2 (\alpha + \beta + 1)} $
+
+- $ \alpha $ can be interpreted as the number of successes
+- $ \beta $ can be interpreted as the number of failures
+
+The random variables $ k $ and $ N-k $ are governed by Binomial Distribution with $ \theta=0.4 $.
+
+Call this the true data generating process.
+
+According to the Law of Large Numbers, for a large number of observations, observed frequencies of $ k $ and $ N-k $ will be described by the true data generating process, i.e., the population probability distribution that we assumed when generating the observations on the computer.... (See Exercise 10.1).
+
+Consequently, the mean of the posterior distribution converges to $ 0.4 $ and the variance shrinks to zero.
+
+```python
+upper_bound = [ii.ppf(0.95) for ii in Bay_stat.posterior_list]
+lower_bound = [ii.ppf(0.05) for ii in Bay_stat.posterior_list]
+
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.scatter(np.arange(len(upper_bound)), upper_bound, label='95 th Quantile')
+ax.scatter(np.arange(len(lower_bound)), lower_bound, label='05 th Quantile')
+
+ax.set_xticks(np.arange(0, len(upper_bound), 2))
+ax.set_xticklabels(num_list[::2])
+ax.set_xlabel('Number of Observations', fontsize=12)
+ax.set_title('Bayesian Coverage Intervals of Posterior Distributions', fontsize=15)
+
+ax.legend(fontsize=11)
+plt.show()
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/10.%20Two%20Meanings%20of%20Probability_files/10.%20Two%20Meanings%20of%20Probability_36_0.png)
+</div>
+
+After observing a large number of outcomes, the posterior distribution collapses around $ 0.4 $.
+
+Thus, the Bayesian statistician comes to believe that $ \theta $ is near $ .4 $.
+
+As shown in the figure above, as the number of observations grows, the Bayesian coverage intervals (BCIs) become narrower and narrower around $ 0.4 $.
+
+However, if you look closely, you will notice that the centers of the BCIs are not exactly $ 0.4 $, due to the persistent influence of the prior distribution and the randomness of the simulation path.
+
+## Role of a Conjugate Prior
+
+We have made assumptions that connect functional forms of our likelihood function and our prior in a way that has simplified our calculations considerably.
+
+Specifically, our assumptions that the likelihood function is **binomial** and that the prior distribution is a **beta distribution** result in the posterior distribution implied by Bayes' Law also being a **beta distribution**.
+
+So posterior and prior are both beta distributions, albeit ones with different parameters.
+
+When a likelihood function and prior fit together like hand and glove in this way, we say that the prior and posterior are **conjugate distributions**.
+
+In this situation, we also sometimes say that we have a **conjugate prior** for the likelihood function $ \textrm{Prob}(X | \theta) $.
+
+Typically, the functional form of the likelihood function determines the functional form of a **conjugate prior**.
+
+A natural question to ask is why should a person's personal prior about a parameter $ \theta $ be limited to being described by a conjugate prior?
+
+Why not some other functional form that more accurately describes the person's beliefs?
+
+To be argumentative, one could ask,... why should the form of the likelihood function have _anything_ to do with my personal beliefs about $ \theta $?
+
+A reasonable response to that question is, well, it shouldn't, but if you want to compute a posterior easily you'll just be happier if your prior is conjugate to your likelihood.
+
+Otherwise, your posterior won't have a convenient analytical form and you'll be in the situation of wanting to apply the Markov chain Monte Carlo techniques.

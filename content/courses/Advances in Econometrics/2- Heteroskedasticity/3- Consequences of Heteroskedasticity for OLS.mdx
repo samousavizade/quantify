@@ -1,0 +1,91 @@
+---
+title: Consequences of Heteroskedasticity for OLS
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Consequences of Heteroskedasticity for OLS
+
+Heteroskedasticity refers to the condition in regression analysis where the variance of the errors, or residuals, is not constant across all levels of the independent variables. This violates one of the key assumptions of the Ordinary Least Squares (OLS) method, which assumes homoscedasticity, or constant variance of errors. Understanding the consequences of heteroskedasticity is crucial for accurate statistical inference and model reliability.
+
+### **Key Consequences**
+
+1. **Unbiased but Inefficient Estimators**
+
+- The OLS estimators remain unbiased in the presence of heteroskedasticity. This means that, on average, the estimated coefficients are correct. However, they are no longer efficient because they do not have the minimum variance among all linear unbiased estimators.
+
+2. **Incorrect Standard Errors**
+
+- Heteroskedasticity leads to incorrect estimation of standard errors. The standard errors calculated under the assumption of homoscedasticity are no longer valid, leading to unreliable hypothesis tests and confidence intervals. This results in potentially misleading conclusions about the significance of predictors.
+
+3. **Invalid Hypothesis Testing**
+
+- Due to incorrect standard errors, t-tests and F-tests become unreliable. The p-values derived from these tests may be inaccurate, leading to incorrect decisions regarding the rejection or acceptance of hypotheses.
+
+4. **Biased Confidence Intervals**
+
+- Confidence intervals constructed using faulty standard errors will be either too wide or too narrow, which misrepresents the precision of coefficient estimates.
+
+5. **Loss of BLUE Property**
+
+- OLS estimators are no longer Best Linear Unbiased Estimators (BLUE) when heteroskedasticity is present. This means that there exist other estimators that could provide more precise estimates with smaller variances.
+
+### **Mathematical Explanation**
+
+In a typical OLS regression model:
+
+$$
+Y_i = \beta_0 + \beta_1 X_i + \epsilon_i
+$$
+
+where $$ \epsilon_i $$ are error terms assumed to be independently and identically distributed with constant variance $$ \sigma^2 $$. Under heteroskedasticity, this assumption changes to:
+
+$$
+Var(\epsilon_i) = \sigma_i^2
+$$
+
+where $$ \sigma_i^2 $$ varies with each observation, often as a function of one or more independent variables.
+
+### **Detection and Diagnosis**
+
+Detecting heteroskedasticity involves examining residual plots for patterns such as a funnel shape, which indicates increasing variance with fitted values. Formal statistical tests such as the Breusch-Pagan test and White test can also be used to detect heteroskedasticity by testing whether the variance of residuals is related to independent variables.
+
+### **Solutions and Remedies**
+
+1. **Robust Standard Errors**
+
+- Using robust standard errors (e.g., White's robust standard errors) adjusts for heteroskedasticity and provides valid standard errors for hypothesis testing without assuming constant variance.
+
+2. **Weighted Least Squares (WLS)**
+
+- WLS assigns weights inversely proportional to the variance of observations, effectively stabilizing variance across observations and improving efficiency.
+
+3. **Data Transformation**
+
+- Transforming variables (e.g., using logarithmic transformations) can sometimes stabilize variance and mitigate heteroskedasticity.
+
+4. **Generalized Least Squares (GLS)**
+
+- If the form of heteroskedasticity is known, GLS can be used to transform the model into one with constant error variance, restoring efficiency properties.
+
+Addressing heteroskedasticity is crucial for ensuring that regression analysis results are reliable and valid. By employing appropriate detection methods and corrective measures, analysts can mitigate its adverse effects on statistical inference and model accuracy.
+
+https://www3.wabash.edu/econometrics/EconometricsBook/chap19.htm
+
+https://corporatefinanceinstitute.com/resources/data-science/heteroskedasticity/
+
+https://fastercapital.com/topics/consequences-of-heteroskedasticity-in-regression-analysis.html
+
+https://spureconomics.com/heteroscedasticity-causes-and-consequences/
+
+https://fastercapital.com/topics/the-impact-of-heteroskedasticity-on-ordinary-least-squares-%28ols%29.html
+
+https://blog.damavis.com/en/heteroscedasticity-impact-on-linear-regression/
+
+https://cran.r-project.org/web/packages/olsrr/vignettes/heteroskedasticity.html
+
+https://statisticsbyjim.com/regression/heteroscedasticity-regression/

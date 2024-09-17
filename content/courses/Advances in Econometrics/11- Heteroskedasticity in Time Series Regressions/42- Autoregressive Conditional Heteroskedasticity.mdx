@@ -1,0 +1,110 @@
+---
+title: Autoregressive Conditional Heteroskedasticity
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+### Autoregressive Conditional Heteroskedasticity
+
+#### Introduction
+
+Autoregressive Conditional Heteroskedasticity (ARCH) models are essential tools in econometrics, particularly when dealing with time series data exhibiting volatility clustering. Volatility clustering refers to the phenomenon where periods of high volatility are followed by high volatility and periods of low volatility are followed by low volatility. This section explores the concept of ARCH models, their mathematical formulation, and their application in modeling time series data with heteroskedasticity.
+
+#### Understanding ARCH Models
+
+ARCH models were introduced by Robert Engle in 1982 to model time-varying volatility in financial time series data. The basic idea is that the variance of the current error term is a function of the past error terms, capturing the clustering of volatility over time.
+
+###### Mathematical Formulation
+
+Consider a time series model with an error term $$ u_t $$:
+
+$$
+y_t = \beta_0 + \beta_1 x_t + u_t
+$$
+
+where $$ u_t $$ is the error term at time $$ t $$. In an ARCH(q) model, the conditional variance of $$ u_t $$, given past information, is a function of past squared error terms:
+
+$$
+u_t = \epsilon_t \sqrt{h_t}
+$$
+
+$$
+h_t = \alpha_0 + \alpha_1 u_{t-1}^2 + \alpha_2 u_{t-2}^2 + \cdots + \alpha_q u_{t-q}^2
+$$
+
+where:
+
+- $$ h_t $$ is the conditional variance of $$ u_t $$ given past information.
+- $$ \epsilon_t $$ is a white noise process with mean zero and variance one.
+- $$ \alpha_0 > 0 $$ and $$ \alpha_i \geq 0 $$ for all i ensure that the conditional variance is positive.
+
+#### Properties of ARCH Models
+
+1. **Volatility Clustering**: ARCH models capture periods of high and low volatility by allowing the conditional variance to change over time based on past squared errors.
+
+2. **Leverage Effect**: While basic ARCH models do not account for asymmetric effects (leverage effects), extensions like GARCH (Generalized ARCH) can accommodate such features.
+
+3. **Mean Reversion**: The conditional variance tends to revert to its long-term mean, which is determined by the parameters of the model.
+
+#### Estimation and Testing
+
+###### Estimation
+
+ARCH models are typically estimated using Maximum Likelihood Estimation (MLE). The likelihood function is constructed based on the assumption that the errors follow a normal distribution:
+
+$$
+L(\theta) = -\frac{n}{2} \log(2\pi) - \frac{1}{2} \sum_{t=1}^{n} \left( \log(h_t) + \frac{u_t^2}{h_t} \right)
+$$
+
+where $$ \theta = (\beta_0, \beta_1, \alpha_0, \alpha_1, ..., \alpha_q) $$ represents the parameters to be estimated.
+
+###### Testing for ARCH Effects
+
+Before fitting an ARCH model, it is essential to test for the presence of ARCH effects in the data. The most common test is Engle's ARCH test:
+
+1. **Estimate OLS Model**: Estimate the regression model using OLS and obtain residuals $$ \hat{u}\_t $$.
+
+2. **Auxiliary Regression**: Regress the squared residuals on lagged squared residuals up to order q:
+
+$$
+\hat{u}_t^2 = \gamma_0 + \gamma_1 \hat{u}_{t-1}^2 + ... + \gamma_q \hat{u}_{t-q}^2 + v_t
+$$
+
+3. **Test Statistic**: Calculate the test statistic as:
+
+$$
+nR^2
+$$
+
+where R² is from the auxiliary regression. Under the null hypothesis of no ARCH effects, this statistic follows a chi-square distribution with q degrees of freedom.
+
+#### Applications of ARCH Models
+
+ARCH models are widely used in finance for modeling asset returns and their volatility. They help in:
+
+- **Risk Management**: By modeling volatility accurately, firms can better assess risk and make informed decisions.
+- **Option Pricing**: Volatility estimates from ARCH models are crucial inputs in option pricing models.
+- **Portfolio Optimization**: Understanding volatility helps in optimizing asset allocation strategies.
+
+#### Limitations and Extensions
+
+While ARCH models capture time-varying volatility, they have limitations:
+
+- **Symmetry Assumption**: Basic ARCH models assume symmetric response to positive and negative shocks.
+- **Complexity**: High-order ARCH models can become complex and difficult to estimate.
+
+Extensions like GARCH (Generalized Autoregressive Conditional Heteroskedasticity) address these limitations by incorporating lagged conditional variances into the model:
+
+$$
+h_t = \alpha_0 + \sum_{i=1}^{q} \alpha_i u_{t-i}^2 + \sum_{j=1}^{p} \beta_j h_{t-j}
+$$
+
+where GARCH(p, q) includes both past squared errors and past conditional variances.
+
+#### Conclusion
+
+Autoregressive Conditional Heteroskedasticity (ARCH) models provide a framework for modeling time-varying volatility in time series data. By capturing volatility clustering, these models offer valuable insights into financial markets and other domains where understanding variability over time is crucial. Despite their limitations, extensions like GARCH enhance their applicability, making them indispensable tools in econometric analysis.

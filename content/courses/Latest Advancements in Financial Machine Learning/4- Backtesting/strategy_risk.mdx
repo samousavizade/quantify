@@ -1,0 +1,200 @@
+---
+title: Investing Smartly How to Evaluate Your Investment Strategy's Vulnerability
+draft: false
+summary: Investment strategies usually involve making bets with an exit plan based on two conditions - achieving a profit or stopping losses. The interaction between these factors is best understood as a binomial process that evaluates the strategy's resilience against minor changes.
+---
+
+<TOCInline toc={props.toc} asDisclosure />
+
+<div style={{ marginBottom: '2rem' }} />
+
+### The Essentials
+
+Investment strategies usually involve making bets with an exit plan based on two conditions: achieving a profit or stopping losses. The interaction between these factors is best understood as a binomial process that evaluates the strategy's resilience against minor changes. In a nutshell, you want a strategy with frequent bets and high precision to increase your Sharpe ratio, a measure of risk-adjusted returns.
+
+The formula for the annualized Sharpe ratio with symmetric payouts is given by:
+
+$$
+\theta[p, n] = \frac{2p - 1}{2 \sqrt{p(1-p)}} \sqrt{n}
+$$
+
+This shows the trade-off between precision $(p)$ and frequency $(n)$ for a given Sharpe ratio $(\theta)$. For instance, to achieve an annualized Sharpe ratio of 2 with weekly bets, you would need a precision of $p=0.6336$.
+
+For non-symmetric payouts, the annualized Sharpe ratio is:
+
+$$
+\theta[p, n, \pi_{-}, \pi_{+}] = \frac{( \pi_{+} - \pi_{-} ) p + \pi_{-}}{( \pi_{+} - \pi_{-} ) \sqrt{p(1-p)}} \sqrt{n}
+$$
+
+### Calculating Sharpe Ratio
+
+<div style={{display: 'flex', justifyContent: 'center'}}>
+    <table style={{tableLayout: 'fixed', width: '90%'}}>
+        <thead>
+        <tr>
+            <th style={{width: '50%', textAlign: 'center'}}>Python</th>
+            <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```python
+                def sharpe_ratio_trials(
+                p: float,
+                n_run: int
+                )
+                ```
+
+            </td>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```julia
+                function sharpeRatioTrials(
+                p::Float64,
+                nRun::Int64
+                )::Tuple
+                ```
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+View More: [Python](https://www.github.com/risklabai/RiskLabAI.py) | [Julia](https://www.github.com/risklabai/RiskLabAI.jl)
+
+This functionality is available in both Python and Julia in the RiskLabAI library.
+
+### Advanced Calculations: Symbolic Operations
+
+For those interested in deeper analysis, the equation for $p$ in terms of various parameters can be computed symbolically.
+
+$$
+p=\frac{-b+\sqrt{b^{2}-4ac}}{2a}
+$$
+
+Where:
+
+- $a=(n+\theta^{2})(\pi_{+}-\pi_{-})^{2}$
+- $b=[2n\pi_{-}-\theta^{2}(\pi_{+}-\pi_{-})](\pi_{+}-\pi_{-})$
+- $c=n \pi_{-}^{2}$
+
+<div style={{display: 'flex', justifyContent: 'center'}}>
+    <table style={{tableLayout: 'fixed', width: '90%'}}>
+        <thead>
+        <tr>
+            <th style={{width: '50%', textAlign: 'center'}}>Python</th>
+            <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```python
+                def target_sharpe_ratio_symbolic():
+                ...
+
+                ```
+
+            </td>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```julia
+                function targetSharpeRatioSymbolic()
+                ...
+                end
+                ```
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+View More: [Python](https://www.github.com/risklabai/RiskLabAI.py) | [Julia](https://www.github.com/risklabai/RiskLabAI.jl)
+
+## Understanding Implied Precision
+
+The `impliedPrecision` function in both Python and Julia computes the implied betting frequency, denoted as $$n$$. It takes four parameters:
+
+- `stopLoss`: The stop loss threshold
+- `profitTaking`: The profit taking threshold
+- `frequency`: Number of bets per year
+- `targetSharpeRatio`: The target annual Sharpe ratio
+
+The function deals with how varying the precision rate $$p$$ and profit/loss ratio $$\pi_{-}$$ affects the required betting frequency $$n$$ to achieve a given target Sharpe ratio $$\theta^{*}$$.
+
+$$
+\theta(p, n, \pi_{-}, \pi_{+}) = \text{Implied betting frequency}
+$$
+
+## Calculating Bin Frequency
+
+The `binFrequency` function calculates the annual frequency of bets, denoted as $$n$$, required to achieve a target Sharpe ratio $$\theta^{*}$$. The parameters are similar to those of `impliedPrecision`.
+
+## Strategy Risk
+
+Unlike portfolio risk, which is usually well-monitored, strategy risk often goes under the radar. Strategy risk is the risk that the investment strategy will fail to meet its objective over time. The question "What is the probability that this strategy will fail?" can be represented mathematically as $$ P[p<p_{\theta^{*}}] $$.
+
+To compute this, we:
+
+1. Estimate the profit/loss ratios $$\pi_{-}$$ and $$\pi_{+}$$ from a time series of bet outcomes.
+2. Calculate the annual frequency $$n$$.
+3. Bootstrap the distribution of $$p$$.
+4. Find $$p_{\theta^{*}}$$, the value of $$p$$ below which the strategy will fail to achieve $$\theta^{*}$$.
+5. Finally, compute the strategy risk as $$P[p<p_{\theta^{*}}]$$.
+
+## When is a Strategy too Risky?
+
+Strategies with $$P[p<p_{\theta^{*}}] > .05$$ are usually considered too risky, irrespective of the underlying assets' volatility. This means that even if the strategy doesn't lose much money, the probability that it will fail to achieve its target is too high.
+
+For code implementations of these algorithms, you can refer to the RiskLabAI library. The functionalities are available in both Python and Julia.
+
+<div style={{display: 'flex', justifyContent: 'center'}}>
+    <table style={{tableLayout: 'fixed', width: '90%'}}>
+        <thead>
+        <tr>
+            <th style={{width: '50%', textAlign: 'center'}}>Python</th>
+            <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```python
+                def implied_precision(
+                stop_loss: float,
+                profit_taking: float,
+                frequency: int,
+                target_sharpe_ratio: float
+                ) -> float:
+                ```
+
+            </td>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```julia
+                function impliedPrecision(
+                stopLoss::Float64,
+                profitTaking::Float64,
+                frequency::Int64,
+                targetSharpeRatio::Float64
+                )::Float64
+                ```
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+View More: [Python](https://www.github.com/risklabai/RiskLabAI.py) | [Julia](https://www.github.com/risklabai/RiskLabAI.jl)
+
+### References
+
+1. De Prado, M. L. (2018). Advances in financial machine learning. John Wiley & Sons.
+2. De Prado, M. M. L. (2020). Machine learning for asset managers. Cambridge University Press.

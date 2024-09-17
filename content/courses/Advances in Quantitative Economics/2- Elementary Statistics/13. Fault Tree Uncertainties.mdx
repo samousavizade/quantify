@@ -1,0 +1,777 @@
+---
+title: Fault Tree Uncertainties
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+# Uncertainties in Fault Tree Analysis
+
+## Introduction
+
+This session applies basic techniques to estimate probability distributions for yearly system failure rates, considering multiple critical components.
+
+We'll employ log normal distributions to estimate probability distributions of crucial component parts.
+
+To approximate the probability distribution of the **total** of $ n $ log normal probability distributions representing the system's overall failure rate, we'll determine the convolution of these $ n $ log normal probability distributions.
+
+We'll utilize the following concepts and methods:
+
+- log normal distributions
+- the convolution theorem explaining the probability distribution of independent random variable sums
+- fault tree analysis for estimating multi-component system failure rates
+- a hierarchical probability model describing uncertain probabilities
+- Fourier transforms and inverse Fourier transforms as efficient convolution computation methods
+
+El-Shanawany, Ardron, and Walker [[El-Shanawany _et al._, 2018](/courses/Introduction-to-Quantitative-Economics/References#id22)] and Greenfield and Sargent [[Greenfield and Sargent, 1993](/courses/Introduction-to-Quantitative-Economics/References#id21)] applied some of the methods outlined here to estimate failure probabilities of nuclear facility safety systems.
+
+These approaches address some of Apostolakis' recommendations [[Apostolakis, 1990](/courses/Introduction-to-Quantitative-Economics/References#id20)] for developing procedures to quantify
+safety system reliability uncertainty.
+
+Let's begin by importing necessary Python tools.
+
+```python
+!pip install tabulate
+```
+
+    Requirement already satisfied: tabulate in /Users/s.alirezamousavizade/anaconda3/lib/python3.11/site-packages (0.9.0)
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.signal import fftconvolve
+from tabulate import tabulate
+import time
+```
+
+```python
+np.set_printoptions(precision=3, suppress=True)
+```
+
+## Log Normal Distribution
+
+If a random variable $ x $ follows a normal distribution with mean $ \mu $ and variance $ \sigma^2 $,
+then $ y = \log(x) $ follows a **log normal distribution** with parameters $ \mu, \sigma^2 $.
+
+Note that we said **parameters** rather than **mean and variance** $ \mu,\sigma^2 $.
+
+- $ \mu $ and $ \sigma^2 $ are the mean and variance of $ x = \exp (y) $
+- they are **not** the mean and variance of $ y $
+- instead, $ y $ has a mean of $ e ^{\mu + \frac{1}{2} \sigma^2} $ and a variance of $ (e^{\sigma^2} - 1) e^{2 \mu + \sigma^2} $
+
+A log normal random variable $ y $ is always non-negative.
+
+The density function for a log normal random variable $ y $ is:
+
+$$
+f(y) = \frac{1}{y \sigma \sqrt{2 \pi}} \exp \left( \frac{- (\log y - \mu)^2 }{2 \sigma^2} \right)
+$$
+
+for $ y \geq 0 $.
+
+Key characteristics of a log normal random variable are:
+
+$$
+\begin{aligned}
+\textrm{mean:} & \quad e ^{\mu + \frac{1}{2} \sigma^2} \cr
+\textrm{variance:} & \quad (e^{\sigma^2} - 1) e^{2 \mu + \sigma^2} \cr
+\textrm{median:} & \quad e^\mu \cr
+\textrm{mode:} & \quad e^{\mu - \sigma^2} \cr
+\textrm{.95 quantile:} & \quad e^{\mu + 1.645 \sigma} \cr
+\textrm{.95-.05 quantile ratio:} & \quad e^{1.645 \sigma} \cr
+\end{aligned}
+$$
+
+Recall the following _stability_ property of two independent normally distributed random variables:
+
+If $ x_1 $ is normal with mean $ \mu_1 $ and variance $ \sigma_1^2 $ and $ x_2 $ is independent of $ x_1 $ and normal with mean $ \mu_2 $ and variance $ \sigma_2^2 $, then $ x_1 + x_2 $ is normally distributed with
+mean $ \mu_1 + \mu_2 $ and variance $ \sigma_1^2 + \sigma_2^2 $.
+
+Independent log normal distributions have a different _stability_ property.
+
+The **product** of independent log normal random variables is also log normal.
+
+Specifically, if $ y_1 $ is log normal with parameters $ (\mu_1, \sigma_1^2) $ and
+$ y_2 $ is log normal with parameters $ (\mu_2, \sigma_2^2) $, then $ y_1 y_2 $ is log normal
+with parameters $ (\mu_1 + \mu_2, \sigma_1^2 + \sigma_2^2) $.
+
+> **Note**While the product of two log normal distributions is log normal, the **sum** of two log normal distributions is **not** log normal.
+
+This observation presents the challenge we face in this lecture: approximating probability distributions of **sums** of independent log normal random variables.
+
+To compute the probability distribution of the sum of two log normal distributions, we can use the following convolution property of a probability distribution that is a sum of independent random variables.
+
+## The Convolution Property
+
+Consider a random variable $ x $ with probability density $ f(x) $, where $ x \in {\bf R} $.
+
+Let $ y $ be a random variable with probability density $ g(y) $, where $ y \in {\bf R} $.
+
+Assume $ x $ and $ y $ are independent random variables and let $ z = x + y \in {\bf R} $.
+
+The probability distribution of $ z $ is then:
+
+$$
+h(z) = (f * g)(z) \equiv \int_{-\infty}^\infty f (z) g(z - \tau) d \tau
+$$
+
+where $ (f\*g) $ denotes the **convolution** of functions $ f $ and $ g $.
+
+For non-negative random variables, the formula simplifies to:
+
+$$
+h(z) = (f * g)(z) \equiv \int_{0}^\infty f (z) g(z - \tau) d \tau
+$$
+
+We'll use a discretized version of this formula.
+
+Specifically, we'll replace both $ f $ and $ g $ with discretized equivalents, normalized to sum to $ 1 $ to maintain their status as probability distributions.
+
+- by **discretized** we mean an evenly spaced sampled version
+
+We'll then use this version of the formula:
+
+$$
+h_n = (f*g)_n = \sum_{m=0}^\infty f_m g_{n-m} , n \geq 0
+$$
+
+to compute a discretized version of the probability distribution of the sum of two random variables,
+one with probability mass function $ f $, the other with probability mass function $ g $.
+
+Before applying the convolution property to sums of log normal distributions, let's practice with some simple discrete distributions.
+
+For example, consider these two probability distributions:
+
+$$
+f_j = \textrm{Prob} (X = j), j = 0, 1
+$$
+
+and
+
+$$
+g_j = \textrm{Prob} (Y = j ) , j = 0, 1, 2, 3
+$$
+
+and
+
+$$
+h_j = \textrm{Prob} (Z \equiv X + Y = j) , j=0, 1, 2, 3, 4
+$$
+
+The convolution property states that:
+
+$$
+h = f* g = g* f
+$$
+
+Let's compute an example using `numpy.convolve` and `scipy.signal.fftconvolve`.
+
+```python
+f = [.75, .25]
+g = [0., .6,  0., .4]
+h = np.convolve(f,g)
+hf = fftconvolve(f,g)
+
+print("f = ", f,  ", np.sum(f) = ", np.sum(f))
+print("g = ", g, ", np.sum(g) = ", np.sum(g))
+print("h = ", h, ", np.sum(h) = ", np.sum(h))
+print("hf = ", hf, ",np.sum(hf) = ", np.sum(hf))
+```
+
+    f =  [0.75, 0.25] , np.sum(f) =  1.0
+    g =  [0.0, 0.6, 0.0, 0.4] , np.sum(g) =  1.0
+    h =  [0.   0.45 0.15 0.3  0.1 ] , np.sum(h) =  1.0
+    hf =  [0.   0.45 0.15 0.3  0.1 ] ,np.sum(hf) =  1.0000000000000002
+
+We'll explain later why using `scipy.signal.ftconvolve` can be advantageous compared to `numpy.convolve`.
+
+They produce identical results, but `scipy.signal.ftconvolve` is significantly faster.
+
+That's why we'll rely on it later in this lecture.
+
+## Approximating Distributions
+
+We'll create an example to demonstrate that discretized distributions can effectively approximate samples drawn from underlying
+continuous distributions.
+
+We'll begin by generating 25000 samples of three independent log normal random variates and their pairwise and triple-wise sums.
+
+Then we'll create histograms and compare them with convolutions of appropriate discretized log normal distributions.
+
+```python
+## create sums of two and three log normal random variates ssum2 = s1 + s2 and ssum3 = s1 + s2 + s3
+
+
+mu1, sigma1 = 5., 1. # mean and standard deviation
+s1 = np.random.lognormal(mu1, sigma1, 25000)
+
+mu2, sigma2 = 5., 1. # mean and standard deviation
+s2 = np.random.lognormal(mu2, sigma2, 25000)
+
+mu3, sigma3 = 5., 1. # mean and standard deviation
+s3 = np.random.lognormal(mu3, sigma3, 25000)
+
+ssum2 = s1 + s2
+
+ssum3 = s1 + s2 + s3
+
+count, bins, ignored = plt.hist(s1, 1000, density=True, align='mid')
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/13.%20Fault%20Tree%20Uncertainties_files/13.%20Fault%20Tree%20Uncertainties_10_0.png)
+</div>
+
+```python
+count, bins, ignored = plt.hist(ssum2, 1000, density=True, align='mid')
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/13.%20Fault%20Tree%20Uncertainties_files/13.%20Fault%20Tree%20Uncertainties_11_0.png)
+</div>
+
+```python
+count, bins, ignored = plt.hist(ssum3, 1000, density=True, align='mid')
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/13.%20Fault%20Tree%20Uncertainties_files/13.%20Fault%20Tree%20Uncertainties_12_0.png)
+</div>
+
+```python
+samp_mean2 = np.mean(s2)
+pop_mean2 = np.exp(mu2+ (sigma2**2)/2)
+
+pop_mean2, samp_mean2, mu2, sigma2
+```
+
+    (244.69193226422038, 242.0809684645844, 5.0, 1.0)
+
+Here are helper functions that generate a discretized version of a log normal
+probability density function.
+
+```python
+def p_log_normal(x,μ,σ):
+    p = 1 / (σ*x*np.sqrt(2*np.pi)) * np.exp(-1/2*((np.log(x) - μ)/σ)**2)
+    return p
+
+def pdf_seq(μ,σ,I,m):
+    x = np.arange(1e-7,I,m)
+    p_array = p_log_normal(x,μ,σ)
+    p_array_norm = p_array/np.sum(p_array)
+    return p_array,p_array_norm,x
+```
+
+Now we'll set a grid length $ I $ and a grid increment size $ m =1 $ for our discretizations.
+
+> **Note**We set $ I $ to a power of two because we want the flexibility to use a Fast Fourier Transform
+> to compute a convolution of two sequences (discrete distributions).
+
+We suggest experimenting with different values of the power $ p $ of 2.
+
+For example, using 15 instead of 12 improves how well the discretized probability mass function approximates the original continuous probability density function under study.
+
+```python
+p=15
+I = 2**p # Truncation value
+m = .1 # increment size
+```
+
+```python
+## Cell to check -- note what happens when don't normalize!
+## things match up without adjustment. Compare with above
+
+p1,p1_norm,x = pdf_seq(mu1,sigma1,I,m)
+## compute number of points to evaluate the probability mass function
+NT = x.size
+
+plt.figure(figsize = (8,8))
+plt.subplot(2,1,1)
+plt.plot(x[:int(NT)],p1[:int(NT)],label = '')
+plt.xlim(0,2500)
+count, bins, ignored = plt.hist(s1, 1000, density=True, align='mid')
+
+plt.show()
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/13.%20Fault%20Tree%20Uncertainties_files/13.%20Fault%20Tree%20Uncertainties_18_0.png)
+</div>
+
+```python
+# Compute mean from discretized pdf and compare with the theoretical value
+
+mean= np.sum(np.multiply(x[:NT],p1_norm[:NT]))
+meantheory = np.exp(mu1+.5*sigma1**2)
+mean, meantheory
+```
+
+    (244.69059898302908, 244.69193226422038)
+
+## Convolving Probability Mass Functions
+
+Now we'll apply the convolution theorem to calculate the probability distribution of a sum of the two log normal random variables we've parameterized above.
+
+We'll also determine the probability of a sum of three log normal distributions constructed earlier.
+
+Before proceeding, we'll explain our choice of Python algorithm for computing a convolution
+of two sequences.
+
+Due to the length of the sequences we're convolving, we use the `scipy.signal.fftconvolve` function
+instead of the numpy.convove function.
+
+While these two functions produce virtually identical results, `scipy.signal.fftconvolve`
+is much faster for long sequences.
+
+The `scipy.signal.fftconvolve` program utilizes fast Fourier transforms and their inverses to calculate convolutions.
+
+Let's define the Fourier transform and the inverse Fourier transform.
+
+The **Fourier transform** of a sequence $ \{x*t\}*{t=0}^{T-1} $ is a sequence of complex numbers
+$ \{x(\omega*j)\}*{j=0}^{T-1} $ given by
+
+$$
+x(\omega_j) = \sum_{t=0}^{T-1} x_t \exp(- i \omega_j t) \tag{13.1}
+$$
+
+where $ \omega_j = \frac{2 \pi j}{T} $ for $ j=0, 1, \ldots, T-1 $.
+
+The **inverse Fourier transform** of the sequence $ \{x(\omega*j)\}*{j=0}^{T-1} $ is
+
+$$
+x_t = T^{-1} \sum_{j=0}^{T-1} x(\omega_j) \exp (i \omega_j t) \tag{13.2}
+$$
+
+The sequences $ \{x*t\}*{t=0}^{T-1} $ and $ \{x(\omega*j)\}*{j=0}^{T-1} $ contain equivalent information.
+
+Equations [(13.1)](#equation-eq-ft1) and [(13.2)](#equation-eq-ift1) show how to derive one series from its Fourier counterpart.
+
+The `scipy.signal.fftconvolve` program implements the theorem that a convolution of two sequences $ \{f_k\}, \{g_k\} $ can be computed as follows:
+
+- Calculate Fourier transforms $ F(\omega), G(\omega) $ of the $ \{f_k\} $ and $ \{g_k\} $ sequences, respectively
+- Form the product $ H (\omega) = F(\omega) G (\omega) $
+- The convolution of $ f \* g $ is the inverse Fourier transform of $ H(\omega) $
+
+The **fast Fourier transform** and the associated **inverse fast Fourier transform** perform these
+calculations very efficiently.
+
+This is the algorithm employed by `scipy.signal.fftconvolve`.
+
+Let's do a preliminary calculation comparing the execution times of `numpy.convove` and `scipy.signal.fftconvolve`.
+
+```python
+
+p1,p1_norm,x = pdf_seq(mu1,sigma1,I,m)
+p2,p2_norm,x = pdf_seq(mu2,sigma2,I,m)
+p3,p3_norm,x = pdf_seq(mu3,sigma3,I,m)
+
+tic = time.perf_counter()
+
+c1 = np.convolve(p1_norm,p2_norm)
+c2 = np.convolve(c1,p3_norm)
+
+
+toc = time.perf_counter()
+
+tdiff1 = toc - tic
+
+tic = time.perf_counter()
+
+c1f = fftconvolve(p1_norm,p2_norm)
+c2f = fftconvolve(c1f,p3_norm)
+toc = time.perf_counter()
+
+toc = time.perf_counter()
+
+tdiff2 = toc - tic
+
+print("time with np.convolve = ", tdiff1,  "; time with fftconvolve = ",  tdiff2)
+```
+
+    time with np.convolve =  148.8020968339988 ; time with fftconvolve =  0.08589458299684338
+
+The fast Fourier transform is two orders of magnitude quicker than `numpy.convolve`
+
+Now let's graph our computed probability mass function approximation for the sum of two log normal random variables against the histogram of the sample we created earlier.
+
+```python
+NT= np.size(x)
+
+plt.figure(figsize = (8,8))
+plt.subplot(2,1,1)
+plt.plot(x[:int(NT)],c1f[:int(NT)]/m,label = '')
+plt.xlim(0,5000)
+
+count, bins, ignored = plt.hist(ssum2, 1000, density=True, align='mid')
+# plt.plot(P2P3[:10000],label = 'FFT method',linestyle = '--')
+
+plt.show()
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/13.%20Fault%20Tree%20Uncertainties_files/13.%20Fault%20Tree%20Uncertainties_23_0.png)
+</div>
+
+```python
+NT= np.size(x)
+plt.figure(figsize = (8,8))
+plt.subplot(2,1,1)
+plt.plot(x[:int(NT)],c2f[:int(NT)]/m,label = '')
+plt.xlim(0,5000)
+
+count, bins, ignored = plt.hist(ssum3, 1000, density=True, align='mid')
+# plt.plot(P2P3[:10000],label = 'FFT method',linestyle = '--')
+
+plt.show()
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/13.%20Fault%20Tree%20Uncertainties_files/13.%20Fault%20Tree%20Uncertainties_24_0.png)
+</div>
+
+```python
+## Let's compute the mean of the discretized pdf
+mean= np.sum(np.multiply(x[:NT],c1f[:NT]))
+# meantheory = np.exp(mu1+.5*sigma1**2)
+mean, 2*meantheory
+```
+
+    (489.38109740938563, 489.38386452844077)
+
+```python
+## Let's compute the mean of the discretized pdf
+mean= np.sum(np.multiply(x[:NT],c2f[:NT]))
+# meantheory = np.exp(mu1+.5*sigma1**2)
+mean, 3*meantheory
+```
+
+    (734.0714863312272, 734.0757967926611)
+
+## Failure Tree Analysis
+
+We'll soon apply the convolution theorem to calculate the probability of a **top event** in a failure tree analysis.
+
+Before applying the convolution theorem, we'll first describe the model that links constituent events to the **top** event whose
+failure rate we aim to quantify.
+
+The model exemplifies the widely used **failure tree analysis** described by El-Shanawany, Ardron, and Walker [[El-Shanawany _et al._, 2018](/courses/Introduction-to-Quantitative-Economics/References#id22)].
+
+To construct the statistical model, we repeatedly employ what's known as the **rare event approximation**.
+
+We want to compute the probability of an event $ A \cup B $.
+
+- the union $ A \cup B $ represents the event that $ A $ OR $ B $ occurs
+
+A probability law states that $ A $ OR $ B $ occurs with probability
+
+$$
+P(A \cup B) = P(A) + P(B) - P(A \cap B)
+$$
+
+where the intersection $ A \cap B $ is the event that $ A $ **AND** $ B $ both occur and the union $ A \cup B $ is
+the event that $ A $ **OR** $ B $ occurs.
+
+If $ A $ and $ B $ are independent, then
+
+$$
+P(A \cap B) = P(A) P(B)
+$$
+
+If $ P(A) $ and $ P(B) $ are both small, then $ P(A) P(B) $ is even smaller.
+
+The **rare event approximation** is
+
+$$
+P(A \cup B) \approx P(A) + P(B)
+$$
+
+This approximation is commonly used in system failure evaluations.
+
+## Application
+
+A system is designed such that a system failure occurs when **any** of $ n $ critical components fails.
+
+The failure probability $ P(A_i) $ of each event $ A_i $ is considered small.
+
+We assume that component failures are statistically independent random variables.
+
+By repeatedly applying a **rare event approximation**, we arrive at the following formula for the system failure probability:
+
+$$
+P(F) \approx P(A_1) + P (A_2) + \cdots + P (A_n)
+$$
+
+or
+
+$$
+P(F) \approx \sum_{i=1}^n P (A_i) \tag{13.3}
+$$
+
+Probabilities for each event are expressed as annual failure rates.
+
+## Unknown Failure Rates
+
+Now we address the core issue that interests us, following [[El-Shanawany _et al._, 2018](/courses/Introduction-to-Quantitative-Economics/References#id22)] and Greenfield and Sargent
+[[Greenfield and Sargent, 1993](/courses/Introduction-to-Quantitative-Economics/References#id21)] in line with Apostolakis [[Apostolakis, 1990](/courses/Introduction-to-Quantitative-Economics/References#id20)].
+
+The constituent probabilities or failure rates $ P(A_i) $ are not known with certainty and require estimation.
+
+We tackle this issue by defining **probabilities of probabilities** that capture one concept of uncertainty about the constituent probabilities used in failure tree analysis.
+
+We assume that a system analyst is uncertain about the failure rates $ P(A_i), i =1, \ldots, n $ for system components.
+
+The analyst manages this uncertainty by treating the system failure probability $ P(F) $ and each component probability $ P(A_i) $ as random variables.
+
+- The spread of the probability distribution of $ P(A_i) $ reflects the analyst's uncertainty about the failure probability $ P(A_i) $
+- The spread of the resulting probability distribution of $ P(F) $ indicates the uncertainty about the system's failure probability.
+
+This approach leads to what's often termed a **hierarchical** model where the analyst has probabilities about the probabilities $ P(A_i) $.
+
+The analyst formalizes this uncertainty by assuming that
+
+- each failure probability $ P(A_i) $ is itself a log normal random variable with parameters $ (\mu_i, \sigma_i) $.
+- failure rates $ P(A_i) $ and $ P(A_j) $ are statistically independent for all pairs where $ i \neq j $.
+
+The analyst determines the parameters $ (\mu_i, \sigma_i) $ for failure events $ i = 1, \ldots, n $ by reviewing reliability studies in engineering literature that have examined historical failure rates of components similar to those used in the system under study.
+
+The analyst assumes that such data on observed variability of annual failure rates or times to failure can inform expectations about parts' performances in the system.
+
+The analyst assumes mutual statistical independence among the random variables $ P(A_i) $.
+
+The analyst aims to approximate a probability mass function and cumulative distribution function
+for the system failure probability $ P(F) $.
+
+- We use the term probability mass function due to our discretization of each random variable, as described earlier.
+
+The analyst computes the probability mass function for the **top event** $ F $, i.e., a **system failure**, by repeatedly applying the convolution theorem to calculate the probability distribution of a sum of independent log normal random variables, as outlined in equation
+[(13.3)](#equation-eq-probtop).
+
+## Waste Hoist Failure Rate Example
+
+We'll consider a near real-world example with $ n = 14 $.
+
+This example estimates the annual failure rate of a crucial hoist at a nuclear waste facility.
+
+A regulatory body requires the system to be designed so that the top event's failure rate is low with high probability.
+
+This example corresponds to Design Option B-2 (Case I) described in Table 10 on page 27 of [[Greenfield and Sargent, 1993](/courses/Introduction-to-Quantitative-Economics/References#id21)].
+
+The table provides parameters $ \mu_i, \sigma_i $ for fourteen log normal random variables comprising **seven pairs** of identically and independently distributed random variables.
+
+- Within each pair, parameters $ \mu_i, \sigma_i $ are identical
+- As shown in table 10 of [[Greenfield and Sargent, 1993](/courses/Introduction-to-Quantitative-Economics/References#id21)] p. 27, parameters of log normal distributions for the seven unique probabilities $ P(A_i) $ have been calibrated to the values in the following Python code:
+
+```python
+mu1, sigma1 = 4.28, 1.1947
+mu2, sigma2 = 3.39, 1.1947
+mu3, sigma3 = 2.795, 1.1947
+mu4, sigma4 = 2.717, 1.1947
+mu5, sigma5 = 2.717, 1.1947
+mu6, sigma6 = 1.444, 1.4632
+mu7, sigma7 = -.040, 1.4632
+```
+
+> **Note**Because the failure rates are all very small, log normal distributions with the
+> above parameter values actually describe $ P(A_i) $ times $ 10^{-09} $.
+
+Therefore, the probabilities we'll place on the $ x $ axis of the probability mass function and associated cumulative distribution function should be multiplied by $ 10^{-09} $
+
+To extract a table summarizing computed quantiles, we'll use a helper function
+
+```python
+def find_nearest(array, value):
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return idx
+```
+
+We'll compute the required thirteen convolutions in the following code.
+
+(Feel free to experiment with different values of the power parameter $ p $ that we use to set the number of points in our grid for constructing
+the probability mass functions that discretize the continuous log normal distributions.)
+
+We'll plot a counterpart to the cumulative distribution function (CDF) in figure 5 on page 29 of [[Greenfield and Sargent, 1993](/courses/Introduction-to-Quantitative-Economics/References#id21)]
+and we'll also present a counterpart to their Table 11 on page 28.
+
+```python
+p=15
+I = 2**p # Truncation value
+m =  .05 # increment size
+
+
+
+
+p1,p1_norm,x = pdf_seq(mu1,sigma1,I,m)
+p2,p2_norm,x = pdf_seq(mu2,sigma2,I,m)
+p3,p3_norm,x = pdf_seq(mu3,sigma3,I,m)
+p4,p4_norm,x = pdf_seq(mu4,sigma4,I,m)
+p5,p5_norm,x = pdf_seq(mu5,sigma5,I,m)
+p6,p6_norm,x = pdf_seq(mu6,sigma6,I,m)
+p7,p7_norm,x = pdf_seq(mu7,sigma7,I,m)
+p8,p8_norm,x = pdf_seq(mu7,sigma7,I,m)
+p9,p9_norm,x = pdf_seq(mu7,sigma7,I,m)
+p10,p10_norm,x = pdf_seq(mu7,sigma7,I,m)
+p11,p11_norm,x = pdf_seq(mu7,sigma7,I,m)
+p12,p12_norm,x = pdf_seq(mu7,sigma7,I,m)
+p13,p13_norm,x = pdf_seq(mu7,sigma7,I,m)
+p14,p14_norm,x = pdf_seq(mu7,sigma7,I,m)
+
+tic = time.perf_counter()
+
+c1 = fftconvolve(p1_norm,p2_norm)
+c2 = fftconvolve(c1,p3_norm)
+c3 = fftconvolve(c2,p4_norm)
+c4 = fftconvolve(c3,p5_norm)
+c5 = fftconvolve(c4,p6_norm)
+c6 = fftconvolve(c5,p7_norm)
+c7 = fftconvolve(c6,p8_norm)
+c8 = fftconvolve(c7,p9_norm)
+c9 = fftconvolve(c8,p10_norm)
+c10 = fftconvolve(c9,p11_norm)
+c11 = fftconvolve(c10,p12_norm)
+c12 = fftconvolve(c11,p13_norm)
+c13 = fftconvolve(c12,p14_norm)
+
+toc = time.perf_counter()
+
+tdiff13 = toc - tic
+
+print("time for 13 convolutions = ", tdiff13)
+```
+
+    time for 13 convolutions =  2.458176125001046
+
+```python
+d13 = np.cumsum(c13)
+Nx=int(1400)
+plt.figure()
+plt.plot(x[0:int(Nx/m)],d13[0:int(Nx/m)])  # show Yad this -- I multiplied by m -- step size
+plt.hlines(0.5,min(x),Nx,linestyles='dotted',colors = {'black'})
+plt.hlines(0.9,min(x),Nx,linestyles='dotted',colors = {'black'})
+plt.hlines(0.95,min(x),Nx,linestyles='dotted',colors = {'black'})
+plt.hlines(0.1,min(x),Nx,linestyles='dotted',colors = {'black'})
+plt.hlines(0.05,min(x),Nx,linestyles='dotted',colors = {'black'})
+plt.ylim(0,1)
+plt.xlim(0,Nx)
+plt.xlabel("$x10^{-9}$",loc = "right")
+plt.show()
+
+x_1 = x[find_nearest(d13,0.01)]
+x_5 = x[find_nearest(d13,0.05)]
+x_10 = x[find_nearest(d13,0.1)]
+x_50 = x[find_nearest(d13,0.50)]
+x_66 = x[find_nearest(d13,0.665)]
+x_85 = x[find_nearest(d13,0.85)]
+x_90 = x[find_nearest(d13,0.90)]
+x_95 = x[find_nearest(d13,0.95)]
+x_99 = x[find_nearest(d13,0.99)]
+x_9978 = x[find_nearest(d13,0.9978)]
+
+print(tabulate([
+    ['1%',f"{x_1}"],
+    ['5%',f"{x_5}"],
+    ['10%',f"{x_10}"],
+    ['50%',f"{x_50}"],
+    ['66.5%',f"{x_66}"],
+    ['85%',f"{x_85}"],
+    ['90%',f"{x_90}"],
+    ['95%',f"{x_95}"],
+    ['99%',f"{x_99}"],
+    ['99.78%',f"{x_9978}"]],
+    headers = ['Percentile', 'x * 1e-9']))
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/13.%20Fault%20Tree%20Uncertainties_files/13.%20Fault%20Tree%20Uncertainties_36_0.png)
+</div>
+
+    Percentile      x * 1e-9
+    ------------  ----------
+    1%                 76.15
+    5%                106.5
+    10%               128.2
+    50%               260.55
+    66.5%             338.55
+    85%               509.4
+    90%               608.8
+    95%               807.6
+    99%              1470.2
+    99.78%           2474.85
+
+The table above closely matches column 2 of Table 11 on p. 28 of [[Greenfield and Sargent, 1993](/courses/Introduction-to-Quantitative-Economics/References#id21)].
+
+Any discrepancies are likely due to slight differences in the number of digits retained when inputting $ \mu_i, \sigma_i, i = 1, \ldots, 14 $
+and in the number of points used in the discretizations.

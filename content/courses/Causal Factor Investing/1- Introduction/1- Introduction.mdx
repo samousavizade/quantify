@@ -1,0 +1,22 @@
+---
+title: About Course
+draft: false
+summary: Backtest statistics are essential for evaluating the efficacy of investment strategies.
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+# 1 Introduction
+
+Science is more than a collection of observed associations. While the description and cataloging of phenomena play a role in scientific discovery, the ultimate goal of science is the amalgamation of theories that have survived rigorous falsification (Hassani et al. 2018). For a theory to be scientific, it is generally expected to declare the falsifiable causal mechanism responsible for the observed phenomenon (for one definition of falsifiability, see Popper 1963). [^1] Put simply, a scientific theory explains why an observed phenomenon takes place, where that explanation is consistent with all the empirical evidence (ideally, including experimental results). Economists subscribe to this view that a genuine science must produce refutable implications, and that those implications must be tested through solid statistical techniques (Lazear 2000).
+
+In the experimental sciences (physics, chemistry, biology, etc.), it is relatively straightforward to propose and falsify causal mechanisms through interventional studies (Fisher 1971). This is not generally the case in financial economics. Researchers cannot reproduce the financial conditions of the Flash Crash of May 6, 2010, remove some traders, and observe whether stock market prices still collapse. This has placed the field of financial economics at a disadvantage when compared with experimental sciences. A direct consequence of this limitation is that, for the past fifty years, financial economics has remained in a phenomenological stage, where researchers catalog associations without proposing falsifiable causal mechanisms.
+
+The good news is, recent progress in causal inference has made it possible to estimate causal effects from observational studies, through natural experiments and simulated interventions (Section 4). After laying out this foundation, I turn the reader's attention to the current state of causal confusion in econometrics (Section 5) and factor investing studies (Section 6). This state of confusion easily explains why factor investing remains in a phenomenological stage, and the proliferation of hundreds of spurious claims that Cochrane (2011) vividly described as the "factor zoo" [^2] (Section 7). The good news is, once financial economists embrace the concepts described in this Element, I foresee the transformation of factor investing into a truly scientific discipline (Section 8).
+
+This Element makes several contributions. First, I describe the logical inconsistency that afflicts the factor investing literature, whereby authors make associational claims in denial or ignorance of the causal content of their models. Second, I define the two different types of spurious claims in factor investing, type-A and type-B. These two types of spurious claims have different origins and consequences, hence it is important for factor researchers to distinguish between the two. In particular, type-B factor spuriosity is an important topic that has not been discussed in depth until now. Type-B spuriosity explains, among other literature findings, the time-varying nature of risk premia. Third, I apply this taxonomy to derive a hierarchy of empirical evidence used in financial research, based on the evidence's susceptibility to being spurious. Fourth, I design Monte Carlo experiments that illustrate the dire consequences of type-B spurious claims in factor investing. Fifth, I propose an alternative explanation for the main findings of the factor investing literature, which is consistent with type-B spuriosity. In particular, the time-varying nature of risk premia reported in canonical journal articles is a likely consequence of under-controlling. Sixth, I propose specific actions that academic authors can take to rebuild factor investing on the more solid scientific foundations of causal inference.
+
+[^1]: [Reference to Popper 1963]
+[^2]: A more appropriate name might have been "factor bestiary," because a zoo is populated only by real animals, while a medieval bestiary described in great detail real (e.g., lions, leopards, and elephants) as well as mythical animals (e.g. chimeras, griffins, and harpies), with equal conviction regarding the existence of both.

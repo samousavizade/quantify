@@ -1,0 +1,76 @@
+---
+title: Serial Correlation–Robust Inference after OLS
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+### Serial Correlation–Robust Inference after OLS
+
+#### Introduction
+
+In time series data, serial correlation (also known as autocorrelation) occurs when the residuals (errors) from a regression model are correlated across time periods. This can lead to inefficiencies in the Ordinary Least Squares (OLS) estimators and incorrect standard errors, which in turn affect hypothesis testing and confidence intervals. To address this issue, we need to make our inference robust to serial correlation.
+
+#### Effects of Serial Correlation on OLS
+
+1. **Unbiasedness and Consistency**: OLS estimators remain unbiased and consistent even in the presence of serial correlation, provided that the other Gauss-Markov assumptions hold. This means that with a large enough sample size, the OLS estimates will converge to the true parameter values.
+
+2. **Efficiency**: Serial correlation violates the assumption of homoskedasticity (constant variance of errors), leading to inefficient OLS estimates. The estimates no longer have the minimum variance among all linear unbiased estimators.
+
+3. **Inference**: The most significant impact of serial correlation is on inference. The standard errors of the OLS estimators are biased, leading to unreliable hypothesis tests and confidence intervals.
+
+#### Serial Correlation–Robust Standard Errors
+
+To make valid inferences in the presence of serial correlation, we can use robust standard errors. These are also known as Newey-West standard errors, which adjust the standard errors to account for serial correlation up to a specified lag length.
+
+###### Steps to Calculate Newey-West Standard Errors
+
+1. **Estimate the OLS Model**: Begin by estimating your regression model using OLS as usual.
+
+2. **Calculate Residuals**: Obtain the residuals from your OLS regression.
+
+3. **Choose Lag Length**: Decide on a lag length $$ q $$. The choice of $$ q $$ can be based on prior knowledge or data-driven methods like the Akaike Information Criterion (AIC).
+
+4. **Compute Newey-West Covariance Matrix**:
+
+- Calculate weights for each lag $$ j $$ using Bartlett weights:
+  $$
+  w_j = 1 - \frac{j}{q+1}
+  $$
+- Compute the Newey-West covariance matrix:
+  $$
+  V_{NW} = \sum_{t=1}^{n} u_t^2 x_t x_t' + \sum_{j=1}^{q} w_j \sum_{t=j+1}^{n} u_t u_{t-j} (x_t x_{t-j}' + x_{t-j} x_t')
+  $$
+  where $$ u_t $$ are the residuals and $$ x_t $$ is a vector of regressors at time $$ t $$.
+
+5. **Adjust Standard Errors**: The diagonal elements of $$ V\_{NW} $$ provide robust standard errors for each coefficient.
+
+#### Testing for Serial Correlation
+
+Before applying robust standard errors, it is often useful to test for serial correlation:
+
+1. **Durbin-Watson Test**: A classical test for AR(1) serial correlation in models with strictly exogenous regressors. The test statistic ranges from 0 to 4, with values around 2 indicating no autocorrelation.
+
+2. **Breusch-Godfrey Test**: A more general test that allows for higher-order autoregressive processes and is applicable when lagged dependent variables are present.
+
+3. **Ljung-Box Test**: Useful for detecting autocorrelation at multiple lag lengths simultaneously.
+
+#### Correcting for Serial Correlation
+
+If serial correlation is detected, besides using robust standard errors, consider model correction:
+
+1. **Include Lagged Dependent Variables**: Sometimes adding lagged values of the dependent variable as regressors can help capture dynamic relationships.
+
+2. **Feasible Generalized Least Squares (FGLS)**: If you assume a specific form of autocorrelation (e.g., AR(1)), FGLS can provide efficient estimates by transforming the model to eliminate autocorrelation.
+
+3. **Differencing**: In some cases, differencing the data can remove trends and reduce serial correlation.
+
+#### Conclusion
+
+Serial correlation in time series data poses challenges for OLS estimation by affecting efficiency and inference reliability. By employing methods such as Newey-West standard errors or model corrections like FGLS and differencing, we can make valid statistical inferences despite the presence of autocorrelation. It is crucial to test for serial correlation and apply appropriate adjustments to ensure robust econometric analysis.
+
+Citations:
+[^1]: https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/30626316/5b9ecc6d-ad88-4f2f-bf19-9e76d19d62c3/Jeffrey_M_Wooldridge_Introductory_Econometrics_A_Modern_Approach.pdf

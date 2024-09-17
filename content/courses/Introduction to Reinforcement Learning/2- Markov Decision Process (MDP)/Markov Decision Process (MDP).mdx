@@ -1,0 +1,237 @@
+---
+title: MDP
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+# Markov Decision Process (MDP)
+
+In this section, we will discuss how to formulate reinforcement learning problems using Markov decision processes (MDPs) and describe various components of MDPs in detail.
+
+## Definition of an MDP
+
+A Markov decision process (MDP) is a model for how the state of a system evolves as different actions are applied to the system. A few different quantities come together to form an MDP.
+
+![png](/static/courses/Introduction-to-Reinforcement-Learning/mdp.png)
+
+> A simple gridworld navigation task where the robot not only has to find its way to the goal location (shown as a green house) but also has to avoid trap locations (shown as red cross signs).
+
+### Key Components of an MDP
+
+- **States** ($S$): The set of states in the MDP. For example, in a gridworld navigation task, $S$ corresponds to the set of locations that the robot can be at any given timestep.
+- **Actions** ($A$): The set of actions that the robot can take at each state, e.g., “go forward”, “turn right”, “turn left”, “stay at the same location”, etc. Actions can change the current state of the robot to some other state within the set $S$.
+- **Transition Function** ($T$): A probability distribution that models the next state of the system given the current state and action. Mathematically, $T: S \times A \times S \rightarrow [0, 1]$ such that $T(s, a, s') = P(s' \mid s, a)$. The transition function satisfies $\sum_{s' \in S} T(s, a, s') = 1$ for all $s \in S$ and $a \in A$.
+
+$$
+T(s, a, s') = P(s' \mid s, a)
+$$
+
+- **Reward Function** ($r$): A function that assigns a reward to each state-action pair, $r: S \times A \rightarrow \mathbb{R}$. The reward function is designed by the user with the goal in mind.
+
+## Return and Discount Factor
+
+The different components above together form a Markov decision process (MDP)
+
+$$
+\text{MDP}: (S, A, T, r)
+$$
+
+Let's consider the situation when the robot starts at a particular state $s_0 \in S$ and continues taking actions to result in a trajectory
+
+$$
+\tau = (s_0, a_0, r_0, s_1, a_1, r_1, s_2, a_2, r_2, \ldots)
+$$
+
+At each time step $t$, the robot is at a state $s_t$ and takes an action $a_t$ which results in a reward $r_t = r(s_t, a_t)$. The **return** of a trajectory is the total reward obtained by the robot along such a trajectory
+
+$$
+R(\tau) = r_0 + r_1 + r_2 + \cdots
+$$
+
+To keep the reinforcement learning formulation meaningful even for infinitely long trajectories, we introduce the notion of a **discount factor** $\gamma < 1$. We write the discounted return as
+
+$$
+R(\tau) = r_0 + \gamma r_1 + \gamma^2 r_2 + \cdots = \sum_{t=0}^{\infty} \gamma^t r_t
+$$
+
+## Discussion of the Markov Assumption
+
+A Markov system is a system where the next state $s_{t+1}$ is only a function of the current state $s_t$ and the action $a_t$ taken at the current state. In Markov systems, the next state does not depend on which actions were taken in the past or the states that the robot was at in the past.
+
+For example, consider a robot where the state $s_t$ is the location and the action $a_t$ is the acceleration. If this robot has some non-zero velocity at state $s_t$, then the next location $s_{t+1}$ is a function of the past location $s_t$, the acceleration $a_t$, and also the velocity of the robot at time $t$ which is proportional to $s_t - s_{t-1}$. This indicates that we should have
+
+$$
+s_{t+1} = \text{some function}(s_t, a_t, s_{t-1})
+$$
+
+However, if we choose our state $s_t$ to be the tuple $(\text{location}, \text{velocity})$, then the system is Markovian because its next state $(\text{location}_{t+1}, \text{velocity}_{t+1})$ depends only upon the current state $(\text{location}_t, \text{velocity}_t)$ and the action $a_t$ at the current state.
+
+# Markov Decision Process (MDP) Assumptions
+
+Markov Decision Processes (MDPs) are a powerful tool for modeling decision-making problems under uncertainty. However, they rely on several key assumptions that must be understood to effectively apply MDPs to real-world problems.
+
+## 1. Markov Property
+
+The Markov property, also known as memorylessness, is a fundamental assumption of MDPs. It states that the future state of the system depends only on the current state and the action taken, and not on any past states or actions.
+
+### Mathematical Representation
+
+The Markov property can be represented mathematically as:
+
+$$
+P(s_{t+1} \mid s_t, a_t, s_{t-1}, a_{t-1}, \ldots) = P(s_{t+1} \mid s_t, a_t)
+$$
+
+This means that the probability of transitioning to a new state $s_{t+1}$ depends only on the current state $s_t$ and the action $a_t$ taken, and not on any past states or actions.
+
+## 2. Stationarity
+
+Stationarity is another key assumption of MDPs. It states that the transition probabilities and reward function do not change over time.
+
+### Mathematical Representation
+
+The stationarity assumption can be represented mathematically as:
+
+$$
+P(s_{t+1} \mid s_t, a_t) = P(s_{t+1} \mid s_t, a_t, t)
+$$
+
+This means that the probability of transitioning to a new state $s_{t+1}$ does not depend on the time step $t$.
+
+## 3. Full Observability
+
+Full observability is an assumption of MDPs that states that the agent has complete knowledge of the current state of the system.
+
+### Mathematical Representation
+
+The full observability assumption can be represented mathematically as:
+
+$$
+P(s_t \mid o_t) = 1
+$$
+
+This means that the agent can determine the current state $s_t$ with certainty given the observation $o_t$.
+
+## 4. Known Model
+
+The known model assumption states that the agent has complete knowledge of the transition probabilities and reward function.
+
+### Mathematical Representation
+
+The known model assumption can be represented mathematically as:
+
+$$
+P(s_{t+1} \mid s_t, a_t) = P(s_{t+1} \mid s_t, a_t, \theta)
+$$
+
+This means that the agent knows the transition probabilities and reward function, which are parameterized by $\theta$.
+
+## 5. Finite State and Action Spaces
+
+Finite state and action spaces are an assumption of MDPs that states that the number of possible states and actions is finite.
+
+## 6. Time-Homogeneity
+
+Time-homogeneity is an assumption of MDPs that states that the transition probabilities and reward function do not change over time.
+
+### Mathematical Representation
+
+The time-homogeneity assumption can be represented mathematically as:
+
+$$
+P(s_{t+1} \mid s_t, a_t) = P(s_{t+1} \mid s_t, a_t, t)
+$$
+
+This means that the probability of transitioning to a new state $s_{t+1}$ does not depend on the time step $t$.
+
+## 7. Additive Rewards
+
+Additive rewards is an assumption of MDPs that states that the reward function is additive, meaning that the reward for taking an action in a state is the sum of the rewards for taking that action in each individual state.
+
+### Mathematical Representation
+
+The additive rewards assumption can be represented mathematically as:
+
+$$
+r(s_t, a_t) = \sum_{i=1}^n r_i(s_t, a_t)
+$$
+
+This means that the reward for taking an action $a_t$ in state $s_t$ is the sum of the rewards for taking that action in each individual state $s_i$.
+
+## 8. No External Influence
+
+No external influence is an assumption of MDPs that states that the system is not affected by external factors that are not modeled by the MDP.
+
+### Mathematical Representation
+
+The no external influence assumption can be represented mathematically as:
+
+$$
+P(s_{t+1} \mid s_t, a_t) = P(s_{t+1} \mid s_t, a_t, \text{external factors})
+$$
+
+This means that the probability of transitioning to a new state $s_{t+1}$ does not depend on external factors that are not modeled by the MDP.
+
+## 9. No Internal Influence
+
+No internal influence is an assumption of MDPs that states that the system is not affected by internal factors that are not modeled by the MDP.
+
+### Mathematical Representation
+
+The no internal influence assumption can be represented mathematically as:
+
+$$
+P(s_{t+1} \mid s_t, a_t) = P(s_{t+1} \mid s_t, a_t, \text{internal factors})
+$$
+
+This means that the probability of transitioning to a new state $s_{t+1}$ does not depend on internal factors that are not modeled by the MDP.
+
+## 10. Rationality
+
+Rationality is an assumption of MDPs that states that the agent acts rationally, meaning that it chooses the action that maximizes the expected reward.
+
+# Non-Markov Decision Processes
+
+While Markov Decision Processes (MDPs) are a powerful tool for modeling decision-making problems, there are many situations where the Markov assumption does not hold. In this section, we will discuss non-Markov decision processes and their differences from MDPs.
+
+## Non-Markov Systems
+
+A non-Markov system is a system where the next state $s_{t+1}$ is not only a function of the current state $s_t$ and the action $a_t$ taken at the current state, but also depends on past states or actions.
+
+### Examples of Non-Markov Systems
+
+- **Partially Observable Markov Decision Processes (POMDPs)**: In POMDPs, the agent does not have direct access to the state of the system, but instead receives observations that are related to the state. The agent must use these observations to infer the state of the system.
+- **Time-Series Data**: In time-series data, the next value in the series is often dependent on past values, not just the current value.
+- **Systems with Memory**: In systems with memory, the next state of the system depends on past states or actions, not just the current state.
+
+## Differences from MDPs
+
+Non-Markov decision processes differ from MDPs in several key ways:
+
+- **Non-Markovian Transition Function**: In non-Markov decision processes, the transition function $T$ is not a function of just the current state $s_t$ and action $a_t$, but also depends on past states or actions.
+- **Non-Stationarity**: Non-Markov decision processes are often non-stationary, meaning that the transition function $T$ changes over time.
+- **Increased Complexity**: Non-Markov decision processes are often more complex than MDPs, as they require the agent to consider past states or actions when making decisions.
+
+## Examples of Non-Markov Decision Processes
+
+- **Recurrent Neural Networks (RNNs)**: RNNs are a type of neural network that are designed to handle sequential data, such as time-series data or natural language processing tasks. RNNs are non-Markov decision processes, as they use past states to inform their decisions.
+- **Long Short-Term Memory (LSTM) Networks**: LSTMs are a type of RNN that are designed to handle long-term dependencies in sequential data. LSTMs are non-Markov decision processes, as they use past states to inform their decisions.
+- **Deep Reinforcement Learning**: Deep reinforcement learning algorithms, such as Deep Q-Networks (DQN) and Policy Gradient Methods (PGMs), are often used to solve non-Markov decision processes. These algorithms use neural networks to learn the transition function $T$ and the reward function $r$.
+
+## Challenges of Non-Markov Decision Processes
+
+Non-Markov decision processes pose several challenges, including:
+
+- **Increased Computational Complexity**: Non-Markov decision processes often require more computational resources than MDPs, as they require the agent to consider past states or actions when making decisions.
+- **Difficulty in Learning the Transition Function**: Non-Markov decision processes can be difficult to learn, as the transition function $T$ is not a function of just the current state $s_t$ and action $a_t$.
+- **Non-Stationarity**: Non-Markov decision processes are often non-stationary, meaning that the transition function $T$ changes over time. This can make it difficult to learn the transition function $T$.
+
+Non-Markov decision processes are a powerful tool for modeling decision-making problems that do not satisfy the Markov assumption. While they pose several challenges, they are often necessary to model real-world systems that are non-Markovian. By understanding the differences between MDPs and non-Markov decision processes, we can better design algorithms to solve these complex problems.
+
+## Summary
+
+The reinforcement learning problem is typically modeled using Markov Decision Processes. A Markov decision process (MDP) is defined by a tuple of four entities $(S, A, T, r)$ where $S$ is the state space, $A$ is the action space, $T$ is the transition function that encodes the transition probabilities of the MDP, and $r$ is the immediate reward obtained by taking action at a particular state.

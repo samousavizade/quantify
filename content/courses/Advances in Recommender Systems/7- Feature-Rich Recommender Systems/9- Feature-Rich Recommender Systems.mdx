@@ -1,0 +1,153 @@
+---
+title: Feature-Rich Recommender Systems
+draft: false
+summary: Backtest statistics are essential for evaluating the efficacy of investment strategies.
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Feature-Rich Recommender Systems
+
+This part of the course focuses on **Feature-Rich Recommender Systems**, which are advanced models that enhance traditional recommendation systems by incorporating additional data, or "side information," beyond basic user-item interaction data. This section highlights the importance and methodology of integrating side information to improve the performance and accuracy of recommender systems.
+
+### Importance of Interaction Data
+
+Interaction data, which includes user interactions with items (e.g., clicks, views, purchases), is the foundational element in understanding user preferences and interests. However, this data is often sparse and noisy, which can limit the effectiveness of recommendation models. To address these limitations, feature-rich recommender systems incorporate additional contextual information, such as:
+
+- **Item Features**: Attributes related to the items being recommended, such as genre, brand, or price.
+- **User Profiles**: Information about the users, including demographics, preferences, and past behavior.
+- **Contextual Information**: The context in which interactions occur, such as time of day, location, or device used.
+
+### Benefits of Side Information
+
+Integrating side information into recommendation models provides several benefits:
+
+- **Improved Prediction Accuracy**: By considering additional features, models can better predict user preferences, especially when interaction data is limited.
+- **Content/Context Awareness**: Models become more aware of the content and context, allowing for more personalized and relevant recommendations.
+- **Enhanced User Experience**: Recommendations that align closely with user interests and contexts can lead to higher user satisfaction and engagement.
+
+### Application in Click-Through Rate (CTR) Prediction
+
+The section also discusses the application of feature-rich recommender systems in predicting click-through rates (CTR) for online advertisements. CTR is a critical metric in digital marketing, measuring the effectiveness of ads by calculating the ratio of clicks to impressions. High CTRs indicate that ads are relevant and engaging to the target audience.
+
+- **CTR Formula**: The formula for calculating CTR is given as:
+
+$$\text{CTR} = \left(\frac{\text{Number of Clicks}}{\text{Number of Impressions}}\right) \times 100\%$$
+
+- **Importance of CTR**: CTR is not only a measure of ad effectiveness but also influences user satisfaction and conversion rates. Accurate CTR prediction helps in optimizing ad placements and targeting strategies, ultimately improving the performance of digital marketing campaigns.
+
+Feature-rich recommender systems leverage additional data to enhance recommendation accuracy and relevance, with significant applications in areas like CTR prediction for online advertising. This approach addresses the limitations of traditional models by integrating diverse data sources to provide a more holistic understanding of user preferences and behaviors.
+
+## An Online Advertising Dataset
+
+The section 21.8.1 introduces an **Online Advertising Dataset**, which is crucial for understanding user interactions with digital ads. This dataset is utilized to enhance the performance of click-through rate (CTR) prediction models, which are essential in the domain of online advertising.
+
+### Importance of Online Advertising
+
+Online advertising has become a significant revenue stream for the internet industry due to advancements in internet and mobile technology. The primary goal of online advertising is to display relevant ads that capture user interest, thereby converting casual visitors into paying customers. This relevance is achieved through the use of datasets that provide insights into user behavior and preferences.
+
+### Dataset Description
+
+The dataset described in this section contains 34 fields, with the first column indicating whether an advertisement was clicked (1) or not (0). The remaining columns are categorical features, which may include identifiers such as advertisement ID, site or application ID, device ID, time, and user profiles. However, the exact semantics of these features are anonymized to protect privacy.
+
+### Dataset Usage
+
+The dataset is used to train and test CTR prediction models. It is divided into a training set and a test set, containing 15,000 and 3,000 samples, respectively. This division allows for the development and validation of models that predict the likelihood of an ad being clicked, which is a critical task in optimizing online advertising strategies.
+
+### Data Download and Preparation
+
+The section provides a code snippet for downloading the dataset from a server and saving it locally. The dataset is compressed in a ZIP file, which is extracted for further analysis and model training.
+
+```python
+#@save
+
+import os
+from collections import defaultdict
+from mxnet import gluon, np
+from d2l import mxnet as d2l
+
+d2l.DATA_HUB['ctr'] = (d2l.DATA_URL + 'ctr.zip', 'e18327c48c8e8e5c23da714dd614e390d369843f')
+data_dir = d2l.download_extract('ctr')
+```
+
+This dataset serves as a foundation for developing models that can effectively predict CTR, thereby improving the targeting and effectiveness of online advertisements. Understanding and utilizing such datasets is critical for digital marketers aiming to optimize their advertising campaigns and maximize their return on investment.
+
+## Dataset Wrapper
+
+The section focuses on the **Dataset Wrapper** for handling the online advertising dataset, which is essential for efficiently loading and processing data for click-through rate (CTR) prediction tasks. This section introduces the `CTRDataset` class, which is implemented to facilitate data loading and preparation for machine learning models.
+
+```python
+#@save
+class CTRDataset(gluon.data.Dataset):
+    def __init__(self, data_path, feat_mapper=None, defaults=None,
+                 min_threshold=4, num_feat=34):
+        self.NUM_FEATS, self.count, self.data = num_feat, 0, {}
+        feat_cnts = defaultdict(lambda: defaultdict(int))
+        self.feat_mapper, self.defaults = feat_mapper, defaults
+        self.field_dims = np.zeros(self.NUM_FEATS, dtype=np.int64)
+        with open(data_path) as f:
+            for line in f:
+                instance = {}
+                values = line.rstrip('\n').split('\t')
+                if len(values) != self.NUM_FEATS + 1:
+                    continue
+                label = np.float32([0, 0])
+                label[int(values[0])] = 1
+                instance['y'] = [np.float32(values[0])]
+                for i in range(1, self.NUM_FEATS + 1):
+                    feat_cnts[i][values[i]] += 1
+                    instance.setdefault('x', []).append(values[i])
+                self.data[self.count] = instance
+                self.count = self.count + 1
+        if self.feat_mapper is None and self.defaults is None:
+            feat_mapper = {i: {feat for feat, c in cnt.items() if c >= min_threshold} for i, cnt in feat_cnts.items()}
+            self.feat_mapper = {i: {feat_v: idx for idx, feat_v in enumerate(feat_values)} for i, feat_values in feat_mapper.items()}
+            self.defaults = {i: len(feat_values) for i, feat_values in feat_mapper.items()}
+        for i, fm in self.feat_mapper.items():
+            self.field_dims[i - 1] = len(fm) + 1
+        self.offsets = np.array((0, *np.cumsum(self.field_dims).asnumpy()[:-1]))
+
+    def __len__(self):
+        return self.count
+
+    def __getitem__(self, idx):
+        feat = np.array([self.feat_mapper[i + 1].get(v, self.defaults[i + 1]) for i, v in enumerate(self.data[idx]['x'])])
+        return feat + self.offsets, self.data[idx]['y']
+```
+
+This code snippet implements the `CTRDataset` class, which is crucial for loading the dataset from a CSV file and preparing it for use with data loaders in machine learning frameworks. The class handles the mapping of categorical features to indices, calculates feature offsets, and provides methods for accessing the data.
+
+### Purpose of the Dataset Wrapper
+
+The `CTRDataset` class is designed to streamline the process of loading the advertising dataset from a CSV file, making it compatible with data handling utilities like `DataLoader`. This wrapper is crucial for managing the dataset's categorical features and preparing them for model training and evaluation.
+
+### Implementation Details
+
+The `CTRDataset` class is implemented using the `gluon.data.Dataset` module. Here are some key components of the implementation:
+
+- **Initialization**: The class constructor initializes several parameters, including the path to the data file, feature mappings, default values, and feature counts. It also sets up data structures to store feature counts and mappings.
+
+- **Feature Mapping and Defaults**: The class constructs a feature mapper and default values for each feature based on their occurrence in the dataset. This helps in handling categorical features efficiently.
+
+- **Data Loading**: The dataset is loaded line by line from the CSV file. Each line is split into features and a label, which indicates whether an ad was clicked (1) or not (0). The features are stored in a dictionary, and the label is converted into a binary format.
+
+- **Feature Indexing**: For each feature, the class maintains a mapping of feature values to indices, which are used to convert categorical features into numerical indices suitable for model input.
+
+- **Offsets Calculation**: Offsets are calculated to ensure that feature indices are correctly aligned when multiple features are combined.
+
+### Usage Example
+
+The section provides an example of how to use the `CTRDataset` class to load the training data and print the first record. This demonstrates the practical application of the dataset wrapper in preparing data for CTR prediction models.
+
+```python
+train_data = CTRDataset(os.path.join(data_dir, 'train.csv'))
+train_data[0]
+```
+
+The output consists of an array of feature indices and a label, showing how the dataset is structured for model consumption.
+
+### Flexibility and Applications
+
+The `CTRDataset` class is flexible and can be adapted to load other similar datasets, such as those from the Criteo display advertising challenge or the Avazu click-through rate prediction dataset. This adaptability makes it a valuable tool for researchers and practitioners working with CTR prediction tasks in online advertising.

@@ -1,0 +1,1240 @@
+---
+title: Linear Algebra
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+# Overview of Linear Algebra
+
+## Overview
+
+Linear algebra is an essential branch of mathematics for economists, particularly for addressing linear equation systems that often appear in economics and finance. For instance, consider the system:
+
+$$
+\begin{aligned}
+y_1 = a x_1 + b x_2 \\
+y_2 = c x_1 + d x_2
+\end{aligned}
+$$
+
+or in a more general form,
+
+$$
+\begin{aligned}
+y_1 = a_{11} x_1 + a_{12} x_2 + \cdots + a_{1k} x_k \\
+\vdots \\
+y_n = a_{n1} x_1 + a_{n2} x_2 + \cdots + a_{nk} x_k
+\end{aligned} \tag{2.1}
+$$
+
+The aim is to determine the unknowns $ x*1, \ldots, x_k $ given the coefficients $ a*{11}, \ldots, a\_{nk} $ and the results $ y_1, \ldots, y_n $.
+
+Key considerations include:
+
+- Does a solution exist?
+- Are there multiple solutions, and how should they be understood?
+- If no solution is available, what is the best approximate solution?
+- How can a solution be computed if it exists?
+
+These issues are explored in linear algebra. This lecture will cover the basics of linear and matrix algebra, focusing on both theoretical and computational elements.
+
+Let's start with some imports:
+
+```python
+import matplotlib.pyplot as plt
+plt.rcParams["figure.figsize"] = (11, 5)  #set default figure size
+import numpy as np
+from matplotlib import cm
+from mpl_toolkits.mplot3d import Axes3D
+from scipy.linalg import inv, solve, det, eig
+```
+
+## Vectors
+
+A _vector_ of length $ n $ is a sequence (or array, or tuple) of $ n $ numbers, denoted as $ x = (x_1, \ldots, x_n) $ or $ x = [x_1, \ldots, x_n] $. These sequences can be written either horizontally or vertically as needed.
+
+The set of all $ n $-vectors is represented by $ \mathbb R^n $. For example, $ \mathbb R ^2 $ represents the plane, and a vector in $ \mathbb R^2 $ is a point in the plane. Vectors are traditionally visualized as arrows from the origin to a point.
+
+The following figure shows three vectors represented in this way.
+
+```python
+fig, ax = plt.subplots(figsize=(10, 8))
+# Set the axes through the origin
+for spine in ['left', 'bottom']:
+    ax.spines[spine].set_position('zero')
+for spine in ['right', 'top']:
+    ax.spines[spine].set_color('none')
+
+ax.set(xlim=(-5, 5), ylim=(-5, 5))
+ax.grid()
+vecs = ((2, 4), (-3, 3), (-4, -3.5))
+for v in vecs:
+    ax.annotate('', xy=v, xytext=(0, 0),
+                arrowprops=dict(facecolor='blue',
+                shrink=0,
+                alpha=0.7,
+                width=0.5))
+    ax.text(1.1 * v[0], 1.1 * v[1], str(v))
+plt.show()
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/2.%20Linear%20Algebra_files/2.%20Linear%20Algebra_4_0.png)
+</div>
+
+### Vector Operations
+
+The two main operations for vectors are addition and scalar multiplication. When adding two vectors, we add them element-by-element:
+
+$$
+x + y =
+\begin{bmatrix}
+x_1 \\
+x_2 \\
+\vdots \\
+x_n
+\end{bmatrix} +
+\begin{bmatrix}
+y_1 \\
+y_2 \\
+\vdots \\
+y_n
+\end{bmatrix} :=
+\begin{bmatrix}
+x_1 + y_1 \\
+x_2 + y_2 \\
+\vdots \\
+x_n + y_n
+\end{bmatrix}
+$$
+
+Scalar multiplication involves taking a number $ \gamma $ and a vector $ x $ to produce:
+
+$$
+\gamma x :=
+\begin{bmatrix}
+\gamma x_1 \\
+\gamma x_2 \\
+\vdots \\
+\gamma x_n
+\end{bmatrix}
+$$
+
+The next figure illustrates scalar multiplication.
+
+```python
+fig, ax = plt.subplots(figsize=(10, 8))
+# Set the axes through the origin
+for spine in ['left', 'bottom']:
+    ax.spines[spine].set_position('zero')
+for spine in ['right', 'top']:
+    ax.spines[spine].set_color('none')
+
+ax.set(xlim=(-5, 5), ylim=(-5, 5))
+x = (2, 2)
+ax.annotate('', xy=x, xytext=(0, 0),
+            arrowprops=dict(facecolor='blue',
+            shrink=0,
+            alpha=1,
+            width=0.5))
+ax.text(x[0] + 0.4, x[1] - 0.2, '$x$', fontsize='16')
+
+
+scalars = (-2, 2)
+x = np.array(x)
+
+for s in scalars:
+    v = s * x
+    ax.annotate('', xy=v, xytext=(0, 0),
+                arrowprops=dict(facecolor='red',
+                shrink=0,
+                alpha=0.5,
+                width=0.5))
+    ax.text(v[0] + 0.4, v[1] - 0.2, f'${s} x$', fontsize='16')
+plt.show()
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/2.%20Linear%20Algebra_files/2.%20Linear%20Algebra_6_0.png)
+</div>
+
+In Python, vectors can be represented as lists or tuples, such as `x = (2, 4, 6)`, but they are more commonly represented as NumPy arrays. NumPy arrays offer a natural syntax for scalar multiplication and addition.
+
+```python
+x = np.ones(3)            # Vector of three ones
+y = np.array((2, 4, 6))   # Converts tuple (2, 4, 6) into array
+x + y
+```
+
+    array([3., 5., 7.])
+
+```python
+4 * x
+```
+
+    array([4., 4., 4.])
+
+### Inner Product and Norm
+
+The _inner product_ of vectors $ x,y \in \mathbb R ^n $ is defined as:
+
+$$
+x' y := \sum_{i=1}^n x_i y_i
+$$
+
+Two vectors are _orthogonal_ if their inner product is zero.
+
+The _norm_ of a vector $ x $ represents its "length" (i.e., its distance from the zero vector) and is defined as:
+
+$$
+\| x \| := \sqrt{x' x} := \left( \sum_{i=1}^n x_i^2 \right)^{1/2}
+$$
+
+The expression $ \| x - y\| $ is considered the distance between $ x $ and $ y $. The inner product and norm can be computed as follows.
+
+```python
+np.sum(x * y)          # Inner product of x and y
+```
+
+    12.0
+
+```python
+np.sqrt(np.sum(x**2))  # Norm of x, take one
+```
+
+    1.7320508075688772
+
+```python
+np.linalg.norm(x)      # Norm of x, take two
+```
+
+    1.7320508075688772
+
+### Span
+
+Given a set of vectors $ A := \{a_1, \ldots, a_k\} $ in $ \mathbb R ^n $, we can create new vectors through linear operations. These new vectors are called _linear combinations_ of $ A $.
+
+A vector $ y \in \mathbb R ^n $ is a linear combination of $ A $ if:
+
+$$
+y = \beta_1 a_1 + \cdots + \beta_k a_k
+\text{ for some scalars } \beta_1, \ldots, \beta_k
+$$
+
+The values $ \beta_1, \ldots, \beta_k $ are the _coefficients_ of the linear combination. The set of all linear combinations of $ A $ is called the _span_ of $ A $.
+
+The next figure shows the span of $ A = \{a_1, a_2\} $ in $ \mathbb R ^3 $, a two-dimensional plane passing through these points and the origin.
+
+```python
+ax = plt.figure(figsize=(10, 8)).add_subplot(projection='3d')
+
+x_min, x_max = -5, 5
+y_min, y_max = -5, 5
+
+α, β = 0.2, 0.1
+
+ax.set(xlim=(x_min, x_max), ylim=(x_min, x_max), zlim=(x_min, x_max),
+       xticks=(0,), yticks=(0,), zticks=(0,))
+
+gs = 3
+z = np.linspace(x_min, x_max, gs)
+x = np.zeros(gs)
+y = np.zeros(gs)
+ax.plot(x, y, z, 'k-', lw=2, alpha=0.5)
+ax.plot(z, x, y, 'k-', lw=2, alpha=0.5)
+ax.plot(y, z, x, 'k-', lw=2, alpha=0.5)
+
+
+# Fixed linear function, to generate a plane
+def f(x, y):
+    return α * x + β * y
+
+# Vector locations, by coordinate
+x_coords = np.array((3, 3))
+y_coords = np.array((4, -4))
+z = f(x_coords, y_coords)
+for i in (0, 1):
+    ax.text(x_coords[i], y_coords[i], z[i], f'$a_{i+1}$', fontsize=14)
+
+# Lines to vectors
+for i in (0, 1):
+    x = (0, x_coords[i])
+    y = (0, y_coords[i])
+    z = (0, f(x_coords[i], y_coords[i]))
+    ax.plot(x, y, z, 'b-', lw=1.5, alpha=0.6)
+
+
+# Draw the plane
+grid_size = 20
+xr2 = np.linspace(x_min, x_max, grid_size)
+yr2 = np.linspace(y_min, y_max, grid_size)
+x2, y2 = np.meshgrid(xr2, yr2)
+z2 = f(x2, y2)
+ax.plot_surface(x2, y2, z2, rstride=1, cstride=1, cmap=cm.jet,
+                linewidth=0, antialiased=True, alpha=0.2)
+plt.show()
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/2.%20Linear%20Algebra_files/2.%20Linear%20Algebra_15_0.png)
+</div>
+
+#### Examples
+
+If $ A $ contains only one vector $ a_1 \in \mathbb R ^2 $, its span is the scalar multiples of $ a_1 $, forming a line through $ a_1 $ and the origin.
+
+If $ A = \{e_1, e_2, e_3\} $ consists of the _canonical basis vectors_ of $ \mathbb R ^3 $:
+
+$$
+e_1 :=
+\begin{bmatrix}
+1 \\
+0 \\
+0
+\end{bmatrix}
+, \quad
+e_2 :=
+\begin{bmatrix}
+0 \\
+1 \\
+0
+\end{bmatrix}
+, \quad
+e_3 :=
+\begin{bmatrix}
+0 \\
+0 \\
+1
+\end{bmatrix}
+$$
+
+then the span of $ A $ is all of $ \mathbb R ^3 $, as any $ x = (x_1, x_2, x_3) \in \mathbb R ^3 $ can be expressed as:
+
+$$
+x = x_1 e_1 + x_2 e_2 + x_3 e_3
+$$
+
+For $ A_0 = \{e_1, e_2, e_1 + e_2\} $, any linear combination $ y = (y_1, y_2, y_3) $ will have $ y_3 = 0 $, so $ A_0 $ does not span all of $ \mathbb R ^3 $.
+
+### Linear Independence
+
+It is often desirable to find sets of vectors with a large span, allowing many vectors to be described by linear combinations of a few vectors.
+
+A set of vectors $ A := \{a_1, \ldots, a_k\} $ in $ \mathbb R ^n $ is:
+
+- _linearly dependent_ if a strict subset of $ A $ has the same span as $ A $.
+- _linearly independent_ if it is not linearly dependent.
+
+A set is linearly independent if no vector is redundant to the span.
+
+For example, if $ \{a_1, a_2\} $ spans a plane in $ \mathbb R ^3 $, adding a third vector $ a_3 $ results in:
+
+- linear dependence if $ a_3 $ lies in the plane
+- linear independence otherwise
+
+Since $ \mathbb R ^n $ can be spanned by $ n $ vectors, any collection of $ m > n $ vectors in $ \mathbb R ^n $ is linearly dependent.
+
+Linear independence of $ A := \{a_1, \ldots, a_k\} \subset \mathbb R ^n $ is equivalent to:
+
+1. No vector in $ A $ can be expressed as a linear combination of the others.
+2. If $ \beta_1 a_1 + \cdots \beta_k a_k = 0 $, then $ \beta_1 = \cdots = \beta_k = 0 $.
+
+### Unique Representations
+
+A group of linearly independent vectors allows each vector in the span to be uniquely expressed as a linear combination of these vectors.
+
+If $ A := \{a_1, \ldots, a_k\} \subset \mathbb R ^n $ is linearly independent and:
+
+$$
+y = \beta_1 a_1 + \cdots \beta_k a_k
+$$
+
+then no other set of coefficients $ \gamma_1, \ldots, \gamma_k $ will result in the same vector $ y $.
+
+If $ y = \gamma_1 a_1 + \cdots \gamma_k a_k $, then:
+
+$$
+(\beta_1 - \gamma_1) a_1 + \cdots + (\beta_k - \gamma_k) a_k = 0
+$$
+
+Linear independence implies $ \gamma_i = \beta_i $ for each $ i $.
+
+## Matrices
+
+Matrices are a systematic way to arrange data for linear operations.
+
+An $ n \times k $ matrix is a rectangular array $ A $ with $ n $ rows and $ k $ columns:
+
+$$
+A =
+\begin{bmatrix}
+a_{11} & a_{12} & \cdots & a_{1k} \\
+a_{21} & a_{22} & \cdots & a_{2k} \\
+\vdots & \vdots & & \vdots \\
+a_{n1} & a_{n2} & \cdots & a_{nk}
+\end{bmatrix}
+$$
+
+The numbers often represent coefficients in a system of linear equations.
+
+A matrix is called a vector if $ n = 1 $ (row vector) or $ k = 1 $ (column vector).
+
+If $ n = k $, the matrix is _square_.
+
+The _transpose_ of $ A $, denoted $ A' $ or $ A^{\top} $, is formed by swapping $ a*{ij} $ with $ a*{ji} $.
+
+A matrix is _symmetric_ if $ A = A' $.
+
+For a square matrix, the elements $ a\_{ii} $ form the _principal diagonal_.
+
+A _diagonal_ matrix has nonzero entries only on the principal diagonal.
+
+An _identity matrix_ is a diagonal matrix with ones on the principal diagonal, denoted by $ I $.
+
+### Matrix Operations
+
+Matrices have several algebraic operations similar to vectors.
+
+Scalar multiplication and addition are straightforward extensions:
+
+$$
+\gamma A =
+\gamma
+\begin{bmatrix}
+a_{11} & \cdots & a_{1k} \\
+\vdots & \vdots & \vdots \\
+a_{n1} & \cdots & a_{nk}
+\end{bmatrix} :=
+\begin{bmatrix}
+\gamma a_{11} & \cdots & \gamma a_{1k} \\
+\vdots & \vdots & \vdots \\
+\gamma a_{n1} & \cdots & \gamma a_{nk}
+\end{bmatrix}
+$$
+
+and
+
+$$
+A + B =
+\begin{bmatrix}
+a_{11} & \cdots & a_{1k} \\
+\vdots & \vdots & \vdots \\
+a_{n1} & \cdots & a_{nk}
+\end{bmatrix} +
+\begin{bmatrix}
+b_{11} & \cdots & b_{1k} \\
+\vdots & \vdots & \vdots \\
+b_{n1} & \cdots & b_{nk}
+\end{bmatrix} :=
+\begin{bmatrix}
+a_{11} + b_{11} & \cdots & a_{1k} + b_{1k} \\
+\vdots & \vdots & \vdots \\
+a_{n1} + b_{n1} & \cdots & a_{nk} + b_{nk}
+\end{bmatrix}
+$$
+
+Matrices must have the same shape for addition.
+
+Matrix multiplication generalizes inner products and aligns with linear operations.
+
+For matrices $ A $ and $ B $, their product $ A B $ has the $ i,j $-th element as the inner product of the $ i $-th row of $ A $ and the $ j $-th column of $ B $.
+
+If $ A $ is $ n \times k $ and $ B $ is $ j \times m $, $ k = j $ is required for multiplication, resulting in an $ n \times m $ matrix.
+
+For $ n \times k $ matrix $ A $ and $ k \times 1 $ column vector $ x $:
+
+$$
+A x =
+\begin{bmatrix}
+a_{11} & \cdots & a_{1k} \\
+\vdots & \vdots & \vdots \\
+a_{n1} & \cdots & a_{nk}
+\end{bmatrix}
+\begin{bmatrix}
+x_{1} \\
+\vdots \\
+x_{k}
+\end{bmatrix} :=
+\begin{bmatrix}
+a_{11} x_1 + \cdots + a_{1k} x_k \\
+\vdots \\
+a_{n1} x_1 + \cdots + a_{nk} x_k
+\end{bmatrix} \tag{2.2}
+$$
+
+> **Note**$ A B $ and $ B A $ are generally different.
+
+The identity matrix is important. If $ A $ is $ n \times k $ and $ I $ is the $ k \times k $ identity matrix, then $ AI = A $. If $ I $ is the $ n \times n $ identity matrix, then $ IA = A $.
+
+### Matrices in NumPy
+
+NumPy arrays serve as matrices and offer fast, efficient methods for standard matrix operations.
+
+You can create them manually from tuples of tuples (or lists of lists) as follows.
+
+```python
+A = ((1, 2),
+     (3, 4))
+
+type(A)
+```
+
+    tuple
+
+```python
+A = np.array(A)
+
+type(A)
+```
+
+    numpy.ndarray
+
+```python
+A.shape
+```
+
+    (2, 2)
+
+The `shape` attribute is a tuple indicating the number of rows and columns.
+
+To get the transpose of `A`, use `A.transpose()` or simply `A.T`.
+
+There are convenient functions for creating common matrices (matrices of zeros, ones, etc.).
+
+Since operations are performed elementwise by default, scalar multiplication and addition have very natural syntax.
+
+```python
+A = np.identity(3)
+B = np.ones((3, 3))
+2 * A
+```
+
+    array([[2., 0., 0.],
+           [0., 2., 0.],
+           [0., 0., 2.]])
+
+```python
+A + B
+```
+
+    array([[2., 1., 1.],
+           [1., 2., 1.],
+           [1., 1., 2.]])
+
+To multiply matrices, use the `@` symbol.
+
+Specifically, `A @ B` performs matrix multiplication, while `A * B` does element-by-element multiplication.
+
+### Matrices as Functions
+
+Each $ n \times k $ matrix $ A $ can be seen as a function $ f(x) = Ax $ that maps $ x \in \mathbb R ^k $ to $ y = Ax \in \mathbb R ^n $.
+
+These functions are _linear_.
+
+A function $ f \colon \mathbb R ^k \to \mathbb R ^n $ is _linear_ if, for all $ x, y \in \mathbb R ^k $ and scalars $ \alpha, \beta $, we have:
+
+$$
+f(\alpha x + \beta y) = \alpha f(x) + \beta f(y)
+$$
+
+This holds for $ f(x) = A x + b $ when $ b $ is zero and fails when $ b $ is nonzero.
+
+It is [known](https://en.wikipedia.org/wiki/Linear_map#Matrices) that $ f $ is linear if and only if there exists a matrix $ A $ such that $ f(x) = Ax $ for all $ x $.
+
+## Tackling Systems of Equations
+
+Let's revisit the equation system [(2.1)](#equation-la-se).
+
+Comparing [(2.1)](#equation-la-se) and [(2.2)](#equation-la-atx), we can rewrite [(2.1)](#equation-la-se) more succinctly as
+
+$$
+y = Ax \tag{2.3}
+$$
+
+Our task is to find a vector $ x \in \mathbb R ^k $ that satisfies [(2.3)](#equation-la-se2), given $ y $ and $ A $.
+
+This is a specific instance of a broader challenge: Determine an $ x $ such that $ y = f(x) $.
+
+Given any function $ f $ and a $ y $, does an $ x $ always exist where $ y = f(x) $?
+
+If so, is it always the only solution?
+
+The answer to both queries is no, as illustrated in the following figure
+
+```python
+def f(x):
+    return 0.6 * np.cos(4 * x) + 1.4
+
+
+xmin, xmax = -1, 1
+x = np.linspace(xmin, xmax, 160)
+y = f(x)
+ya, yb = np.min(y), np.max(y)
+
+fig, axes = plt.subplots(2, 1, figsize=(10, 10))
+
+for ax in axes:
+    # Set the axes through the origin
+    for spine in ['left', 'bottom']:
+        ax.spines[spine].set_position('zero')
+    for spine in ['right', 'top']:
+        ax.spines[spine].set_color('none')
+
+    ax.set(ylim=(-0.6, 3.2), xlim=(xmin, xmax),
+           yticks=(), xticks=())
+
+    ax.plot(x, y, 'k-', lw=2, label='$f$')
+    ax.fill_between(x, ya, yb, facecolor='blue', alpha=0.05)
+    ax.vlines([0], ya, yb, lw=3, color='blue', label='range of $f$')
+    ax.text(0.04, -0.3, '$0$', fontsize=16)
+
+ax = axes[0]
+
+ax.legend(loc='upper right', frameon=False)
+ybar = 1.5
+ax.plot(x, x * 0 + ybar, 'k--', alpha=0.5)
+ax.text(0.05, 0.8 * ybar, '$y$', fontsize=16)
+for i, z in enumerate((-0.35, 0.35)):
+    ax.vlines(z, 0, f(z), linestyle='--', alpha=0.5)
+    ax.text(z, -0.2, f'$x_{i}$', fontsize=16)
+
+ax = axes[1]
+
+ybar = 2.6
+ax.plot(x, x * 0 + ybar, 'k--', alpha=0.5)
+ax.text(0.04, 0.91 * ybar, '$y$', fontsize=16)
+
+plt.show()
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/2.%20Linear%20Algebra_files/2.%20Linear%20Algebra_31_0.png)
+</div>
+
+In the first graph, multiple solutions exist as the function isn't one-to-one, while
+the second graph shows no solutions since $ y $ is outside $ f $'s range.
+
+Can we set conditions on $ A $ in [(2.3)](#equation-la-se2) to avoid these issues?
+
+In this context, it's crucial to recognize that $ Ax $ represents a linear combination of $ A $'s columns.
+
+Specifically, if $ a_1, \ldots, a_k $ are $ A $'s columns, then
+
+$$
+Ax = x_1 a_1 + \cdots + x_k a_k
+$$
+
+Thus, the range of $ f(x) = Ax $ is precisely the span of $ A $'s columns.
+
+We want a large range to include any $ y $.
+
+As you may recall, the condition for a large span is [linear independence](#la-li).
+
+Fortunately, linear independence of $ A $'s columns also ensures uniqueness.
+
+Indeed, our [earlier discussion](#la-unique-reps) showed that if $ \{a_1, \ldots, a_k\} $ are linearly independent and $ y = Ax = x_1 a_1 + \cdots + x_k a_k $, then no $ z \not= x $ satisfies $ y = Az $.
+
+### The Case of Square Matrices
+
+Let's explore more details, starting with $ A $ being $ n \times n $.
+
+This is the common scenario where equation count equals unknown count.
+
+For any $ y \in \mathbb R ^n $, we aim to find a unique $ x \in \mathbb R ^n $ where $ y = Ax $.
+
+Given the above observations, if $ A $'s columns are linearly independent, their span, and thus the range of $ f(x) = Ax $, encompasses all of $ \mathbb R ^n $.
+
+Therefore, an $ x $ always exists where $ y = Ax $.
+
+Moreover, this solution is unique.
+
+Specifically, these statements are equivalent:
+
+1. $ A $'s columns are linearly independent.
+2. For any $ y \in \mathbb R ^n $, $ y = Ax $ has a single solution.
+
+The property of having linearly independent columns is often termed _full column rank_.
+
+#### Inverse Matrices
+
+Can we express the solution in a formula?
+
+For scalar $ y $ and $ A $ with $ A \not= 0 $, the solution is $ x = A^{-1} y $.
+
+A similar expression applies to matrices.
+
+Specifically, if a square matrix $ A $ has full column rank, it possesses a multiplicative _inverse matrix_ $ A^{-1} $, where $ A A^{-1} = A^{-1} A = I $.
+
+Thus, multiplying both sides of $ y = Ax $ by $ A^{-1} $ results in $ x = A^{-1} y $.
+
+This is the solution we seek.
+
+#### Determinants
+
+Another note on square matrices is that each has a unique number called its _determinant_ — the formula can be found [here](https://en.wikipedia.org/wiki/Determinant).
+
+If $ A $'s determinant is not zero, we call $ A $ _nonsingular_.
+
+Perhaps the most important fact about determinants is that $ A $ is nonsingular if and only if it has full column rank.
+
+This provides a useful single-number indicator of whether a square matrix is invertible.
+
+### When Rows Outnumber Columns
+
+This is the $ n \times k $ case where $ n > k $.
+
+This situation is important in many contexts, particularly in linear regression (where $ n $ is the number of observations and $ k $ is the number of explanatory variables).
+
+For any $ y \in \mathbb R ^n $, we look for an $ x \in \mathbb R ^k $ where $ y = Ax $.
+
+In this scenario, a solution is highly unlikely.
+
+Without losing much generality, let's consider the intuition focusing on linearly independent columns of $ A $.
+
+It follows that the span of $ A $'s columns is a $ k $-dimensional subspace of $ \mathbb R ^n $.
+
+This span is very "unlikely" to contain any arbitrary $ y \in \mathbb R ^n $.
+
+To understand why, recall the [earlier figure](#la-3dvec), with $ k=2 $ and $ n=3 $.
+
+Imagine a randomly chosen $ y \in \mathbb R ^3 $, somewhere in that three-dimensional space.
+
+What's the chance that $ y $ lies in $ \{a_1, a_2\} $'s span (i.e., the two-dimensional plane through these points)?
+
+In a sense, it must be tiny, as this plane has zero "thickness".
+
+Thus, in the $ n > k $ case, we typically abandon the idea of existence.
+
+However, we can still seek the best approximation, such as an
+$ x $ that minimizes $ \| y - Ax\| $.
+
+This problem can be solved using calculus or orthogonal projection theory.
+
+The solution is known to be $ \hat x = (A'A)^{-1}A'y $.
+
+### When Columns Outnumber Rows
+
+This is the $ n \times k $ case where $ n < k $, so there are fewer equations than unknowns.
+
+Here, we either have no solutions or infinitely many — uniqueness never occurs.
+
+Consider the case where $ k=3 $ and $ n=2 $.
+
+Here, $ A $'s columns are 3 vectors in $ \mathbb R ^2 $.
+
+This set can never be linearly independent, as two vectors can span $ \mathbb R ^2 $.
+
+(For instance, use the canonical basis vectors)
+
+Thus, one column is a linear combination of the other two.
+
+Say $ a_1 = \alpha a_2 + \beta a_3 $.
+
+Then if $ y = Ax = x_1 a_1 + x_2 a_2 + x_3 a_3 $, we can also write
+
+$$
+y
+= x_1 (\alpha a_2 + \beta a_3) + x_2 a_2 + x_3 a_3
+= (x_1 \alpha + x_2) a_2 + (x_1 \beta + x_3) a_3
+$$
+
+In other words, uniqueness fails.
+
+### Solving Linear Equations with SciPy
+
+Here's a demonstration of solving linear equations using SciPy's `linalg` submodule.
+
+All these routines are Python interfaces to well-tested and highly optimized FORTRAN code.
+
+```python
+A = ((1, 2), (3, 4))
+A = np.array(A)
+y = np.ones((2, 1))  # Column vector
+det(A)  # Check that A is nonsingular, and hence invertible
+```
+
+    -2.0
+
+```python
+A_inv = inv(A)  # Compute the inverse
+A_inv
+```
+
+    array([[-2. ,  1. ],
+           [ 1.5, -0.5]])
+
+```python
+x = A_inv @ y  # Solution
+A @ x          # Should equal y
+```
+
+    array([[1.],
+           [1.]])
+
+```python
+solve(A, y)  # Produces the same solution
+```
+
+    array([[-1.],
+           [ 1.]])
+
+Note how we can solve for $ x = A^{-1} y $ either via `inv(A) @ y`, or using `solve(A, y)`.
+
+The latter method employs a different algorithm (LU decomposition) that's numerically more stable, and thus should generally be preferred.
+
+To get the least-squares solution $ \hat x = (A'A)^{-1}A'y $, use `scipy.linalg.lstsq(A, y)`.
+
+## Eigenvalues and Eigenvectors
+
+Let $ A $ be a square $ n \times n $ matrix.
+
+If $ \lambda $ is a scalar and $ v $ is a non-zero vector in $ \mathbb R ^n $ where
+
+$$
+A v = \lambda v
+$$
+
+then we call $ \lambda $ an _eigenvalue_ of $ A $, and
+$ v $ an _eigenvector_.
+
+Thus, an eigenvector of $ A $ is a vector that, when the map $ f(x) = Ax $ is applied, is merely scaled.
+
+The next image shows two eigenvectors (blue arrows) and their images under $ A $ (red arrows).
+
+As expected, the image $ Av $ of each $ v $ is just a scaled version of the original.
+
+```python
+A = ((1, 2),
+     (2, 1))
+A = np.array(A)
+evals, evecs = eig(A)
+evecs = evecs[:, 0], evecs[:, 1]
+
+fig, ax = plt.subplots(figsize=(10, 8))
+# Set the axes through the origin
+for spine in ['left', 'bottom']:
+    ax.spines[spine].set_position('zero')
+for spine in ['right', 'top']:
+    ax.spines[spine].set_color('none')
+ax.grid(alpha=0.4)
+
+xmin, xmax = -3, 3
+ymin, ymax = -3, 3
+ax.set(xlim=(xmin, xmax), ylim=(ymin, ymax))
+
+# Plot each eigenvector
+for v in evecs:
+    ax.annotate('', xy=v, xytext=(0, 0),
+                arrowprops=dict(facecolor='blue',
+                shrink=0,
+                alpha=0.6,
+                width=0.5))
+
+# Plot the image of each eigenvector
+for v in evecs:
+    v = A @ v
+    ax.annotate('', xy=v, xytext=(0, 0),
+                arrowprops=dict(facecolor='red',
+                shrink=0,
+                alpha=0.6,
+                width=0.5))
+
+# Plot the lines they run through
+x = np.linspace(xmin, xmax, 3)
+for v in evecs:
+    a = v[1] / v[0]
+    ax.plot(x, a * x, 'b-', lw=0.4)
+
+plt.show()
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/2.%20Linear%20Algebra_files/2.%20Linear%20Algebra_45_0.png)
+</div>
+
+The eigenvalue equation is equivalent to $ (A - \lambda I) v = 0 $, which
+has a non-zero solution $ v $ only when $ A -
+\lambda I $'s columns are linearly dependent.
+
+This is equivalent to saying the determinant is zero.
+
+Thus, to find all eigenvalues, we can search for $ \lambda $ where the
+determinant of $ A - \lambda I $ is zero.
+
+This can be expressed as finding the roots of a polynomial
+in $ \lambda $ of degree $ n $.
+
+This implies the existence of $ n $ solutions in the complex
+plane, though some might be repeated.
+
+Some interesting facts about a square matrix $ A $'s eigenvalues are:
+
+1. $ A $'s determinant equals the eigenvalue product.
+2. $ A $'s trace (the sum of principal diagonal elements) equals the eigenvalue sum.
+3. If $ A $ is symmetric, all its eigenvalues are real.
+4. If $ A $ is invertible and $ \lambda_1, \ldots, \lambda_n $ are its eigenvalues, $ A^{-1} $'s eigenvalues are $ 1/\lambda_1, \ldots, 1/\lambda_n $.
+
+A consequence of the first statement is that a matrix is invertible if and only if all its eigenvalues are non-zero.
+
+Using SciPy, we can compute a matrix's eigenvalues and eigenvectors as follows.
+
+```python
+A = ((1, 2),
+     (2, 1))
+
+A = np.array(A)
+evals, evecs = eig(A)
+evals
+```
+
+    array([ 3.+0.j, -1.+0.j])
+
+```python
+evecs
+```
+
+    array([[ 0.70710678, -0.70710678],
+           [ 0.70710678,  0.70710678]])
+
+Note that the _columns_ of `evecs` are the eigenvectors.
+
+Since any scalar multiple of an eigenvector is an eigenvector with the same
+eigenvalue (verify this), the eig routine normalizes each eigenvector's length
+to one.
+
+### Generalized Eigenvalues
+
+Sometimes, it's beneficial to explore the _generalized eigenvalue problem_, which, for given matrices $ A $ and $ B $, seeks generalized eigenvalues $ \lambda $ and eigenvectors $ v $ such that
+
+$$
+A v = \lambda B v
+$$
+
+You can solve this in SciPy using `scipy.linalg.eig(A, B)`.
+
+If $ B $ is square and invertible, we can treat the generalized eigenvalue problem as a standard eigenvalue problem $ B^{-1} A v = \lambda v $, but this isn't always possible.
+
+## Additional Topics
+
+We wrap up our discussion by briefly mentioning several other significant topics.
+
+### Series Expansions
+
+Recall the standard summation formula for a geometric series, stating that if $ |a| < 1 $, then $ \sum\_{k=0}^{\infty} a^k = (1 - a)^{-1} $.
+
+This concept has a generalization in the matrix context.
+
+#### Matrix Norms
+
+For a square matrix $ A $, define
+
+$$
+\| A \| := \max_{\| x \| = 1} \| A x \|
+$$
+
+The norms on the right side are standard vector norms, while the left side norm is a _matrix norm_ — in this case, the _spectral norm_.
+
+For instance, for a square matrix $ S $, the condition $ \| S \| < 1 $ means $ S $ is _contractive_, indicating it pulls all vectors towards the origin.
+
+#### Neumann's Theorem
+
+Consider a square matrix $ A $ and let $ A^k := A A^{k-1} $ with $ A^1 := A $.
+
+In other words, $ A^k $ is $ A $ raised to the $ k $-th power.
+
+Neumann's theorem states: If $ \| A^k \| < 1 $ for some $ k \in \mathbb{N} $, then $ I - A $ is invertible, and
+
+$$
+(I - A)^{-1} = \sum_{k=0}^{\infty} A^k \tag{2.4}
+$$
+
+#### Spectral Radius
+
+Gelfand's formula tells us that, for any square matrix $ A $,
+
+$$
+\rho(A) = \lim_{k \to \infty} \| A^k \|^{1/k}
+$$
+
+Here, $ \rho(A) $ is the _spectral radius_, defined as $ \max_i |\lambda_i| $, where $ \{\lambda_i\}\_i $ is $ A $'s eigenvalue set.
+
+As a result of Gelfand's formula, if all eigenvalues are strictly less than one in absolute value, there exists a $ k $ with $ \| A^k \| < 1 $.
+
+In which case [(2.4)](#equation-la-neumann) holds.
+
+### Matrices with Positive Definiteness
+
+Consider a symmetric matrix $ A $ of size $ n \times n $.
+
+We define $ A $ as:
+
+1. _positive definite_ if $ x' A x > 0 $ for every $ x \in \mathbb R ^n \setminus \{0\} $
+2. _positive semi-definite_ or _nonnegative definite_ if $ x' A x \geq 0 $ for every $ x \in \mathbb R ^n $
+
+Similar definitions exist for negative definite and negative semi-definite matrices.
+
+It's worth noting that a positive definite $ A $ has all positive eigenvalues, making it invertible with a positive definite inverse.
+
+### Differentiation of Linear and Quadratic Forms
+
+These formulas are valuable in many economic scenarios. Consider:
+
+- $z$, $x$, and $a$ as $n \times 1$ vectors
+- $A$ as an $n \times n$ matrix
+- $B$ as an $m \times n$ matrix and $y$ as an $m \times 1$ vector
+
+Then:
+
+1. $ \frac{\partial a' x}{\partial x} = a $
+2. $ \frac{\partial A x}{\partial x} = A' $
+3. $ \frac{\partial x' A x}{\partial x} = (A + A') x $
+4. $ \frac{\partial y' B z}{\partial y} = B z $
+5. $ \frac{\partial y' B z}{\partial B} = y z' $
+
+Exercise 2.1 below will test your application of these formulas.
+
+### Additional Resources
+
+You can find the `scipy.linalg` submodule documentation [here](https://docs.scipy.org/doc/scipy/reference/linalg.html).
+
+Chapters 2 and 3 of [Econometric Theory](https://johnstachurski.net/emet.html) provide a similar discussion on linear algebra, including solved exercises.
+
+For those comfortable with a slightly abstract approach, [[Jänich, 1994](/courses/Introduction-to-Quantitative-Economics/References#id178)] offers a good intermediate-level text on linear algebra.
+
+## Practice Problems
+
+## Problem 2.1
+
+Given an $ n \times 1 $ vector $ x $, consider the optimization problem:
+
+$$
+v(x) = \max_{y,u} \left\{ - y'P y - u' Q u \right\}
+$$
+
+subject to the constraint:
+
+$$
+y = A x + B u
+$$
+
+Where:
+
+- $P$ is an $ n \times n $ matrix and $Q$ is an $ m \times m $ matrix
+- $A$ is an $ n \times n $ matrix and $B$ is an $ n \times m $ matrix
+- Both $P$ and $Q$ are symmetric and positive semidefinite
+
+(Consider the necessary dimensions of $y$ and $u$ for this to be a well-defined problem)
+
+One approach is to create the Lagrangian:
+
+$$
+\mathcal L = - y' P y - u' Q u + \lambda' \left[A x + B u - y\right]
+$$
+
+where $ \lambda $ is an $ n \times 1 $ vector of Lagrange multipliers.
+
+Apply the differentiation formulas for quadratic and linear forms to find the first-order conditions for maximizing $ \mathcal L $ with respect to $y$, $u$, and minimizing it with respect to $ \lambda $.
+
+Demonstrate that these conditions imply:
+
+1. $ \lambda = - 2 P y $
+2. The optimal $u$ satisfies $ u = - (Q + B' P B)^{-1} B' P A x $
+3. The function $v$ satisfies $ v(x) = - x' \tilde P x $ where $ \tilde P = A' P A - A'P B (Q + B'P B)^{-1} B' P A $
+
+In economic contexts, Lagrange multipliers often represent shadow prices.
+
+> **Note**If the Lagrange multipliers aren't of interest, we can substitute the constraint into the objective function and maximize $ -(Ax + Bu)'P (Ax + Bu) - u' Q u $ with respect to $u$. This leads to the same maximizer.
+
+## Answer to Problem 2.1
+
+We're dealing with an optimization problem:
+
+$$
+v(x) = \max_{y,u} \{ -y'Py - u'Qu \}
+$$
+
+subject to:
+
+$$
+y = Ax + Bu
+$$
+
+with given:
+
+- $P$: symmetric and positive semidefinite $n \times n$ matrix
+- $Q$: symmetric and positive semidefinite $m \times m$ matrix
+- $A$: $n \times n$ matrix
+- $B$: $n \times m$ matrix
+
+The Lagrangian is:
+
+$$
+L = -y'Py - u'Qu + \lambda' \lbrack Ax + Bu - y \rbrack
+$$
+
+**Part 1.**
+
+Differentiating $L$ with respect to $y$ and setting to zero:
+
+$$
+\frac{ \partial L}{\partial y} = - (P + P') y - \lambda = - 2 P y - \lambda = 0 \:,
+$$
+
+as P is symmetric.
+
+Thus, the first-order condition for $y$ implies:
+
+$$
+\lambda = -2 Py \:
+$$
+
+**Part 2.**
+
+Differentiating $L$ with respect to $u$ and setting to zero:
+
+$$
+\frac{ \partial L}{\partial u} = - (Q + Q') u - B'\lambda = - 2Qu + B'\lambda = 0 \:
+$$
+
+Substituting $ \lambda = -2 P y $ gives:
+
+$$
+Qu + B'Py = 0 \:
+$$
+
+Using the constraint $ y = Ax + Bu $:
+
+$$
+Qu + B'P(Ax + Bu) = 0
+$$
+
+$$
+(Q + B'PB)u + B'PAx = 0
+$$
+
+This is the first-order condition for u.
+
+Therefore, the optimal $u$ must satisfy:
+
+$$
+u = -(Q + B'PB)^{-1}B'PAx \:,
+$$
+
+**Part 3.**
+
+Rewriting our problem using the constraint:
+
+$$
+v(x) = \max_{u} \{ -(Ax+ Bu)'P(Ax+Bu) - u'Qu \} \:
+$$
+
+Given optimal $u = -(Q + B'PB)^{-1}B'PAx$, we have:
+
+$$
+v(x) = -(Ax+ B u)'P(Ax+B u) - u'Q u \,\,\,\, with \,\,\,\, u = -(Q + B'PB)^{-1}B'PAx
+$$
+
+Expanding:
+
+$$
+\begin{aligned}
+v(x) &= -(Ax+ B u)'P(Ax+Bu) - u'Q u \\
+&= -(x'A' + u'B')P(Ax+Bu) - u'Q u \\
+&= - x'A'PAx - u'B'PAx - x'A'PBu - u'B'PBu - u'Qu \\
+&= - x'A'PAx - 2u'B'PAx - u'(Q + B'PB) u
+\end{aligned}
+$$
+
+Let $S := (Q + B'PB)^{-1} B'PA$, so $u = -Sx$.
+
+For the term $- 2u'B'PAx$:
+
+$$
+\begin{aligned}
+-2u'B'PAx &= -2 x'S'B'PAx \\
+& = 2 x'A'PB( Q + B'PB)^{-1} B'PAx
+\end{aligned}
+$$
+
+Note: $(Q + B'PB)^{-1}$ is symmetric as $P$ and $Q$ are symmetric.
+
+For the term $- u'(Q + B'PB) u$:
+
+$$
+\begin{aligned}
+-u'(Q + B'PB) u &= - x'S' (Q + B'PB)Sx \\
+&= -x'A'PB(Q + B'PB)^{-1}B'PAx
+\end{aligned}
+$$
+
+The sum of these terms is $ x'A'PB(Q + B'PB)^{-1}B'PAx $.
+
+Therefore:
+
+$$
+\begin{aligned}
+v(x) &= - x'A'PAx - 2u'B'PAx - u'(Q + B'PB) u\\
+&= - x'A'PAx + x'A'PB(Q + B'PB)^{-1}B'PAx \\
+&= -x'[A'PA - A'PB(Q + B'PB)^{-1}B'PA] x
+\end{aligned}
+$$
+
+Thus, $v(x) = -x' P̃x where P̃ := A'PA - A'PB(Q + B'PB)^{-1}B'PA$
+
+Although there is a specialized matrix data type defined in NumPy, it’s more standard to work with ordinary NumPy arrays.
+
+Suppose that $ \|S \| < 1 $. Take any nonzero vector $ x $, and let $ r := \|x\| $. We have $ \| Sx \| = r \| S (x/r) \| \leq r \| S \| < r = \| x\| $. Hence every point is pulled towards the origin.

@@ -1,0 +1,868 @@
+---
+title: A First Look at the Kalman Filter
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+# An Introduction to the Kalman Filter
+
+Beyond the packages in Anaconda, this lecture requires these additional libraries:
+
+```python
+!pip install quantecon
+```
+
+## Summary
+
+This lecture offers a straightforward and clear introduction to the Kalman filter, aimed at those who either
+
+- have heard about the Kalman filter but lack understanding of its operation, or
+- are familiar with the Kalman filter equations, but unsure of their origins
+
+For further (more detailed) reading on the Kalman filter, refer to
+
+- [[Ljungqvist and Sargent, 2018](/courses/Introduction-to-Quantitative-Economics/References#id186)], section 2.7
+- [[Anderson and Moore, 2005](/courses/Introduction-to-Quantitative-Economics/References#id146)]
+
+The second source provides an extensive analysis of the Kalman filter.
+
+Prerequisite knowledge: Understanding of matrix operations, multivariate normal distributions, covariance matrices, etc.
+
+We will need the following imports:
+
+```python
+import matplotlib.pyplot as plt
+plt.rcParams["figure.figsize"] = (11, 5)  #set default figure size
+from scipy import linalg
+import numpy as np
+import matplotlib.cm as cm
+from quantecon import Kalman, LinearStateSpace
+from scipy.stats import norm
+from scipy.integrate import quad
+from scipy.linalg import eigvals
+```
+
+    OMP: Info #276: omp_set_nested routine deprecated, please use omp_set_max_active_levels instead.
+
+## Core Concept
+
+The Kalman filter is widely used in economics, but let's imagine we are aerospace engineers.
+
+A missile has been launched from country Y and our task is to track it.
+
+Let $ x \in \mathbb{R}^2 $ represent the missile's current position—a
+pair indicating latitude-longitude coordinates on a map.
+
+At this moment, the exact position $ x $ is unknown, but
+we have some beliefs about $ x $.
+
+One way to express our knowledge is a point estimate $ \hat x $
+
+- But what if the President wants to know the probability that the missile is currently over the Sea of Japan?...
+- Then it is better to express our initial beliefs with a bivariate probability density $ p $
+- $ \int_E p(x)dx $ indicates the probability we assign to the missile being in region $ E $.
+
+The density $ p $ is referred to as our _prior_ for the random variable $ x $.
+
+To keep things manageable in our example, we assume our prior is Gaussian.
+
+Specifically, we assume
+
+$$
+p = N(\hat x, \Sigma) \tag{25.1}
+$$
+
+where $ \hat x $ is the mean of the distribution and $ \Sigma $ is a
+$ 2 \times 2 $ covariance matrix. In our simulations, we will assume that
+
+$$
+\hat x
+= \left(
+\begin{array}{c}
+0.2 \\
+-0.2
+\end{array}
+\right),
+\qquad
+\Sigma
+= \left(
+\begin{array}{cc}
+0.4 & 0.3 \\
+0.3 & 0.45
+\end{array}
+\right) \tag{25.2}
+$$
+
+This density $ p(x) $ is depicted below as a contour map, with the center of the red ellipse being equal to $ \hat x $.
+
+```python
+# Set up the Gaussian prior density p
+Σ = [[0.4, 0.3], [0.3, 0.45]]
+Σ = np.matrix(Σ)
+x_hat = np.matrix([0.2, -0.2]).T
+# Define the matrices G and R from the equation y = G x + N(0, R)
+G = [[1, 0], [0, 1]]
+G = np.matrix(G)
+R = 0.5 * Σ
+# The matrices A and Q
+A = [[1.2, 0], [0, -0.2]]
+A = np.matrix(A)
+Q = 0.3 * Σ
+# The observed value of y
+y = np.matrix([2.3, -1.9]).T
+
+# Set up grid for plotting
+x_grid = np.linspace(-1.5, 2.9, 100)
+y_grid = np.linspace(-3.1, 1.7, 100)
+X, Y = np.meshgrid(x_grid, y_grid)
+
+def bivariate_normal(x, y, σ_x=1.0, σ_y=1.0, μ_x=0.0, μ_y=0.0, σ_xy=0.0):
+    """
+    Compute and return the probability density function of bivariate normal
+    distribution of normal random variables x and y
+
+    Parameters
+    ----------
+    x : array_like(float)
+        Random variable
+
+    y : array_like(float)
+        Random variable
+
+    σ_x : array_like(float)
+          Standard deviation of random variable x
+
+    σ_y : array_like(float)
+          Standard deviation of random variable y
+
+    μ_x : scalar(float)
+          Mean value of random variable x
+
+    μ_y : scalar(float)
+          Mean value of random variable y
+
+    σ_xy : array_like(float)
+           Covariance of random variables x and y
+
+    """
+
+    x_μ = x - μ_x
+    y_μ = y - μ_y
+
+    ρ = σ_xy / (σ_x * σ_y)
+    z = x_μ**2 / σ_x**2 + y_μ**2 / σ_y**2 - 2 * ρ * x_μ * y_μ / (σ_x * σ_y)
+    denom = 2 * np.pi * σ_x * σ_y * np.sqrt(1 - ρ**2)
+    return np.exp(-z / (2 * (1 - ρ**2))) / denom
+
+def gen_gaussian_plot_vals(μ, C):
+    "Z values for plotting the bivariate Gaussian N(μ, C)"
+    m_x, m_y = float(μ[0]), float(μ[1])
+    s_x, s_y = np.sqrt(C[0, 0]), np.sqrt(C[1, 1])
+    s_xy = C[0, 1]
+    return bivariate_normal(X, Y, s_x, s_y, m_x, m_y, s_xy)
+
+# Plot the figure
+
+fig, ax = plt.subplots(figsize=(10, 8))
+ax.grid()
+
+Z = gen_gaussian_plot_vals(x_hat, Σ)
+ax.contourf(X, Y, Z, 6, alpha=0.6, cmap=cm.jet)
+cs = ax.contour(X, Y, Z, 6, colors="black")
+ax.clabel(cs, inline=1, fontsize=10)
+
+plt.show()
+```
+
+    /var/folders/zj/sz5g50055l9gj8nhh_6md1cw0000gn/T/ipykernel_31780/3508717107.py:61: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      m_x, m_y = float(μ[0]), float(μ[1])
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/25.%20A%20First%20Look%20at%20the%20Kalman%20Filter_files/25.%20A%20First%20Look%20at%20the%20Kalman%20Filter_8_1.png)
+</div>
+
+### The Filtering Process
+
+We have some good news and some bad news.
+
+The good news is that the missile has been detected by our sensors, which indicate the current location as $ y = (2.3, -1.9) $.
+
+The next diagram shows the original prior $ p(x) $ and the newly reported
+location $ y $
+
+```python
+fig, ax = plt.subplots(figsize=(10, 8))
+ax.grid()
+
+Z = gen_gaussian_plot_vals(x_hat, Σ)
+ax.contourf(X, Y, Z, 6, alpha=0.6, cmap=cm.jet)
+cs = ax.contour(X, Y, Z, 6, colors="black")
+ax.clabel(cs, inline=1, fontsize=10)
+ax.text(float(y[0]), float(y[1]), "$y$", fontsize=20, color="black")
+
+plt.show()
+```
+
+    /var/folders/zj/sz5g50055l9gj8nhh_6md1cw0000gn/T/ipykernel_31780/3508717107.py:61: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      m_x, m_y = float(μ[0]), float(μ[1])
+
+
+    /var/folders/zj/sz5g50055l9gj8nhh_6md1cw0000gn/T/ipykernel_31780/3470248806.py:8: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      ax.text(float(y[0]), float(y[1]), "$y$", fontsize=20, color="black")
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/25.%20A%20First%20Look%20at%20the%20Kalman%20Filter_files/25.%20A%20First%20Look%20at%20the%20Kalman%20Filter_10_2.png)
+</div>
+
+The bad news is that our sensors lack precision.
+
+Specifically, we should interpret the sensor output not as
+$ y=x $, but instead as
+
+$$
+y = G x + v, \quad \text{where} \quad v \sim N(0, R) \tag{25.3}
+$$
+
+Here $ G $ and $ R $ are $ 2 \times 2 $ matrices with $ R $
+being positive definite. Both are assumed to be known, and the noise term $ v $ is assumed
+to be independent of $ x $.
+
+How should we combine our prior $ p(x) = N(\hat x, \Sigma) $ with this
+new information $ y $ to enhance our understanding of the missile's location?
+
+As you might have guessed, the solution is to apply Bayes’ theorem, which instructs
+us to update our prior $ p(x) $ to $ p(x \,|\, y) $ via
+
+$$
+p(x \,|\, y) = \frac{p(y \,|\, x) \, p(x)} {p(y)}
+$$
+
+where $ p(y) = \int p(y \,|\, x) \, p(x) dx $.
+
+In determining $ p(x \,|\, y) $, we note that
+
+- $ p(x) = N(\hat x, \Sigma) $.
+- Considering [(25.3)](#equation-kl-measurement-model),... the conditional density $ p(y \,|\, x) $ is $ N(Gx, R) $.
+- $ p(y) $ is independent of $ x $, and only serves as a normalizing constant in the calculations.
+
+Since we are in a linear and Gaussian framework, the updated density can be computed by calculating population linear regressions.
+
+Specifically, the solution is known [1] to be
+
+$$
+p(x \,|\, y) = N(\hat x^F, \Sigma^F)
+$$
+
+where
+
+$$
+\hat x^F := \hat x + \Sigma G' (G \Sigma G' + R)^{-1}(y - G \hat x)
+\quad \text{and} \quad
+\Sigma^F := \Sigma - \Sigma G' (G \Sigma G' + R)^{-1} G \Sigma \tag{25.4}
+$$
+
+Here $ \Sigma G' (G \Sigma G' + R)^{-1} $ is the matrix of population regression coefficients of the hidden object $ x - \hat x $ on the surprise $ y - G \hat x $.
+
+This new density $ p(x \,|\, y) = N(\hat x^F, \Sigma^F) $ is illustrated in the next figure via contour lines and the color map.
+
+The original density is retained as contour lines for comparison
+
+```python
+fig, ax = plt.subplots(figsize=(10, 8))
+ax.grid()
+
+Z = gen_gaussian_plot_vals(x_hat, Σ)
+cs1 = ax.contour(X, Y, Z, 6, colors="black")
+ax.clabel(cs1, inline=1, fontsize=10)
+M = Σ * G.T * linalg.inv(G * Σ * G.T + R)
+x_hat_F = x_hat + M * (y - G * x_hat)
+Σ_F = Σ - M * G * Σ
+new_Z = gen_gaussian_plot_vals(x_hat_F, Σ_F)
+cs2 = ax.contour(X, Y, new_Z, 6, colors="black")
+ax.clabel(cs2, inline=1, fontsize=10)
+ax.contourf(X, Y, new_Z, 6, alpha=0.6, cmap=cm.jet)
+ax.text(float(y[0]), float(y[1]), "$y$", fontsize=20, color="black")
+
+plt.show()
+```
+
+    /var/folders/zj/sz5g50055l9gj8nhh_6md1cw0000gn/T/ipykernel_31780/3508717107.py:61: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      m_x, m_y = float(μ[0]), float(μ[1])
+    /var/folders/zj/sz5g50055l9gj8nhh_6md1cw0000gn/T/ipykernel_31780/792457825.py:14: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      ax.text(float(y[0]), float(y[1]), "$y$", fontsize=20, color="black")
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/25.%20A%20First%20Look%20at%20the%20Kalman%20Filter_files/25.%20A%20First%20Look%20at%20the%20Kalman%20Filter_12_1.png)
+</div>
+
+Our new density modifies the prior $ p(x) $ in a direction determined by the new
+information $ y - G \hat x $.
+
+In creating the figure, we set $ G $ to the identity matrix and $ R = 0.5 \Sigma $ for $ \Sigma $ defined in [(25.2)](#equation-kalman-dhxs).
+
+### The Prediction Step
+
+What have we accomplished so far?
+
+We have derived probabilities for the current state (missile) location given prior and current information.
+
+This is termed “filtering” rather than forecasting because we are eliminating
+noise rather than predicting the future.
+
+- $ p(x \,|\, y) = N(\hat x^F, \Sigma^F) $ is referred to as the _filtering distribution_
+
+But now let’s assume we have another task: to forecast the missile's location after one time unit (whatever that may be) has passed.
+
+To achieve this, we need a model of how the state evolves.
+
+Let’s assume we have one, and that it’s linear and Gaussian. Specifically,
+
+$$
+x_{t+1} = A x_t + w_{t+1}, \quad \text{where} \quad w_t \sim N(0,... Q) \tag{25.5}
+$$
+
+Our goal is to combine this motion law and our current distribution $ p(x \,|\, y) = N(\hat x^F, \Sigma^F) $ to derive a new _predictive_ distribution for the location in one time unit.
+
+Considering [(25.5)](#equation-kl-xdynam), all we need to do is introduce a random vector $ x^F \sim N(\hat x^F, \Sigma^F) $ and determine the distribution of $ A x^F + w $ where $ w $ is independent of $ x^F $ and has distribution $ N(0, Q) $.
+
+Since linear combinations of Gaussians are Gaussian, $ A x^F + w $ is Gaussian.
+
+Basic calculations and the expressions in [(25.4)](#equation-kl-filter-exp) indicate that
+
+$$
+\mathbb{E} [A x^F + w]
+= A \mathbb{E} x^F + \mathbb{E} w
+= A \hat x^F
+= A \hat x + A \Sigma G' (G \Sigma G' + R)^{-1}(y - G \hat x)
+$$
+
+and
+
+$$
+\operatorname{Var} [A x^F + w]
+= A \operatorname{Var}[x^F] A' + Q
+= A \Sigma^F A' + Q
+= A \Sigma A' - A \Sigma G' (G \Sigma G' + R)^{-1} G \Sigma A' + Q
+$$
+
+The matrix $ A \Sigma G' (G \Sigma G' + R)^{-1} $ is often denoted as
+$ K\_{\Sigma} $ and is called the _Kalman gain_.
+
+- The subscript $ \Sigma $ is added to remind us that $ K\_{\Sigma} $ depends on $ \Sigma $, but not on $ y $ or $ \hat x $.
+
+Using this notation, we can summarize our findings as follows.
+
+Our updated prediction is the density $ N(\hat x*{new}, \Sigma*{new}) $ where
+
+$$
+\begin{aligned}
+\hat x_{new} &:= A \hat x + K_{\Sigma} (y - G \hat x) \\
+\Sigma_{new} &:= A \Sigma A' - K_{\Sigma} G \Sigma A' + Q \nonumber
+\end{aligned} \tag{25.6}
+$$
+
+- The density $ p*{new}(x) = N(\hat x*{new}, \Sigma\_{new}) $ is known as the _predictive distribution_
+
+The predictive distribution is the new density shown in the following figure, where
+the update has used parameters.
+
+$$
+A
+= \left(
+\begin{array}{cc}
+1.2 & 0.0 \\
+0.0 & -0.2
+\end{array}
+\right),
+\qquad
+Q = 0.3 * \Sigma
+$$
+
+```python
+fig, ax = plt.subplots(figsize=(10, 8))
+ax.grid()
+
+# Density 1
+Z = gen_gaussian_plot_vals(x_hat, Σ)
+cs1 = ax.contour(X, Y, Z, 6, colors="black")
+ax.clabel(cs1, inline=1, fontsize=10)
+
+# Density 2
+M = Σ * G.T * linalg.inv(G * Σ * G.T + R)
+x_hat_F = x_hat + M * (y - G * x_hat)
+Σ_F = Σ - M * G * Σ
+Z_F = gen_gaussian_plot_vals(x_hat_F, Σ_F)
+cs2 = ax.contour(X, Y, Z_F, 6, colors="black")
+ax.clabel(cs2, inline=1, fontsize=10)
+
+# Density 3
+new_x_hat = A * x_hat_F
+new_Σ = A * Σ_F * A.T + Q
+new_Z = gen_gaussian_plot_vals(new_x_hat, new_Σ)
+cs3 = ax.contour(X, Y, new_Z, 6, colors="black")
+ax.clabel(cs3, inline=1, fontsize=10)
+ax.contourf(X, Y, new_Z, 6, alpha=0.6, cmap=cm.jet)
+ax.text(float(y[0]), float(y[1]), "$y$", fontsize=20, color="black")
+
+plt.show()
+```
+
+    /var/folders/zj/sz5g50055l9gj8nhh_6md1cw0000gn/T/ipykernel_31780/3508717107.py:61: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      m_x, m_y = float(μ[0]), float(μ[1])
+    /var/folders/zj/sz5g50055l9gj8nhh_6md1cw0000gn/T/ipykernel_31780/3056082785.py:24: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      ax.text(float(y[0]), float(y[1]), "$y$", fontsize=20, color="black")
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/25.%20A%20First%20Look%20at%20the%20Kalman%20Filter_files/25.%20A%20First%20Look%20at%20the%20Kalman%20Filter_15_1.png)
+</div>
+
+### The Iterative Process
+
+Let's review what we've accomplished.
+
+We began the current period with a prior $ p(x) $ for the missile's position $ x $.
+
+We then utilized the current measurement $ y $ to update to $ p(x \,|\, y) $.
+
+Lastly, we employed the motion law [(25.5)](#equation-kl-xdynam) for $ \{x*t\} $ to update to $ p*{new}(x) $.
+
+As we move into the next period, we're prepared to repeat the process, using $ p\_{new}(x) $
+as the new prior.
+
+Using $ p*t(x) $ to denote $ p(x) $ and $ p*{t+1}(x) $ for $ p\_{new}(x) $, the complete recursive procedure is:
+
+1. Begin the current period with prior $ p_t(x) = N(\hat x_t, \Sigma_t) $.
+2. Observe current measurement $ y_t $.
+3. Calculate the filtering distribution $ p_t(x \,|\, y) = N(\hat x_t^F, \Sigma_t^F) $ from $ p_t(x) $ and $ y_t $, applying Bayes rule and the conditional distribution [(25.3)](#equation-kl-measurement-model).
+4. Determine the predictive distribution $ p*{t+1}(x) = N(\hat x*{t+1}, \Sigma\_{t+1}) $ from the filtering distribution and [(25.5)](#equation-kl-xdynam).
+5. Increase $ t $ by one and return to step 1.
+
+Reiterating [(25.6)](#equation-kl-mlom0), the evolution of $ \hat x_t $ and $ \Sigma_t $ is as follows
+
+$$
+\begin{aligned}
+\hat x_{t+1} &= A \hat x_t + K_{\Sigma_t} (y_t - G \hat x_t) \\
+\Sigma_{t+1} &= A \Sigma_t A' - K_{\Sigma_t} G \Sigma_t A' + Q \nonumber
+\end{aligned} \tag{25.7}
+$$
+
+These are the typical dynamic equations for the Kalman filter (see, for instance, [[Ljungqvist and Sargent, 2018](/courses/Introduction-to-Quantitative-Economics/References#id186)], page 58).
+
+## Convergence
+
+The matrix $ \Sigma_t $ quantifies the uncertainty of our estimate $ \hat x_t $ of $ x_t $.
+
+Except in special cases, this uncertainty will never be completely eliminated, no matter how much time passes.
+
+One reason is that our estimate $ \hat x_t $ is based on information available at $ t-1 $, not $ t $.
+
+Even if we knew the exact value of $ x*{t-1} $ (which we don't), the transition equation [(25.5)](#equation-kl-xdynam) implies that $ x_t = A x*{t-1} + w_t $.
+
+Since the disturbance $ w_t $ is not observable at $ t-1 $,... any time $ t-1 $ prediction of $ x_t $ will have some error (unless $ w_t $ is degenerate).
+
+Nonetheless, it's possible that $ \Sigma_t $ converges to a constant matrix as $ t \to \infty $.
+
+To examine this, let's expand the second equation in [(25.7)](#equation-kalman-lom):
+
+$$
+\Sigma_{t+1} = A \Sigma_t A' - A \Sigma_t G' (G \Sigma_t G' + R)^{-1} G \Sigma_t A' + Q \tag{25.8}
+$$
+
+This is a nonlinear difference equation in $ \Sigma_t $.
+
+A fixed point of [(25.8)](#equation-kalman-sdy) is a constant matrix $ \Sigma $ such that
+
+$$
+\Sigma = A \Sigma A' - A \Sigma G' (G \Sigma G' + R)^{-1} G \Sigma A' + Q \tag{25.9}
+$$
+
+Equation [(25.8)](#equation-kalman-sdy) is known as a discrete-time Riccati difference equation.
+
+Equation [(25.9)](#equation-kalman-dare) is known as a [discrete-time algebraic Riccati equation](https://en.wikipedia.org/wiki/Algebraic_Riccati_equation).
+
+Conditions for the existence of a fixed point and convergence of $ \{\Sigma_t\} $ to it are discussed in [[Anderson _et al._, 1996](/courses/Introduction-to-Quantitative-Economics/References#id148)] and [[Anderson and Moore, 2005](/courses/Introduction-to-Quantitative-Economics/References#id146)], chapter 4.
+
+A sufficient (but not necessary) condition is that all the eigenvalues $ \lambda_i $ of $ A $ satisfy $ |\lambda_i| < 1 $ (cf. e.g., [[Anderson and Moore, 2005](/courses/Introduction-to-Quantitative-Economics/References#id146)], p. 77).
+
+(This strong condition ensures that the unconditional distribution of $ x_t $ converges as $ t \rightarrow + \infty $.)
+
+In this case, for any initial choice of $ \Sigma_0 $ that is both non-negative and symmetric, the sequence $ \{\Sigma_t\} $ in [(25.8)](#equation-kalman-sdy) converges to a non-negative symmetric matrix $ \Sigma $ that solves [(25.9)](#equation-kalman-dare).
+
+## Implementation
+
+The `Kalman` class from the [QuantEcon.py](http://quantecon.org/quantecon-py) package implements the Kalman filter
+
+- Instance data comprises:
+- the moments $ (\hat x_t, \Sigma_t) $ of the current prior....
+- An instance of the [LinearStateSpace](https://github.com/QuantEcon/QuantEcon.py/blob/master/quantecon/lss.py) class from [QuantEcon.py](http://quantecon.org/quantecon-py).
+
+The latter represents a linear state space model of the form
+
+$$
+\begin{aligned}
+x_{t+1} & = A x_t + C w_{t+1}
+\\
+y_t & = G x_t + H v_t
+\end{aligned}
+$$
+
+where the shocks $ w_t $ and $ v_t $ are IID standard normals.
+
+To relate this to the notation of this lecture we set
+
+$$
+Q := CC' \quad \text{and} \quad R := HH'
+$$
+
+- The `Kalman` class from the [QuantEcon.py](http://quantecon.org/quantecon-py) package has several methods, some of which we'll use in more advanced applications in future lectures.
+- Methods relevant for this lecture include:
+- `prior_to_filtered`, which updates $ (\hat x_t, \Sigma_t) $ to $ (\hat x_t^F, \Sigma_t^F) $
+- `filtered_to_forecast`, which updates the filtering distribution to the predictive distribution – which becomes the new prior $ (\hat x*{t+1}, \Sigma*{t+1}) $
+- `update`, which combines the last two methods
+- `stationary_values`, which computes the solution to [(25.9)](#equation-kalman-dare) and the corresponding (stationary) Kalman gain
+
+You can view the program [on GitHub](https://github.com/QuantEcon/QuantEcon.py/blob/master/quantecon/kalman.py).
+
+## Exercises
+
+## Exercise 25.1
+
+Examine the following basic application of the Kalman filter, loosely based
+on [[Ljungqvist and Sargent, 2018](/courses/Introduction-to-Quantitative-Economics/References#id186)], section 2.9.2.
+
+Assume that
+
+- all variables are scalars
+- the hidden state $ \{x_t\} $ is actually constant, equal to some $ \theta \in \mathbb{R} $ unknown to the modeler
+
+State dynamics are thus given by [(25.5)](#equation-kl-xdynam) with $ A=1 $, $ Q=0 $ and $ x_0 = \theta $.
+
+The measurement equation is $ y_t = \theta + v_t $ where $ v_t $ is $ N(0,1) $ and IID.
+
+This exercise requires you to simulate the model and, using the code from `kalman.py`, plot the first five predictive densities $ p_t(x) = N(\hat x_t, \Sigma_t) $.
+
+As demonstrated in [[Ljungqvist and Sargent,... 2018](/courses/Introduction-to-Quantitative-Economics/References#id186)], sections 2.9.1–2.9.2, these distributions asymptotically concentrate all mass on the unknown value $ \theta $.
+
+In the simulation, use $ \theta = 10 $, $ \hat x_0 = 8 $ and $ \Sigma_0 = 1 $.
+
+Your figure should – allowing for randomness – resemble this
+
+![https://python.quantecon.org/_static/lecture_specific/kalman/kl_ex1_fig.png](https://python.quantecon.org/_static/lecture_specific/kalman/kl_ex1_fig.png)
+
+## Solution to Exercise 25.1
+
+```python
+# Parameters
+θ = 10  # Constant value of state x_t
+A, C, G, H = 1, 0, 1, 1
+ss = LinearStateSpace(A, C, G, H, mu_0=θ)
+
+# Set prior, initialize kalman filter
+x_hat_0, Σ_0 = 8, 1
+kalman = Kalman(ss, x_hat_0, Σ_0)
+
+# Draw observations of y from state space model
+N = 5
+x, y = ss.simulate(N)
+y = y.flatten()
+
+# Set up plot
+fig, ax = plt.subplots(figsize=(10,8))
+xgrid = np.linspace(θ - 5, θ + 2, 200)
+
+for i in range(N):
+    # Record the current predicted mean and variance
+    m, v = [float(z) for z in (kalman.x_hat, kalman.Sigma)]
+    # Plot, update filter
+    ax.plot(xgrid, norm.pdf(xgrid, loc=m, scale=np.sqrt(v)), label=f'$t={i}$')
+    kalman.update(y[i])
+
+ax.set_title(f'First {N} densities when $\\theta = {θ:.1f}$')
+ax.legend(loc='upper left')
+plt.show()
+```
+
+    /var/folders/zj/sz5g50055l9gj8nhh_6md1cw0000gn/T/ipykernel_31780/1660567565.py:21: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      m, v = [float(z) for z in (kalman.x_hat, kalman.Sigma)]
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/25.%20A%20First%20Look%20at%20the%20Kalman%20Filter_files/25.%20A%20First%20Look%20at%20the%20Kalman%20Filter_22_1.png)
+</div>
+
+## Exercise 25.2
+
+The previous figure suggests that probability mass
+converges to $ \theta $.
+
+To get a clearer picture, select a small $ \epsilon > 0 $ and compute
+
+$$
+z_t := 1 - \int_{\theta - \epsilon}^{\theta + \epsilon} p_t(x) dx
+$$
+
+for $ t = 0, 1, 2, \ldots, T $.
+
+Graph $ z_t $ against $ T $, using $ \epsilon = 0.1 $ and $ T = 600 $.
+
+Your figure should show error decreasing erratically, similar to this
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](https://python.quantecon.org/_static/lecture_specific/kalman/kl_ex2_fig.png)
+</div>
+
+## Solution to Exercise 25.2
+
+```python
+ϵ = 0.1
+θ = 10  # Constant value of state x_t
+A, C, G, H = 1, 0, 1, 1
+ss = LinearStateSpace(A, C, G, H, mu_0=θ)
+
+x_hat_0, Σ_0 = 8, 1
+kalman = Kalman(ss, x_hat_0, Σ_0)
+
+T = 600
+z = np.empty(T)
+x, y = ss.simulate(T)
+y = y.flatten()
+
+for t in range(T):
+    # Record the current predicted mean and variance and plot their densities
+    m, v = [float(temp) for temp in (kalman.x_hat, kalman.Sigma)]
+
+    f = lambda x: norm.pdf(x, loc=m, scale=np.sqrt(v))
+    integral, error = quad(f, θ - ϵ, θ + ϵ)
+    z[t] = 1 - integral
+
+    kalman.update(y[t])
+
+fig, ax = plt.subplots(figsize=(9, 7))
+ax.set_ylim(0, 1)
+ax.set_xlim(0, T)
+ax.plot(range(T), z)
+ax.fill_between(range(T), np.zeros(T), z, color="blue", alpha=0.2)
+plt.show()
+```
+
+    /var/folders/zj/sz5g50055l9gj8nhh_6md1cw0000gn/T/ipykernel_31780/3050251196.py:16: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      m, v = [float(temp) for temp in (kalman.x_hat, kalman.Sigma)]
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/25.%20A%20First%20Look%20at%20the%20Kalman%20Filter_files/25.%20A%20First%20Look%20at%20the%20Kalman%20Filter_25_1.png)
+</div>
+
+## Exercise 25.3
+
+As mentioned [above](#kalman-convergence), if the shock sequence $ \{w*t\} $ is non-degenerate, then it's generally impossible to predict $ x_t $ without error at time $ t-1 $ (and this would be true even if we could observe $ x*{t-1} $).
+
+Now let's compare the prediction $ \hat x*t $ made by the Kalman filter
+against a competitor who **can** observe $ x*{t-1} $.
+
+This competitor will use the conditional expectation $ \mathbb E[ x_t
+\,|\, x_{t-1}] $, which in this case is $ A x\_{t-1} $.
+
+The conditional expectation is known to be the optimal prediction method for minimizing mean squared error.
+
+(More precisely, the minimizer of $ \mathbb E \, \|... x*t - g(x*{t-1}) \|^2 $ with respect to $ g $ is $ g^\*(x*{t-1}) := \mathbb E[ x_t \,|\, x*{t-1}] $)
+
+So we're comparing the Kalman filter against a competitor with more
+information (able to observe the latent state) and
+behaving optimally in terms of minimizing squared error.
+
+Our comparison will be based on squared error.
+
+Specifically, your task is to create a graph plotting observations of both $ \| x*t - A x*{t-1} \|^2 $ and $ \| x_t - \hat x_t \|^2 $ against $ t $ for $ t = 1, \ldots, 50 $.
+
+For the parameters, use $ G = I, R = 0.5 I $ and $ Q = 0.3 I $, where $ I $ is
+the $ 2 \times 2 $ identity.
+
+Use
+
+$$
+A
+= \left(
+\begin{array}{cc}
+0.5 & 0.4 \\
+0.6 & 0.3
+\end{array}
+\right)
+$$
+
+To initialize the prior density, use
+
+$$
+\Sigma_0
+= \left(
+\begin{array}{cc}
+0.9 & 0.3 \\
+0.3 & 0.9
+\end{array}
+\right)
+$$
+
+and $ \hat x_0 = (8, 8) $.
+
+Finally, set $ x_0 = (0, 0) $.
+
+You should end up with a figure similar to this (allowing for randomness)
+
+![https://python.quantecon.org/_static/lecture_specific/kalman/kalman_ex3.png](https://python.quantecon.org/_static/lecture_specific/kalman/kalman_ex3.png)
+
+Notice how, after an initial learning period, the Kalman filter performs quite well, even compared to the competitor who predicts optimally with knowledge of the latent state.
+
+## Solution to Exercise 25.3
+
+```python
+# Define A, C, G, H
+G = np.identity(2)
+H = np.sqrt(0.5) * np.identity(2)
+
+A = [[0.5, 0.4],
+     [0.6, 0.3]]
+C = np.sqrt(0.3) * np.identity(2)
+
+# Set up state space mode, initial value x_0 set to zero
+ss = LinearStateSpace(A, C, G, H, mu_0 = np.zeros(2))
+
+# Define the prior density
+Σ = [[0.9, 0.3],
+     [0.3, 0.9]]
+Σ = np.array(Σ)
+x_hat = np.array([8, 8])
+
+# Initialize the Kalman filter
+kn = Kalman(ss, x_hat, Σ)
+
+# Print eigenvalues of A
+print("Eigenvalues of A:")
+print(eigvals(A))
+
+# Print stationary Σ
+S, K = kn.stationary_values()
+print("Stationary prediction error variance:")
+print(S)
+
+# Generate the plot
+T = 50
+x, y = ss.simulate(T)
+
+e1 = np.empty(T-1)
+e2 = np.empty(T-1)
+
+for t in range(1, T):
+    kn.update(y[:,t])
+    e1[t-1] = np.sum((x[:, t] - kn.x_hat.flatten())**2)
+    e2[t-1] = np.sum((x[:, t] - A @ x[:, t-1])**2)
+
+fig, ax = plt.subplots(figsize=(9,6))
+ax.plot(range(1, T), e1, 'k-', lw=2, alpha=0.6,
+        label='Kalman filter error')
+ax.plot(range(1, T), e2, 'g-', lw=2, alpha=0.6,
+        label='Conditional expectation error')
+ax.legend()
+plt.show()
+```
+
+    Eigenvalues of A:
+    [ 0.9+0.j -0.1+0.j]
+    Stationary prediction error variance:
+    [[0.40329108 0.1050718 ]
+     [0.1050718  0.41061709]]
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/25.%20A%20First%20Look%20at%20the%20Kalman%20Filter_files/25.%20A%20First%20Look%20at%20the%20Kalman%20Filter_28_1.png)
+</div>
+
+## Exercise 25.4
+
+Experiment with adjusting the coefficient $ 0.3 $ in $ Q = 0.3 I $ both higher and lower.
+
+Note how the diagonal values in the stationary solution $ \Sigma $ (refer to [(25.9)](#equation-kalman-dare)) increase and decrease in correlation with this coefficient.
+
+The interpretation is that increased variability in the law of motion for $ x_t $ results in greater (permanent) uncertainty in prediction.
+
+**[1]** For reference, see page 93 of [[Bishop, 2006](/courses/Introduction-to-Quantitative-Economics/References#id151)]. To derive his expressions to those used above,... you'll also need to apply the [Woodbury matrix identity](https://en.wikipedia.org/wiki/Woodbury_matrix_identity).

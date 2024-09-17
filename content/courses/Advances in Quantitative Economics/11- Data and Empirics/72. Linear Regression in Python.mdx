@@ -1,0 +1,911 @@
+---
+title: Linear Regression in Python
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+# Linear Regression in Python
+
+## Contents
+
+- [Linear Regression in Python](#Linear-Regression-in-Python)
+- [Overview](#Overview)
+- [Simple Linear Regression](#Simple-Linear-Regression)
+- [Extending the Linear Regression Model](#Extending-the-Linear-Regression-Model)
+- [Endogeneity](#Endogeneity)
+- [Summary](#Summary)
+- [Exercises](#Exercises)
+
+In addition to what is included in Anaconda, this lecture will require the following libraries:
+
+```python
+!pip install linearmodels
+```
+
+## Overview
+
+Linear regression serves as a fundamental method for examining the relationship between two or more variables.
+
+In this lecture, we will utilize the Python package `statsmodels` to estimate, interpret, and visualize linear regression models.
+
+Throughout this process, we will cover a range of topics, including
+
+- simple and multivariate linear regression
+- visualization
+- endogeneity and omitted variable bias
+- two-stage least squares
+
+As a case study, we will reproduce results from Acemoglu, Johnson, and Robinson’s influential paper [[Acemoglu _et al._, 2001](/courses/Introduction-to-Quantitative-Economics/References#id97)].
+
+- You can download a copy [here](https://economics.mit.edu/research/publications/colonial-origins-comparative-development-empirical-investigation).
+
+In the paper, the authors highlight the significance of institutions in economic development.
+
+The primary contribution is the employment of settler mortality rates as a source of _exogenous_ variation in institutional differences.
+
+Such variation is essential to ascertain whether institutions lead to enhanced economic growth, rather than the reverse.
+
+Let’s begin with some imports:
+
+```python
+import matplotlib.pyplot as plt
+plt.rcParams["figure.figsize"] = (11, 5)  #set default figure size
+import numpy as np
+import pandas as pd
+import statsmodels.api as sm
+from statsmodels.iolib.summary2 import summary_col
+from linearmodels.iv import IV2SLS
+import seaborn as sns
+sns.set_theme()
+```
+
+### Prerequisites
+
+This lecture presupposes familiarity with basic econometrics.
+
+For an introductory text covering these subjects, see, for instance,
+[[Wooldridge, 2015](/courses/Introduction-to-Quantitative-Economics/References#id96)].
+
+## Simple Linear Regression
+
+[[Acemoglu _et al._,... 2001](/courses/Introduction-to-Quantitative-Economics/References#id97)] aim to ascertain whether differences in institutions can elucidate observed economic outcomes.
+
+How do we quantify _institutional differences_ and _economic outcomes_?
+
+In this study,
+
+- economic outcomes are represented by log GDP per capita in 1995, adjusted for exchange rates.
+- institutional differences are represented by an index of protection against expropriation averaged over 1985-95, developed by the [Political Risk Services Group](https://www.prsgroup.com/).
+
+These variables and additional data utilized in the paper can be downloaded from Daron Acemoglu’s [webpage](https://economics.mit.edu/people/faculty/daron-acemoglu/data-archive).
+
+We will employ pandas’ `.read_stata()` function to import data contained in the `.dta` files into dataframes.
+
+```python
+df1 = pd.read_stata('https://github.com/QuantEcon/lecture-python/blob/master/source/_static/lecture_specific/ols/maketable1.dta?raw=true')
+df1.head()
+```
+
+| \*\*\*\* | **shortnam** | **euro1900** | **excolony** | **avexpr** | **logpgp95** | **cons1** | **cons90** | **democ00a** | **cons00a** | **extmort4** | **logem4** | **loghjypl** | **baseco** |
+| -------- | ------------ | ------------ | ------------ | ---------- | ------------ | --------- | ---------- | ------------ | ----------- | ------------ | ---------- | ------------ | ---------- |
+| **0**    | AFG          | 0.000000     | 1.0          | NaN        | NaN          | 1.0       | 2.0        | 1.0          | 1.0         | 93.699997    | 4.540098   | NaN          | NaN        |
+| **1**    | AGO          | 8.000000     | 1.0          | 5.363636   | 7.770645     | 3.0       | 3.0        | 0.0          | 1.0         | 280.000000   | 5.634789   | -3.411248    | 1.0        |
+| **2**    | ARE          | 0.000000     | 1.0          | 7.181818   | 9.804219     | NaN       | NaN        | NaN          | NaN         | NaN          | NaN        | NaN          | NaN        |
+| **3**    | ARG          | 60.000004    | 1.0          | 6.386364   | 9.133459     | 1.0       | 6.0        | 3.0          | 3.0         | 68.900002    | 4.232656   | -0.872274    | 1.0        |
+| **4**    | ARM          | 0.000000     | 0.0          | NaN        | 7.682482     | NaN       | NaN        | NaN          | NaN         | NaN          | NaN        | NaN          | NaN        |
+
+Let’s utilize a scatterplot to examine whether any clear relationship exists
+between GDP per capita and the protection against
+expropriation index.
+
+```python
+df1.plot(x='avexpr', y='logpgp95', kind='scatter')
+plt.show()
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/72.%20Linear%20Regression%20in%20Python_files/72.%20Linear%20Regression%20in%20Python_10_0.png)
+</div>
+
+The plot illustrates a relatively strong positive correlation between
+protection against expropriation and log GDP per capita.
+
+Specifically, if higher protection against expropriation is indicative of
+institutional quality, then superior institutions appear to be positively
+associated with improved economic outcomes (higher GDP per capita).
+
+Given the plot, selecting a linear model to characterize this relationship
+seems like a logical assumption.
+
+We can express our model as
+
+$$
+{logpgp95}_i = \beta_0 + \beta_1 {avexpr}_i + u_i
+$$
+
+where:
+
+- $ \beta_0 $ is the intercept of the linear trend line on the
+  y-axis
+- $ \beta_1 $ is the slope of the linear trend line, indicating
+  the _marginal effect_ of protection against risk on log GDP per
+  capita
+- $ u_i $ is a random error term (deviations of observations from
+  the linear trend due to factors not included in the model)
+
+Visually, this linear model entails selecting a straight line that best
+fits the data, as depicted in the following plot (Figure 2 in [[Acemoglu _et al._, 2001](/courses/Introduction-to-Quantitative-Economics/References#id97)])
+
+```python
+# Dropping NA's is required to use numpy's polyfit
+df1_subset = df1.dropna(subset=['logpgp95', 'avexpr'])
+
+# Use only 'base sample' for plotting purposes
+df1_subset = df1_subset[df1_subset['baseco'] == 1]
+
+X = df1_subset['avexpr']
+y = df1_subset['logpgp95']
+labels = df1_subset['shortnam']
+
+# Replace markers with country labels
+fig, ax = plt.subplots()
+ax.scatter(X, y, marker='')
+
+for i, label in enumerate(labels):
+    ax.annotate(label, (X.iloc[i], y.iloc[i]))
+
+# Fit a linear trend line
+ax.plot(np.unique(X),
+         np.poly1d(np.polyfit(X, y, 1))(np.unique(X)),
+         color='black')
+
+ax.set_xlim([3.3,10.5])
+ax.set_ylim([4,10.5])
+ax.set_xlabel('Average Expropriation Risk 1985-95')
+ax.set_ylabel('Log GDP per capita, PPP, 1995')
+ax.set_title('Figure 2: OLS relationship between expropriation \
+    risk and income')
+plt.show()
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/72.%20Linear%20Regression%20in%20Python_files/72.%20Linear%20Regression%20in%20Python_12_0.png)
+</div>
+
+The most prevalent technique for estimating the parameters ($ \beta $’s)
+of the linear model is Ordinary Least Squares (OLS).
+
+As the name suggests,... an OLS model is resolved by identifying the parameters
+that minimize _the sum of squared residuals_, i.e.
+
+$$
+\underset{\hat{\beta}}{\min} \sum^N_{i=1}{\hat{u}^2_i}
+$$
+
+where $ \hat{u}\_i $ is the discrepancy between the observation and
+the predicted value of the dependent variable.
+
+To estimate the constant term $ \beta_0 $, we must add a column
+of 1’s to our dataset (consider the equation if $ \beta_0 $ were
+replaced with $ \beta_0 x_i $ and $ x_i = 1 $).
+
+```python
+df1['const'] = 1
+```
+
+Now we can construct our model in `statsmodels` utilizing the OLS function.
+
+We will employ `pandas` dataframes with `statsmodels`, though standard arrays can also be utilized as arguments.
+
+```python
+reg1 = sm.OLS(endog=df1['logpgp95'], exog=df1[['const', 'avexpr']], \
+    missing='drop')
+type(reg1)
+```
+
+    statsmodels.regression.linear_model.OLS
+
+Thus far, we have merely constructed our model.
+
+We need to apply `.fit()` to obtain parameter estimates
+$ \hat{\beta}\_0 $ and $ \hat{\beta}\_1 $.
+
+```python
+results = reg1.fit()
+type(results)
+```
+
+    statsmodels.regression.linear_model.RegressionResultsWrapper
+
+We now possess the fitted regression model stored in `results`.
+
+To view the OLS regression results, we can invoke the `.summary()`
+method.
+
+Note that an observation was inadvertently omitted from the results in the
+original paper (refer to the note in `maketable2.do` from Acemoglu’s webpage), resulting in slight differences in the
+coefficients.
+
+```python
+print(results.summary())
+```
+
+                                OLS Regression Results
+    ==============================================================================
+    Dep. Variable:               logpgp95   R-squared:                       0.611
+    Model:                            OLS   Adj. R-squared:                  0.608
+    Method:                 Least Squares   F-statistic:                     171.4
+    Date:                Wed, 04 Sep 2024   Prob (F-statistic):           4.16e-24
+    Time:                        16:25:57   Log-Likelihood:                -119.71
+    No. Observations:                 111   AIC:                             243.4
+    Df Residuals:                     109   BIC:                             248.8
+    Df Model:                           1
+    Covariance Type:            nonrobust
+    ==============================================================================
+                     coef    std err          t      P>|t|      [0.025      0.975]
+    ------------------------------------------------------------------------------
+    const          4.6261      0.301     15.391      0.000       4.030       5.222
+    avexpr         0.5319      0.041     13.093      0.000       0.451       0.612
+    ==============================================================================
+    Omnibus:                        9.251   Durbin-Watson:                   1.689
+    Prob(Omnibus):                  0.010   Jarque-Bera (JB):                9.170
+    Skew:                          -0.680   Prob(JB):                       0.0102
+    Kurtosis:                       3.362   Cond. No.                         33.2
+    ==============================================================================
+
+    Notes:
+    [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+
+From our findings, we observe that
+
+- The intercept $ \hat{\beta}\_0 = 4.63 $.
+- The slope $ \hat{\beta}\_1 = 0.53 $.
+- The positive $ \hat{\beta}\_1 $ parameter estimate indicates that
+  institutional quality positively influences economic outcomes, as
+  illustrated in the figure.
+- The p-value of 0.000 for $ \hat{\beta}\_1 $ suggests that the
+  impact of institutions on GDP is statistically significant (using p <
+  0.05 as a rejection rule).
+- The R-squared value of 0.611 signifies that approximately 61% of the variation
+  in log GDP per capita is elucidated by protection against
+  expropriation.
+
+Utilizing our parameter estimates, we can now express our estimated
+relationship as
+
+$$
+\widehat{logpgp95}_i = 4.63 + 0.53 \ {avexpr}_i
+$$
+
+This equation delineates the line that best fits our data,... as demonstrated in
+Figure 2.
+
+We can utilize this equation to predict the level of log GDP per capita for
+a value of the index of expropriation protection.
+
+For instance, for a country with an index value of 7.07 (the mean for
+the dataset), we determine that their predicted level of log GDP per capita
+in 1995 is 8.38.
+
+```python
+mean_expr = np.mean(df1_subset['avexpr'])
+mean_expr
+```
+
+    6.515625
+
+```python
+predicted_logpdp95 = 4.63 + 0.53 * 7.07
+predicted_logpdp95
+```
+
+    8.3771
+
+A simpler (and more precise) method to achieve this result is to employ
+`.predict()` and set $ constant = 1 $ and
+$ {avexpr}\_i = mean_expr $.
+
+```python
+results.predict(exog=[1, mean_expr])
+```
+
+    array([8.09156367])
+
+We can generate an array of predicted $ {logpgp95}\_i $ for each value
+of $ {avexpr}\_i $ in our dataset by invoking `.predict()` on our
+results.
+
+Plotting the predicted values against $ {avexpr}\_i $ demonstrates that the
+predicted values align along the linear line that we fitted previously.
+
+The observed values of $ {logpgp95}\_i $ are also plotted for
+comparison.
+
+```python
+# Drop missing observations from whole sample
+
+df1_plot = df1.dropna(subset=['logpgp95', 'avexpr'])
+
+# Plot predicted values
+
+fix, ax = plt.subplots()
+ax.scatter(df1_plot['avexpr'], results.predict(), alpha=0.5,
+        label='predicted')
+
+# Plot observed values
+
+ax.scatter(df1_plot['avexpr'], df1_plot['logpgp95'], alpha=0.5,
+        label='observed')
+
+ax.legend()
+ax.set_title('OLS predicted values')
+ax.set_xlabel('avexpr')
+ax.set_ylabel('logpgp95')
+plt.show()
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/72.%20Linear%20Regression%20in%20Python_files/72.%20Linear%20Regression%20in%20Python_27_0.png)
+</div>
+
+## Extending the Linear Regression Model
+
+Up to this point, we have solely accounted for institutions impacting economic
+performance - there are almost certainly numerous additional factors
+affecting GDP that are not included in our model.
+
+Omitting variables that influence $ logpgp95_i $ will lead to **omitted variable bias**, yielding biased and inconsistent parameter estimates.
+
+We can broaden our bivariate regression model to a **multivariate regression model** by incorporating other factors that may influence $ logpgp95_i $.
+
+[[Acemoglu _et al._, 2001](/courses/Introduction-to-Quantitative-Economics/References#id97)] examine additional factors such as:
+
+- the influence of climate on economic outcomes; latitude is utilized to proxy
+  this
+- differences that impact both economic performance and institutions,
+  e.g., cultural, historical, etc.; controlled for with the use of
+  continent dummies
+
+Let’s estimate some of the extended models discussed in the paper
+(Table 2) using data from `maketable2.dta`.
+
+```python
+df2 = pd.read_stata('https://github.com/QuantEcon/lecture-python/blob/master/source/_static/lecture_specific/ols/maketable2.dta?raw=true')
+
+# Add constant term to dataset
+df2['const'] = 1
+
+# Create lists of variables to be used in each regression
+X1 = ['const', 'avexpr']
+X2 = ['const', 'avexpr', 'lat_abst']
+X3 = ['const', 'avexpr', 'lat_abst', 'asia', 'africa', 'other']
+
+# Estimate an OLS regression for each set of variables
+reg1 = sm.OLS(df2['logpgp95'], df2[X1], missing='drop').fit()
+reg2 = sm.OLS(df2['logpgp95'], df2[X2], missing='drop').fit()
+reg3 = sm.OLS(df2['logpgp95'], df2[X3], missing='drop').fit()
+```
+
+Having fitted our model, we will employ `summary_col` to
+present the results in a single table (model numbers correspond to those
+in the paper).
+
+```python
+info_dict={'R-squared' : lambda x: f"{x.rsquared:.2f}",
+           'No. observations' : lambda x: f"{int(x.nobs):d}"}
+
+results_table = summary_col(results=[reg1,reg2,reg3],
+                            float_format='%0.2f',
+                            stars = True,
+                            model_names=['Model 1',
+                                         'Model 3',
+                                         'Model 4'],
+                            info_dict=info_dict,
+                            regressor_order=['const',
+                                             'avexpr',
+                                             'lat_abst',
+                                             'asia',
+                                             'africa'])
+
+results_table.add_title('Table 2 - OLS Regressions')
+
+print(results_table)
+```
+
+            Table 2 - OLS Regressions
+    =========================================
+                     Model 1 Model 3 Model 4
+    -----------------------------------------
+    const            4.63*** 4.87*** 5.85***
+                     (0.30)  (0.33)  (0.34)
+    avexpr           0.53*** 0.46*** 0.39***
+                     (0.04)  (0.06)  (0.05)
+    lat_abst                 0.87*   0.33
+                             (0.49)  (0.45)
+    asia                             -0.15
+                                     (0.15)
+    africa                           -0.92***
+                                     (0.17)
+    other                            0.30
+                                     (0.37)
+    R-squared        0.61    0.62    0.72
+    R-squared Adj.   0.61    0.62    0.70
+    R-squared        0.61    0.62    0.72
+    No. observations 111     111     111
+    =========================================
+    Standard errors in parentheses.
+    $* p<.1, ** p<.05, ***p<.01$
+
+## Endogeneity
+
+As [[Acemoglu _et al._, 2001](/courses/Introduction-to-Quantitative-Economics/References#id97)] note, the OLS models are likely affected by
+**endogeneity** issues,... leading to biased and inconsistent model
+estimates.
+
+Specifically, there is likely a reciprocal relationship between institutions and
+economic outcomes:
+
+- wealthier countries may be capable of affording or preferring superior institutions
+- variables that influence income may also correlate with
+  institutional differences
+- the construction of the index may be biased; analysts may be predisposed
+  to perceive countries with higher income as having better
+  institutions
+
+To address endogeneity, we can utilize **two-stage least squares (2SLS)
+regression**, which is an extension of OLS regression.
+
+This method necessitates substituting the endogenous variable
+$ {avexpr}\_i $ with a variable that is:
+
+1. correlated with $ {avexpr}\_i $
+1. not correlated with the error term (i.e., it should not directly affect
+   the dependent variable, otherwise it would be correlated with
+   $ u_i $ due to omitted variable bias)
+
+The new set of regressors is termed an **instrument**, which aims to
+eliminate endogeneity in our proxy of institutional differences.
+
+The key contribution of [[Acemoglu _et al._, 2001](/courses/Introduction-to-Quantitative-Economics/References#id97)] is the use of settler mortality
+rates to instrument for institutional differences.
+
+They propose that higher mortality rates of colonizers led to the
+establishment of institutions that were more extractive in nature (less
+protection against expropriation), and these institutions persist
+today.
+
+Utilizing a scatterplot (Figure 3 in [[Acemoglu _et al._, 2001](/courses/Introduction-to-Quantitative-Economics/References#id97)]), we can observe that protection
+against expropriation is negatively correlated with settler mortality
+rates, aligning with the authors’ hypothesis and satisfying the first
+condition of a valid instrument.
+
+```python
+# Dropping NA's is required to use numpy's polyfit
+df1_subset2 = df1.dropna(subset=['logem4', 'avexpr'])
+
+X = df1_subset2['logem4']
+y = df1_subset2['avexpr']
+labels = df1_subset2['shortnam']
+
+# Replace markers with country labels
+fig, ax = plt.subplots()
+ax.scatter(X, y, marker='')
+
+for i, label in enumerate(labels):
+    ax.annotate(label, (X.iloc[i], y.iloc[i]))
+
+# Fit a linear trend line
+ax.plot(np.unique(X),
+         np.poly1d(np.polyfit(X, y, 1))(np.unique(X)),
+         color='black')
+
+ax.set_xlim([1.8,8.4])
+ax.set_ylim([3.3,10.4])
+ax.set_xlabel('Log of Settler Mortality')
+ax.set_ylabel('Average Expropriation Risk 1985-95')
+ax.set_title('Figure 3: First-stage relationship between settler mortality \
+    and expropriation risk')
+plt.show()
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/72.%20Linear%20Regression%20in%20Python_files/72.%20Linear%20Regression%20in%20Python_33_0.png)
+</div>
+
+The second condition may not be met if settler mortality rates from the 17th to 19th centuries have a direct effect on current GDP (in addition to their indirect effect through institutions).
+
+For instance,... settler mortality rates may relate to the current disease environment in a country, which could influence current economic performance.
+
+[[Acemoglu _et al._, 2001](/courses/Introduction-to-Quantitative-Economics/References#id97)] contend this is improbable because:
+
+- The majority of settler deaths were attributed to malaria and yellow fever
+  and had a limited impact on local populations.
+- The disease burden on local populations in Africa or India, for example,
+  did not appear to be higher than average, supported by relatively
+  high population densities in these regions prior to colonization.
+
+As we seem to possess a valid instrument, we can apply 2SLS regression to
+obtain consistent and unbiased parameter estimates.
+
+**First stage**
+
+The first stage involves regressing the endogenous variable
+($ {avexpr}\_i $) on the instrument.
+
+The instrument comprises all exogenous variables in our model (and
+not merely the variable we have replaced).
+
+Using model 1 as an illustration, our instrument is simply a constant and
+settler mortality rates $ {logem4}\_i $.
+
+Thus, we will estimate the first-stage regression as
+
+$$
+{avexpr}_i = \delta_0 + \delta_1 {logem4}_i + v_i
+$$
+
+The data necessary to estimate this equation is located in
+`maketable4.dta` (only complete data, indicated by `baseco = 1`, is
+utilized for estimation).
+
+```python
+# Import and select the data
+df4 = pd.read_stata('https://github.com/QuantEcon/lecture-python/blob/master/source/_static/lecture_specific/ols/maketable4.dta?raw=true')
+df4 = df4[df4['baseco'] == 1]
+
+# Add a constant variable
+df4['const'] = 1
+
+# Fit the first stage regression and print summary
+results_fs = sm.OLS(df4['avexpr'],
+                    df4[['const', 'logem4']],
+                    missing='drop').fit()
+print(results_fs.summary())
+```
+
+                                OLS Regression Results
+    ==============================================================================
+    Dep. Variable:                 avexpr   R-squared:                       0.270
+    Model:                            OLS   Adj. R-squared:                  0.258
+    Method:                 Least Squares   F-statistic:                     22.95
+    Date:                Wed, 04 Sep 2024   Prob (F-statistic):           1.08e-05
+    Time:                        16:26:04   Log-Likelihood:                -104.83
+    No. Observations:                  64   AIC:                             213.7
+    Df Residuals:                      62   BIC:                             218.0
+    Df Model:                           1
+    Covariance Type:            nonrobust
+    ==============================================================================
+                     coef    std err          t      P>|t|      [0.025      0.975]
+    ------------------------------------------------------------------------------
+    const          9.3414      0.611     15.296      0.000       8.121      10.562
+    logem4        -0.6068      0.127     -4.790      0.000      -0.860      -0.354
+    ==============================================================================
+    Omnibus:                        0.035   Durbin-Watson:                   2.003
+    Prob(Omnibus):                  0.983   Jarque-Bera (JB):                0.172
+    Skew:                           0.045   Prob(JB):                        0.918
+    Kurtosis:                       2.763   Cond. No.                         19.4
+    ==============================================================================
+
+    Notes:
+    [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+
+**Second stage**
+
+We need to retrieve the predicted values of $ {avexpr}\_i $ using
+`.predict()`.
+
+We then substitute the endogenous variable $ {avexpr}\_i $ with the
+predicted values $ \widehat{avexpr}\_i $ in the original linear model.
+
+Our second stage regression is thus
+
+$$
+{logpgp95}_i = \beta_0 + \beta_1 \widehat{avexpr}_i + u_i
+$$
+
+```python
+df4['predicted_avexpr'] = results_fs.predict()
+
+results_ss = sm.OLS(df4['logpgp95'],
+                    df4[['const', 'predicted_avexpr']]).fit()
+print(results_ss.summary())
+```
+
+                                OLS Regression Results
+    ==============================================================================
+    Dep. Variable:               logpgp95   R-squared:                       0.477
+    Model:                            OLS   Adj. R-squared:                  0.469
+    Method:                 Least Squares   F-statistic:                     56.60
+    Date:                Wed, 04 Sep 2024   Prob (F-statistic):           2.66e-10
+    Time:                        16:26:04   Log-Likelihood:                -72.268
+    No. Observations:                  64   AIC:                             148.5
+    Df Residuals:                      62   BIC:                             152.9
+    Df Model:                           1
+    Covariance Type:            nonrobust
+    ====================================================================================
+                           coef    std err          t      P>|t|      [0.025      0.975]
+    ------------------------------------------------------------------------------------
+    const                1.9097      0.823      2.320      0.024       0.264       3.555
+    predicted_avexpr     0.9443      0.126      7.523      0.000       0.693       1.195
+    ==============================================================================
+    Omnibus:                       10.547   Durbin-Watson:                   2.137
+    Prob(Omnibus):                  0.005   Jarque-Bera (JB):               11.010
+    Skew:                          -0.790   Prob(JB):                      0.00407
+    Kurtosis:                       4.277   Cond. No.                         58.1
+    ==============================================================================
+
+    Notes:
+    [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+
+The results from the second-stage regression provide us with an unbiased and consistent
+estimate of the effect of institutions on economic outcomes.
+
+The result indicates a stronger positive relationship than what the OLS
+results suggested.
+
+Note that while our parameter estimates are accurate, our standard errors
+are not, and for this reason,... computing 2SLS ‘manually’ (in stages with
+OLS) is not advisable.
+
+We can accurately estimate a 2SLS regression in one step using the
+[linearmodels](https://github.com/bashtage/linearmodels) package, an extension of `statsmodels`
+
+Note that when utilizing `IV2SLS`, the exogenous and instrument variables
+are separated in the function arguments (whereas previously the instrument
+included exogenous variables).
+
+```python
+iv = IV2SLS(dependent=df4['logpgp95'],
+            exog=df4['const'],
+            endog=df4['avexpr'],
+            instruments=df4['logem4']).fit(cov_type='unadjusted')
+
+print(iv.summary)
+```
+
+                              IV-2SLS Estimation Summary
+    ==============================================================================
+    Dep. Variable:               logpgp95   R-squared:                      0.1870
+    Estimator:                    IV-2SLS   Adj. R-squared:                 0.1739
+    No. Observations:                  64   F-statistic:                    37.568
+    Date:                Wed, Sep 04 2024   P-value (F-stat)                0.0000
+    Time:                        16:26:04   Distribution:                  chi2(1)
+    Cov. Estimator:            unadjusted
+
+                                 Parameter Estimates
+    ==============================================================================
+                Parameter  Std. Err.     T-stat    P-value    Lower CI    Upper CI
+    ------------------------------------------------------------------------------
+    const          1.9097     1.0106     1.8897     0.0588     -0.0710      3.8903
+    avexpr         0.9443     0.1541     6.1293     0.0000      0.6423      1.2462
+    ==============================================================================
+
+    Endogenous: avexpr
+    Instruments: logem4
+    Unadjusted Covariance (Homoskedastic)
+    Debiased: False
+
+Given that we now possess consistent and unbiased estimates, we can deduce
+from the model we have estimated that institutional differences
+(originating from institutions established during colonization) can assist
+in explaining disparities in income levels across countries today.
+
+[[Acemoglu _et al._, 2001](/courses/Introduction-to-Quantitative-Economics/References#id97)] employ a marginal effect of 0.94 to calculate that the
+difference in the index between Chile and Nigeria (i.e., institutional
+quality) suggests up to a 7-fold difference in income, underscoring the
+importance of institutions in economic development.
+
+## Summary
+
+We have illustrated basic OLS and 2SLS regression in `statsmodels` and `linearmodels`.
+
+If you are acquainted with R, you may wish to utilize the [formula interface](https://www.statsmodels.org/dev/example_formulas.html) to `statsmodels`, or consider employing [r2py](https://rpy2.github.io/) to invoke R from within Python.
+
+## Exercises
+
+## Exercise 72.1
+
+In the lecture, we believe the original model suffers from endogeneity
+bias due to the probable influence income has on institutional development.
+
+Although endogeneity is often best identified by analyzing the data
+and model, we can formally assess for endogeneity using the **Hausman
+test**.
+
+We seek to test for correlation between the endogenous variable,
+$ avexpr_i $, and the errors, $ u_i $
+
+$$
+\begin{aligned}
+H_0 : Cov(avexpr_i, u_i) = 0 \quad (no\ endogeneity) \\
+H_1 : Cov(avexpr_i, u_i) \neq 0 \quad (endogeneity)
+\end{aligned}
+$$
+
+This test is conducted in two stages.
+
+Initially, we regress $ avexpr_i $ on the instrument, $ logem4_i $
+
+$$
+avexpr_i = \pi_0 + \pi_1 logem4_i + \upsilon_i
+$$
+
+Subsequently,... we retrieve the residuals $ \hat{\upsilon}\_i $ and incorporate
+them into the original equation
+
+$$
+logpgp95_i = \beta_0 + \beta_1 avexpr_i + \alpha \hat{\upsilon}_i + u_i
+$$
+
+If $ \alpha $ is statistically significant (with a p-value < 0.05),
+we reject the null hypothesis and conclude that $ avexpr_i $ is
+endogenous.
+
+Using the above information, estimate a Hausman test and interpret your
+findings.
+
+## Solution to Exercise 72.1
+
+```python
+# Load in data
+df4 = pd.read_stata('https://github.com/QuantEcon/lecture-python/blob/master/source/_static/lecture_specific/ols/maketable4.dta?raw=true')
+
+# Add a constant term
+df4['const'] = 1
+
+# Estimate the first stage regression
+reg1 = sm.OLS(endog=df4['avexpr'],
+              exog=df4[['const', 'logem4']],
+              missing='drop').fit()
+
+# Retrieve the residuals
+df4['resid'] = reg1.resid
+
+# Estimate the second stage residuals
+reg2 = sm.OLS(endog=df4['logpgp95'],
+              exog=df4[['const', 'avexpr', 'resid']],
+              missing='drop').fit()
+
+print(reg2.summary())
+```
+
+                                OLS Regression Results
+    ==============================================================================
+    Dep. Variable:               logpgp95   R-squared:                       0.689
+    Model:                            OLS   Adj. R-squared:                  0.679
+    Method:                 Least Squares   F-statistic:                     74.05
+    Date:                Wed, 04 Sep 2024   Prob (F-statistic):           1.07e-17
+    Time:                        16:26:07   Log-Likelihood:                -62.031
+    No. Observations:                  70   AIC:                             130.1
+    Df Residuals:                      67   BIC:                             136.8
+    Df Model:                           2
+    Covariance Type:            nonrobust
+    ==============================================================================
+                     coef    std err          t      P>|t|      [0.025      0.975]
+    ------------------------------------------------------------------------------
+    const          2.4782      0.547      4.530      0.000       1.386       3.570
+    avexpr         0.8564      0.082     10.406      0.000       0.692       1.021
+    resid         -0.4951      0.099     -5.017      0.000      -0.692      -0.298
+    ==============================================================================
+    Omnibus:                       17.597   Durbin-Watson:                   2.086
+    Prob(Omnibus):                  0.000   Jarque-Bera (JB):               23.194
+    Skew:                          -1.054   Prob(JB):                     9.19e-06
+    Kurtosis:                       4.873   Cond. No.                         53.8
+    ==============================================================================
+
+    Notes:
+    [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+
+The output indicates that the coefficient on the residuals is statistically
+significant, suggesting $ avexpr_i $ is endogenous.
+
+## Exercise 72.2
+
+The OLS parameter $ \beta $ can also be computed using matrix
+algebra and `numpy` (you might need to revisit the
+numpy lecture to
+complete this exercise).
+
+The linear equation we aim to estimate is (expressed in matrix form)
+
+$$
+y = X\beta + u
+$$
+
+To find the unknown parameter $ \beta $, we seek to minimize
+the sum of squared residuals
+
+$$
+\underset{\hat{\beta}}{\min} \hat{u}'\hat{u}
+$$
+
+By rearranging the first equation and substituting into the second
+equation, we can express it as
+
+$$
+\underset{\hat{\beta}}{\min} \ (Y - X\hat{\beta})' (Y - X\hat{\beta})
+$$
+
+Solving this optimization problem yields the solution for the
+$ \hat{\beta} $ coefficients
+
+$$
+\hat{\beta} = (X'X)^{-1}X'y
+$$
+
+Utilizing the above information, compute $ \hat{\beta} $ from model 1
+using `numpy` - your results should match those in the
+`statsmodels` output from earlier in the lecture.
+
+## Solution to Exercise 72.2
+
+```python
+# Load in data
+df1 = pd.read_stata('https://github.com/QuantEcon/lecture-python/blob/master/source/_static/lecture_specific/ols/maketable1.dta?raw=true')
+df1 = df1.dropna(subset=['logpgp95', 'avexpr'])
+
+# Add a constant term
+df1['const'] = 1
+
+# Define the X and y variables
+y = np.asarray(df1['logpgp95'])
+X = np.asarray(df1[['const', 'avexpr']])
+
+# Compute β_hat
+β_hat = np.linalg.solve(X.T @ X, X.T @ y)
+
+# Print out the results from the 2 x 1 vector β_hat
+print(f'β_0 = {β_hat[0]:.2}')
+print(f'β_1 = {β_hat[1]:.2}')
+```
+
+    β_0 = 4.6
+    β_1 = 0.53
+
+It is also feasible to use `np.linalg.inv(X.T @ X) @ X.T @ y` to derive
+$ \beta $, however, `.solve()` is preferred as it requires fewer
+computations.

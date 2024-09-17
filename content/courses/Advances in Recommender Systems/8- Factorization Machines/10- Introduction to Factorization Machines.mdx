@@ -1,0 +1,239 @@
+---
+title: Introduction to Factorization Machines
+draft: false
+summary: Backtest statistics are essential for evaluating the efficacy of investment strategies.
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Factorization Machines
+
+Factorization Machines (FMs) are a versatile and powerful machine learning model introduced by Steffen Rendle in 2010. They are designed to handle high-dimensional and sparse data, making them particularly useful for tasks such as classification, regression, and ranking. FMs are a generalization of both linear regression and matrix factorization models, and they share similarities with support vector machines (SVM) that use a polynomial kernel.
+
+### Key Features of Factorization Machines
+
+- **Modeling Interactions**: FMs can efficiently model interactions between variables, which is particularly useful for capturing complex relationships in data. They can model χ-way variable interactions, where χ is typically set to two, meaning they focus on pairwise interactions.
+
+- **Efficiency**: One of the significant advantages of FMs is their computational efficiency. They can reduce polynomial computation time to linear complexity, making them suitable for high-dimensional sparse inputs. This efficiency is crucial for applications like recommendation systems and online advertising, where quick computations are necessary.
+
+- **Applications**: FMs are widely used in modern recommendation systems to model user-item interactions and provide personalized recommendations. They are also employed in click-through rate prediction for online advertising, allowing businesses to estimate the likelihood of a user clicking on an ad.
+
+### Technical Details
+
+FMs extend the concept of matrix factorization by incorporating feature interactions in addition to latent factors. This is achieved by learning a low-dimensional representation of the feature interactions rather than explicitly modeling them. The FM model equation can be computed in linear time, allowing for direct optimization without the need for support vectors, unlike non-linear SVMs.
+
+### Advantages Over Other Models
+
+- **Handling Sparse Data**: FMs are particularly effective in scenarios with sparse data, where traditional models like SVMs might struggle to learn reliable parameters.
+
+- **Scalability**: The linear complexity of FMs makes them scalable to large datasets, such as those found in recommendation systems or advertising platforms.
+
+- **General Applicability**: FMs can work with any real-valued feature vector, making them applicable across various domains without the need for specialized models.
+
+Overall, Factorization Machines provide a robust framework for capturing both linear and nonlinear feature interactions, making them a valuable tool in the field of machine learning, especially for tasks involving high-dimensional and sparse datasets.
+
+### 2-Way Factorization Machines
+
+2-Way Factorization Machines (FMs) are a specific type of factorization machine that focuses on modeling pairwise interactions between features. This approach is particularly useful in scenarios where capturing the interaction between two features can significantly enhance predictive performance.
+
+#### Mathematical Formulation
+
+The model for a 2-way factorization machine is defined as:
+
+$$
+\hat{y}(\mathbf{x}) = w_0 + \sum_{i=1}^{d} w_i x_i + \sum_{i=1}^{d} \sum_{j=i+1}^{d} \langle \mathbf{v}_i, \mathbf{v}_j \rangle x_i x_j
+$$
+
+Where:
+
+- $$w_0$$ is the global bias.
+- $$w_i$$ represents the weight of the i-th variable.
+- $$\mathbf{v}_i$$ is the latent factor vector associated with the i-th feature.
+- $$\langle \mathbf{v}_i, \mathbf{v}_j \rangle$$ denotes the dot product between the latent vectors of features i and j, capturing their interaction.
+- $$d$$ is the number of features, and $$k$$ is the dimensionality of the latent factors.
+
+#### Key Characteristics
+
+- **Feature Interactions**: The model captures pairwise interactions between features using latent vectors, which are learned during training. This allows the model to automatically discover important interactions without explicit feature engineering.
+
+- **Linear and Non-linear Components**: The first two terms in the equation correspond to a linear regression model, while the last term extends matrix factorization to model interactions, making it suitable for tasks like recommendation systems where user-item interactions are crucial.
+
+- **Efficiency**: By leveraging latent factors, the number of parameters is reduced from quadratic to linear in terms of the number of features, which helps mitigate overfitting and enhances computational efficiency.
+
+#### Applications
+
+2-Way FMs are widely used in:
+
+- **Recommendation Systems**: To model interactions between users and items, providing personalized recommendations.
+- **Click-Through Rate Prediction**: Estimating the likelihood of a user clicking on an advertisement by modeling user-ad interactions.
+
+Overall, 2-Way Factorization Machines offer a powerful way to capture complex interactions in data while maintaining computational efficiency, making them a popular choice in various machine learning applications involving high-dimensional and sparse datasets.
+
+### An Efficient Optimization Criterion
+
+Optimizing factorization machines (FMs) directly can be computationally expensive, with a complexity of $$O(kd^2)$$, where $$k$$ is the number of latent factors and $$d$$ is the number of features. This high complexity arises because all pairwise interactions need to be computed. To address this inefficiency, the interaction term can be reformulated to significantly reduce the computational cost, achieving linear time complexity, $$O(kd)$$.
+
+#### Reformulation of Pairwise Interaction Term
+
+The reformulation of the pairwise interaction term is expressed as follows:
+
+$$
+\sum_{i=1}^{d}\sum_{j=i+1}^{d} \langle \mathbf{v}_i, \mathbf{v}_j \rangle x_i x_j = \frac{1}{2} \left( \sum_{l=1}^{k} \left( \left( \sum_{i=1}^{d} v_{i,l} x_i \right)^2 - \sum_{i=1}^{d} v_{i,l}^2 x_i^2 \right) \right)
+$$
+
+This reformulation allows for:
+
+- **Reduced Complexity**: By reorganizing the computation of interactions, the complexity is reduced from quadratic to linear in terms of feature dimensions.
+- **Efficiency with Sparse Data**: For datasets with sparse features, only the non-zero elements need to be computed, further enhancing efficiency.
+
+#### Learning the FM Model
+
+To train the FM model, different loss functions can be used depending on the task:
+
+- **Mean Squared Error (MSE)** for regression tasks.
+- **Cross-Entropy Loss** for classification tasks.
+- **Bayesian Personalized Ranking (BPR) Loss** for ranking tasks.
+
+Standard optimization techniques such as stochastic gradient descent (SGD) and Adam are suitable for optimizing the FM model parameters. These optimizers help in efficiently learning the weights and latent factors, ensuring that the model can handle large-scale and sparse datasets effectively.
+
+Overall, this efficient optimization criterion is crucial for making factorization machines practical for real-world applications, where computational resources and time are often limited.
+
+### Model Implementation
+
+The implementation of Factorization Machines (FMs) involves constructing a model that efficiently combines linear regression with feature interaction modeling. This is achieved through a design that incorporates both a linear regression block and a feature interaction block, which is optimized for computational efficiency.
+
+#### Key Components of the FM Model
+
+- **Linear Regression Block**: This part of the model handles the first-order interactions, which are the direct linear relationships between features and the target variable. It consists of a linear layer with a bias term.
+
+- **Feature Interaction Block**: The second-order interactions, which involve pairwise feature interactions, are captured using latent factor vectors. This block efficiently computes these interactions using a reformulated approach that reduces computational complexity.
+
+- **Sigmoid Activation**: For tasks like click-through rate (CTR) prediction, which is treated as a classification problem, a sigmoid function is applied to the final output to map it to a probability score between 0 and 1.
+
+#### Code Implementation
+
+The implementation in code form can be represented as follows:
+
+```python
+import os
+from mxnet import gluon, init, np, npx
+from mxnet.gluon import nn
+from d2l import mxnet as d2l
+
+npx.set_np()
+
+class FM(nn.Block):
+    def __init__(self, field_dims, num_factors):
+        super(FM, self).__init__()
+        num_inputs = int(sum(field_dims))
+        self.embedding = nn.Embedding(num_inputs, num_factors)
+        self.fc = nn.Embedding(num_inputs, 1)
+        self.linear_layer = nn.Dense(1, use_bias=True)
+
+    def forward(self, x):
+        square_of_sum = np.sum(self.embedding(x), axis=1) ** 2
+        sum_of_square = np.sum(self.embedding(x) ** 2, axis=1)
+        x = self.linear_layer(self.fc(x).sum(1)) \
+            + 0.5 * (square_of_sum - sum_of_square).sum(1, keepdims=True)
+        x = npx.sigmoid(x)
+        return x
+```
+
+#### Explanation of the Code
+
+- **Embedding Layers**: Two embedding layers are used. One captures the latent factors for interaction modeling, and the other captures the linear weights for each feature.
+
+- **Interaction Calculation**: The computation of feature interactions is done using the difference between the square of sums and the sum of squares, which is a reformulated efficient approach.
+
+- **Output Layer**: The final output is passed through a sigmoid function, making it suitable for binary classification tasks like CTR prediction.
+
+This implementation showcases how FMs can be constructed to efficiently handle both linear and interaction effects, making them suitable for applications involving high-dimensional and sparse datasets.
+
+### Load the Advertising Dataset
+
+The process of loading the advertising dataset is a crucial step in preparing data for training a Factorization Machine (FM) model, particularly for tasks like click-through rate (CTR) prediction. This section outlines the steps and code necessary to load and prepare the dataset for model training and evaluation.
+
+#### Dataset Preparation
+
+The dataset used in this context is typically an online advertising dataset, which consists of features that represent various aspects of advertisements and user interactions. The goal is to predict the likelihood of a user clicking on an advertisement based on these features.
+
+#### Code Implementation
+
+The following code snippet demonstrates how to load the dataset using a custom data wrapper for CTR data:
+
+```python
+batch_size = 2048
+
+data_dir = d2l.download_extract('ctr')
+
+train_data = d2l.CTRDataset(os.path.join(data_dir, 'train.csv'))
+
+test_data = d2l.CTRDataset(os.path.join(data_dir, 'test.csv'),
+                           feat_mapper=train_data.feat_mapper,
+                           defaults=train_data.defaults)
+
+train_iter = gluon.data.DataLoader(
+    train_data, shuffle=True, last_batch='rollover', batch_size=batch_size,
+    num_workers=d2l.get_dataloader_workers())
+
+test_iter = gluon.data.DataLoader(
+    test_data, shuffle=False, last_batch='rollover', batch_size=batch_size,
+    num_workers=d2l.get_dataloader_workers())
+```
+
+#### Explanation of the Code
+
+- **Batch Size**: The batch size is set to 2048, which determines the number of samples processed before the model is updated. This size is chosen to balance between computational efficiency and memory usage.
+
+- **Data Directory**: The dataset is downloaded and extracted from a specified directory using the `d2l.download_extract` function.
+
+- **Dataset Loading**: The `CTRDataset` class is used to load the training and testing data from CSV files. It maps features using a feature mapper from the training data to ensure consistency between the training and testing datasets.
+
+- **DataLoader**: The `gluon.data.DataLoader` is utilized to create iterators for both training and testing data. These iterators handle batching, shuffling, and loading data efficiently during model training and evaluation.
+
+This setup ensures that the dataset is properly loaded and ready for use in training a Factorization Machine model, facilitating the CTR prediction task by providing structured and efficiently accessible data.
+
+### Train the Model
+
+Training a Factorization Machine (FM) model involves setting up the model parameters, selecting an appropriate optimizer, and defining the loss function to guide the training process. This section outlines the steps and code required to train an FM model effectively, particularly for tasks like click-through rate (CTR) prediction.
+
+#### Training Setup
+
+- **Learning Rate and Embedding Size**: The learning rate is set to 0.02, and the embedding size is initialized to 20. These hyperparameters are crucial as they influence the convergence speed and the capacity of the model to capture feature interactions.
+
+- **Optimizer**: The `Adam` optimizer is chosen for its efficiency and ability to handle sparse gradients, which is common in high-dimensional data.
+
+- **Loss Function**: The `SigmoidBinaryCrossEntropyLoss` is used as the loss function, suitable for binary classification tasks such as CTR prediction.
+
+#### Code Implementation
+
+The following code snippet demonstrates how to train the FM model:
+
+```python
+devices = d2l.try_all_gpus()
+
+net = FM(train_data.field_dims, num_factors=20)
+net.initialize(init.Xavier(), ctx=devices)
+
+lr, num_epochs, optimizer = 0.02, 30, 'adam'
+
+trainer = gluon.Trainer(net.collect_params(), optimizer, {'learning_rate': lr})
+
+loss = gluon.loss.SigmoidBinaryCrossEntropyLoss()
+
+d2l.train_ch13(net, train_iter, test_iter, loss, trainer, num_epochs, devices)
+```
+
+#### Explanation of the Code
+
+- **Device Configuration**: The model is configured to utilize all available GPUs for training, which can significantly speed up the process.
+
+- **Model Initialization**: The FM model is initialized using the Xavier initialization method, which helps in maintaining the scale of gradients during training.
+
+- **Training Loop**: The `d2l.train_ch13` function handles the training loop, iterating over the dataset for a specified number of epochs (30 in this case). It updates the model parameters using the optimizer and evaluates the model on the test set.
+
+- **Performance Metrics**: The training process outputs metrics such as loss, training accuracy, and test accuracy, providing insights into the model's performance and convergence.
+
+This setup ensures that the Factorization Machine is trained efficiently, leveraging the computational power of GPUs and the effectiveness of the Adam optimizer, making it suitable for large-scale and sparse datasets typical in CTR prediction tasks.

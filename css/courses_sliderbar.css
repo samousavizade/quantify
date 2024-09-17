@@ -1,0 +1,7 @@
+.sidebar {
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  height: 100vh; /* Full viewport height */
+  overflow-y: auto; /* Scroll inside sidebar if content overflows */
+}

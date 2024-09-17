@@ -1,0 +1,140 @@
+---
+title: Some RATS Programs for Estimating Volatility Models
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Some RATS Programs for Estimating Volatility Models
+
+This appendix provides some RATS programs for estimating volatility models discussed in this chapter. The programs are written in a general form so that they can be easily modified to handle other volatility models. To use these programs, one needs to specify the model, prepare the data, and provide initial parameter values. The programs use the BFGS algorithm to maximize the conditional log-likelihood function.
+
+### GARCH(1,1) Model
+
+The following program estimates a GARCH(1,1) model:
+
+```
+all 0 2500:1
+open data c:\data\m-ibm3dx7008.txt
+data(org=obs) / date rt
+set h = 0.0
+nonlin a0 a1 b1
+frml gvar = a0 + a1*h{1} + b1*rt{1}**2
+frml garchlik = -0.5*(log(h)+rt**2/h)
+smpl 2 2500
+compute a0 = 0.1, a1 = 0.1, b1 = 0.75
+maximize(method=bfgs,recursive,iterations=150) garchlik
+set fv = gvar
+```
+
+In this program:
+
+1. The first line allocates memory for 2500 observations.
+2. The second and third lines read the data file.
+3. The fourth line initializes the conditional variance series.
+4. The fifth line declares the parameters to be estimated.
+5. The sixth line specifies the GARCH(1,1) model for conditional variance:
+
+$h_t = a_0 + a_1 h_{t-1} + b_1 r_{t-1}^2$
+
+6. The seventh line gives the log-likelihood function:
+
+$\ell_t = -\frac{1}{2}(\log h_t + \frac{r_t^2}{h_t})$
+
+7. The eighth line specifies the sample period for estimation.
+8. The ninth line provides initial values for the parameters.
+9. The tenth line performs maximum likelihood estimation.
+10. The last line computes the fitted values of conditional variance.
+
+### EGARCH(1,1) Model
+
+The following program estimates an EGARCH(1,1) model:
+
+```
+all 0 2500:1
+open data c:\data\m-ibm3dx7008.txt
+data(org=obs) / date rt
+set h = 0.0
+nonlin a0 a1 b1 g1
+frml gvar = exp(a0 + a1*log(h{1}) + g1*rt{1}/sqrt(h{1}) + b1*(abs(rt{1}/sqrt(h{1}))-sqrt(2/3.14159)))
+frml garchlik = -0.5*(log(h)+rt**2/h)
+smpl 2 2500
+compute a0 = -0.1, a1 = 0.9, b1 = 0.1, g1 = -0.05
+maximize(method=bfgs,recursive,iterations=150) garchlik
+set fv = gvar
+```
+
+The key differences from the GARCH(1,1) program are:
+
+1. An additional parameter `g1` is declared for the leverage effect.
+2. The conditional variance equation is modified to:
+
+$\log h_t = a_0 + a_1 \log h_{t-1} + g_1 \frac{r_{t-1}}{\sqrt{h_{t-1}}} + b_1 \left(\frac{|r_{t-1}|}{\sqrt{h_{t-1}}} - \sqrt{\frac{2}{\pi}}\right)$
+
+### GJR-GARCH(1,1) Model
+
+The following program estimates a GJR-GARCH(1,1) model:
+
+```
+all 0 2500:1
+open data c:\data\m-ibm3dx7008.txt
+data(org=obs) / date rt
+set h = 0.0
+set ind = 0.0
+nonlin a0 a1 b1 g1
+frml gvar = a0 + a1*h{1} + b1*rt{1}**2 + g1*ind{1}*rt{1}**2
+frml garchlik = -0.5*(log(h)+rt**2/h)
+smpl 2 2500
+compute a0 = 0.1, a1 = 0.1, b1 = 0.75, g1 = 0.05
+maximize(method=bfgs,recursive,iterations=150) garchlik
+set fv = gvar
+```
+
+The key differences from the GARCH(1,1) program are:
+
+1. An indicator variable `ind` is created to capture negative returns.
+2. An additional parameter `g1` is declared for the asymmetric effect.
+3. The conditional variance equation is modified to:
+
+$h_t = a_0 + a_1 h_{t-1} + b_1 r_{t-1}^2 + g_1 I_{t-1} r_{t-1}^2$
+
+where $I_{t-1} = 1$ if $r_{t-1} < 0$ and 0 otherwise.
+
+### GARCH-M(1,1) Model
+
+The following program estimates a GARCH-M(1,1) model:
+
+```
+all 0 2500:1
+open data c:\data\m-ibm3dx7008.txt
+data(org=obs) / date rt
+set h = 0.0
+nonlin mu a0 a1 b1 lambda
+frml meqn = mu + lambda*sqrt(h)
+frml gvar = a0 + a1*h{1} + b1*(rt{1}-meqn{1})**2
+frml garchlik = -0.5*(log(h)+(rt-meqn)**2/h)
+smpl 2 2500
+compute mu = 0.01, a0 = 0.1, a1 = 0.1, b1 = 0.75, lambda = 0.05
+maximize(method=bfgs,recursive,iterations=150) garchlik
+set fv = gvar
+```
+
+The key differences from the GARCH(1,1) program are:
+
+1. Additional parameters `mu` and `lambda` are declared for the mean equation.
+2. A mean equation is specified:
+
+$r_t = \mu + \lambda \sqrt{h_t} + \epsilon_t$
+
+3. The conditional variance equation is modified to use the residuals from the mean equation:
+
+$h_t = a_0 + a_1 h_{t-1} + b_1 (r_{t-1} - \mu - \lambda \sqrt{h_{t-1}})^2$
+
+4. The log-likelihood function is adjusted to account for the mean equation.
+
+These programs can be easily modified to estimate other volatility models or to use different optimization algorithms. For example, to use the BHHH algorithm instead of BFGS, simply change `method=bfgs` to `method=bhhh` in the `maximize` command.
+
+Note that these programs assume that the conditional distribution of the standardized residuals is normal. To use other distributions, such as the Student's t-distribution, the log-likelihood function would need to be modified accordingly.

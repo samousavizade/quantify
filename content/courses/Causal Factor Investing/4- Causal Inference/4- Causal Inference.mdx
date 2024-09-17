@@ -1,0 +1,255 @@
+---
+title: Causal Inference
+draft: false
+summary: Backtest statistics are essential for evaluating the efficacy of investment strategies.
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+# 4 Causal Inference
+
+The academic field of causal inference studies methods to determine the independent effect of a particular variable within a larger system. Assessing independent effects is far from trivial, as the fundamental problem of causal inference illustrates. Consider two random variables $(X, Y)$, where a researcher wishes to estimate the effect of $X$ on $Y$. Let $E[Y|do(X = x_0)]$ denote the expected outcome of $Y$ when $X$ is set to $x_0$ (control), and let $E[Y|do(X = x_1)]$ denote the expected outcome of $Y$ when $X$ is set to $x_1$ (treatment). The average treatment effect (ATE) of $X$ on $Y$ is defined as
+
+$$
+ATE = E[Y|do(X = x_1)] - E[Y|do(X = x_0)].
+$$
+
+In general, ATE is not equal to the observed difference, $E[Y|X = x_1] - E[Y|X = x_0]$. The observed difference between two states of $X$ is
+
+$$
+\begin{align*}
+E[Y|X = x_1] - E[Y|X = x_0] &= E[Y_{X=x_1}|X = x_1] - E[Y_{X=x_0}|X = x_0] \\
+&= E[Y_{X=x_1}|X = x_1] - E[Y_{X=x_0}|X = x_1] \\
+&\quad + E[Y_{X=x_0}|X = x_1] - E[Y_{X=x_0}|X = x_0] \\
+&= \underbrace{E[Y_{X=x_1}|X = x_1] - E[Y_{X=x_0}|X = x_1]}_{ATT} \\
+&\quad + \underbrace{E[Y_{X=x_0}|X = x_1] - E[Y_{X=x_0}|X = x_0]}_{SSB},
+\end{align*}
+$$
+
+where $E[Y_{X=x_0}|X = x_1]$ is a counterfactual expression, representing the expected value of $Y$ in an alternative universe where $X$ is set to $x_0$, given that what actually happened is $X = x_1$. Naturally, $E[Y_{X=x_i}|X = x_i] = E[Y|X = x_i]$, for $i \in \{0, 1\}$, because the counterfactual expression (the left-hand side) replicates what actually happened (right-hand side).
+
+The above equation splits the observed difference into two components, the so-called average treatment effect on the treated (ATT) and self-selection bias (SSB). The fundamental problem of causal inference is that computing ATT requires estimating the counterfactual $E[Y_{X=x_0}|X = x_1]$, which is not directly observable. What is directly observable is the difference $E[Y|X = x_1] - E[Y|X = x_0]$, however that estimand of ATT is biased by SSB. The impact of SSB on $E[Y|X = x_1] - E[Y|X = x_0]$ can be significant, to the point of misleading the researcher.
+
+Following the earlier example, suppose that $Y$ is the number of drownings in a month, $X = x_0$ represents low ice cream monthly sales, and $X = x_1$ represents high ice cream monthly sales. The value of $E[Y|X = x_1] - E[Y|X = x_0]$ is high, because of the confounding effect of warm weather, which encourages both, ice cream sales and swimming. While high ice cream sales are associated with more drownings, it would be incorrect to infer that the former is a cause of the latter. The counterfactual $E[Y_{X=x_0}|X = x_1]$ represents the expected number of drownings in a month of high ice cream sales, should ice cream sales have been suppressed. The value of that unobserved counterfactual is arguably close to the observed $E[Y_{X=x_1}|X = x_1]$, hence $ATT \approx 0$, and the observed difference is largely due to SSB.
+
+Studies designed to establish causality propose methods to nullify SSB. These studies can be largely grouped into three types: interventional studies, natural experiments, and simulated interventions.
+
+## 4.1 Interventional Studies
+
+In a controlled experiment, scientists assess causality by observing the effect on Y of changing the values of X while keeping constant all other variables in the system (a do-operation). Hasan Ibn al-Haytham (965–1040) conducted the first recorded controlled experiment in history, in which he designed a camera obscura to manipulate variables involved in vision. Through various ingenious experiments, Ibn al-Haytham showed that light travels in a straight line, and that light reflects from the observed objects to the observer's eyes, hence falsifying the extramission theories of light by Ptolemy, Galen, and Euclid (Toomer 1964). This example illustrates a strong prerequisite for conducting a controlled experiment: the researcher must have direct control of all the variables involved in the data-generating process. When that is the case, the ceteris paribus condition is satisfied, and the difference in Y can be attributed to the change in X. When some of the variables in the data-generating process are not under direct experimental control (e.g., the weather in the drownings example), the ceteris paribus condition cannot be guaranteed.
+
+In that case, scientists may execute a randomized controlled trial (RCT), whereby members of a population (called units or subjects) are randomly assigned either to a treatment or to a control group. Such random assignment aims to create two groups that are as comparable as possible, so that any difference in outcomes can be attributed to the treatment. In an RCT, the researcher carries out the do-operation on two random samples of units, rather than on a particular unit, hence enabling a ceteris paribus comparison. The randomization also allows the researcher to quantify the experiment's uncertainty via Monte Carlo, by computing the standard deviation on ATEs from different subsamples. Scientists may keep secret from participants (single-blind) and researchers (double-blind) which units belong to each group, in order to further remove subject and experimenter biases. For additional information, see Hernán and Robins (2020) and Kohavi et al. (2020).
+
+We can use the earlier characterization of the fundamental problem of causal inference to show how random assignment achieves its goal. Consider the situation where a researcher assigns units randomly to $X = x_0$ (control group) and $X = x_1$ (treatment group). Following with the earlier example, this is equivalent to tossing a coin at the beginning of every month, then setting $X = x_0$ (low ice cream sales) on heads and setting $X = x_1$ (high ice cream sales) on tails. Because the intervention on X was decided at random, units in the treatment group are expected to be undistinguishable from units in the control group, hence
+
+$$
+E[Y_{X=x_0}|X = x_1] = E[Y_{X=x_0}|X = x_0] = E[Y_{X=x_0}] = E[Y|do(X = x_0)]
+$$
+
+$$
+E[Y_{X=x_1}|X = x_1] = E[Y_{X=x_1}|X = x_0] = E[Y_{X=x_1}] = E[Y|do(X = x_1)]
+$$
+
+Random assignment makes $Y_{X=x_0}$ and $Y_{X=x_1}$ independent of the observed X. The implication from the first equation above is that $SSB = 0$. In the drownings example, $E[Y_{X=x_0}|X = x_1] = E[Y_{X=x_0}|X = x_0]$, because suppressing ice cream sales would have had the same expected outcome $(E[Y_{X=x_0}])$ on both, high sales months and low sales months, since the monthly sales were set at random to begin with (irrespective of the weather). In conclusion, under random assignment, the observed difference matches both ATT and ATE:
+
+$$
+\begin{align*}
+E[Y|X=x_1] - E[Y|X=x_0] &= E[Y_{X=x_1}|X=x_1] - E[Y_{X=x_0}|X=x_1] \\
+&\quad + E[Y_{X=x_0}|X=x_1] - E[Y_{X=x_0}|X=x_0] \\
+&= E[Y|do(X=x_1)] - E[Y|do(X=x_0)] \\
+&\quad + E[Y|do(X=x_0)] - E[Y|do(X=x_0)] \\
+&= ATE
+\end{align*}
+$$
+
+## 4.2 Natural Experiments
+
+Sometimes interventional studies are not possible, because they are unfeasible, unethical, or prohibitively expensive. Under those circumstances, scientists may resort to natural experiments or simulated interventions. In a natural experiment (also known as a quasi-experiment), units are assigned to the treatment and control groups determined randomly by Nature or by other factors outside the influence of scientists (Dunning 2012).
+
+Although natural experiments are obser- vational (as opposed to interventional, like controlled experiments and RCT) studies, the fact that the assignment of units to groups is assumed random enables the attribution of the difference in outcomes to the treatment. Put differently, Nature performs the do-operation, and the researcher’s challenge is to identify the two random groups that enable a ceteris paribus comparison. Common examples of natural experiments include (1) regression discontinuity design (RDD); (2)
+crossover studies (COSs); and (3) difference-in-differences (DID) studies. Case– control studies,[^17] cohort studies,[^18] and synthetic control studies[^19] are not proper natural experiments because there is no random assignment of units to groups.
+
+Regression discontinuity design studies compare the outcomes of: (a) units that received treatment because the value of an assignment variable fell barely above a threshold; and (b) units that escaped treatment because the value of an assignment variable fell barely below a threshold. The critical assumption behind RDD is that groups (a) and (b) are comparable in everything but the slight difference in the assignment variable, which can be attributed to noise, hence the difference in outcomes between (a) and (b) is the treatment effect. For further reading, see Imbens and Lemieux (2008).
+
+Natural experiments are particularly useful in financial economics, where interventional studies are often not possible. For example, a researcher may study the effect of a regulatory change on stock prices by comparing the returns of affected and unaffected stocks before and after the change. The assumption is that the regulatory change affects some stocks but not others, and that the assignment of stocks to the treatment group (affected) and control group (unaffected) is as good as random.f
+
+A COS is a longitudinal study in which the exposure of units to a treatment is randomly removed for a time, and then returned. COS assumes that the effect of confounders does not change per unit over time. When that assumption holds, COSs have two advantages over standard longitudinal studies. First, in a COS the influence of confounding variables is reduced by each unit serving as its own control. Second, COS are statistically efficient, as they can identify causal effects in smaller samples than other studies. COS may not be appropriate when the order of treatments affects the outcome (order effects). Sufficiently long wash-out periods should be observed between treatments, to avoid that past treatments confound the estimated effects of new treatments (carryover effects). COS can also have an interventional counterpart, when the random assignment is under the control of the researcher. To learn more, see Jones and Kenward (2003).
+
+When factors other than the treatment influence the outcome over time, researchers may apply a pre-post with-without comparison, called a DID study. In a DID study, researchers compare two differences: (i) the before-after difference
+in outcomes of the treatment group; and (ii) the before-after difference in outcomes of the control group (where the random assignment of units to groups is done by Nature). By computing the difference between (i) and (ii), DID attempts to remove from the treatment effect (i) all time-varying factors captured by (ii). DID relies on the “equal-trends assumption,” namely that no time-varying differences exist between treatment and control groups. The validity of the equal-trends assumption can be assessed in a number of ways. For example, researchers may compute changes in outcomes for the treatment and control groups repeatedly before the treatment is actually administered, so as to confirm that the outcome trends move in parallel. For additional information, see Angrist and Pischke (2008, pp. 227–243).
+
+In addition, A popular method for analyzing natural experiments is the difference-in-differences (DID) approach. DID compares the difference between
+
+- (i). the before-after difference in outcomes of the treatment group; and
+- (ii). the before-after difference in outcomes of the control group (where the random assignment of units to groups is done by Nature).
+
+By computing the difference between (i) and (ii), DID attempts to remove from the treatment effect (i) all time-varying factors captured by (ii). Mathematically, the DID estimator can be expressed as:
+
+$$
+\text{DID} = (Y_{T,1} - Y_{T,0}) - (Y_{C,1} - Y_{C,0})
+$$
+
+where $Y_{T,1}$ and $Y_{T,0}$ are the average outcomes for the treatment group after and before the intervention, respectively, and $Y_{C,1}$ and $Y_{C,0}$ are the average outcomes for the control group after and before the intervention, respectively.
+
+DID relies on the "equal-trends assumption," namely that no time-varying differences exist between treatment and control groups. The validity of the equal-trends assumption can be assessed in a number of ways. For example, researchers may compute changes in outcomes for the treatment and control groups repeatedly before the treatment is actually administered, to confirm that the outcome trends move in parallel. This can be visualized by plotting the average outcomes for both groups over time and checking if they follow similar trends before the intervention.
+
+Another approach to natural experiments is the regression discontinuity design (RDD). RDD exploits situations where treatment assignment is determined by whether a continuous variable (the "running variable") falls above or below a certain threshold. Units just above and just below the threshold are assumed to be similar in all respects except for their treatment status, allowing for causal inference. The basic RDD estimator can be written as:
+
+$$
+\tau_{RDD} = \lim_{\epsilon \to 0^+} E[Y_i | X_i = c + \epsilon] - \lim_{\epsilon \to 0^-} E[Y_i | X_i = c - \epsilon]
+$$
+
+where $\tau_{RDD}$ is the treatment effect, $Y_i$ is the outcome for unit $i$, $X_i$ is the running variable, and $c$ is the threshold.
+
+For additional information on natural experiments and their analysis, see Angrist and Pischke (2008, pp. 227–243) and Imbens and Lemieux (2008).
+
+## 4.3 Simulated Interventions
+
+The previous sections explained how interventional studies and natural experiments use randomization to achieve the ceteris paribus comparisons that result in $SSB = 0$. Each approach demanded stronger assumptions than the previous one, with the corresponding cost in terms of generality of the conclusions. For instance, the conclusions from a controlled experiment are more general than the conclusions from an RCT, because in the former researchers control the variables involved in the data-generating process in such a way that ceteris paribus comparisons are clearer. Likewise, the conclusions from an RCT are more general than the conclusions from a natural experiment, because in an RCT the researcher is in control of the random assignment, and the researcher performs the do-operation.
+
+In recent decades, the field of causal inference has added one more tool to the scientific arsenal: when interventional studies and natural experiments are not possible, researchers may still conduct an observational study that simulates a do-operation, with the help of a hypothesized causal graph. The hypothesized causal graph encodes the information needed to remove from observations the SSB introduced by confounders, under the assumption that the causal graph is correct.
+
+### 4.3.1 Causal Discovery
+
+The first step in simulating an intervention is to identify the causal graph consistent with the observations. Over the past three decades, statisticians have developed numerous computational methods and algorithms for the discovery of causal relations, represented as directed acyclic graphs (see Glymour et al. 2019). These methods can be divided into the following classes: (a) constraint-based algorithms; (b) score-based algorithms; and (c) functional causal models (FCMs).
+
+Constraint-based methods exploit conditional independence relationships in the data to recover the underlying causal structure. Two of the most widely used methods are the PC algorithm (named after its authors, Peter Spirtes and Clark Glymour), and the fast causal inference (FCI) algorithm (Spirtes et al. 2000). The PC algorithm assumes that there are no latent (unobservable) confounders, and under this assumption the discovered causal information is asymptotically correct. The FCI algorithm gives asymptotically correct results even in the presence of latent confounders.
+
+Score-based methods can be used in the absence of latent confounders. These algorithms attempt to find the causal structure by optimizing a defined score function. An example of a score-based method is the greedy equivalence search (GES) algorithm. This heuristic algorithm searches over the space of Markov equivalence classes, that is, the set of causal structures satisfying the same conditional independences, evaluating the fitness of each structure based on a score calculated from the data (Chickering 2003). The GES algorithm is known to be consistent under certain assumptions, which means that as the sample size increases, the algorithm will converge to the true causal structure with probability approaching 1. However, this does not necessarily mean that the algorithm will converge to the true causal structure in finite time or with a reasonable sample size. GES is also known to be sensitive to the initial ordering of variables.
+
+FCMs distinguish between different directed-acyclic graphs in the same equivalence class. This comes at the cost of making additional assumptions on the data distribution than conditional independence relations. A FCM models the effect variable $Y$ as $Y = f(X, \epsilon)$, where $f$ is a function of the direct causes $X$ and $\epsilon$ is noise that is independent of $X$. Subject to the aforementioned assumptions, the causal direction between $X$ and $Y$ is identifiable, because the independence condition between $\epsilon$ and $X$ holds only for the true causal direction (Shimizu et al. 2006; Hoyer et al. 2009; and Zhang and Hyvaerinen 2009).
+
+Causal graphs can also be derived from nonnumerical data. For example, Laudy et al. (2022) apply natural language processing techniques to news articles in which different authors express views of the form $X \rightarrow Y$. By aggregating those views, these researchers derive directed acyclic graphs that represent collective, forward-looking, point-in-time views of causal mechanisms.
+
+Machine learning is a powerful tool for causal discovery. Various methods allow researchers to identify the important variables associated in a phenomenon, with minimal model specification assumptions. In doing so, these methods decouple the variable search from the specification search, in contrast with traditional statistical methods. Examples include mean-decrease accuracy, local surrogate models, and Shapley values (López de Prado 2020, pp. 3–4, López de Prado 2022a). Once the variables relevant to a phenomenon have been isolated, researchers can apply causal discovery methods to propose a causal structure (identify the links between variables, and the direction of the causal arrows).
+
+### 4.3.2 Do-Calculus
+
+Do-calculus is a complete axiomatic system that allows researchers to estimate do-operators by means of conditional probabilities, where the necessary and sufficient conditioning variables can be determined with the help of the causal graph (Shpitser and Pearl 2006). The following sections review some notions of do-calculus needed to understand this Element. I encourage the reader to learn more about these important concepts in Pearl (2009), Pearl et al. (2016), and Neal (2020).
+
+#### 4.3.2.1 Blocked Paths
+
+In a graph with three variables $\{X, Y, Z\}$, a variable $Z$ is a confounder with respect to $X$ and $Y$ when the causal relationships include a structure $X \leftarrow Z \rightarrow Y$. A variable $Z$ is a collider with respect to $X$ and $Y$ when the causal relationships are reversed, that is, $X \rightarrow Z \leftarrow Y$. A variable $Z$ is a mediator with respect to $X$ and $Y$ when the causal relationships include a structure $X \rightarrow Z \rightarrow Y$.[^20]
+
+A path is a sequence of arrows and nodes that connect two variables $X$ and $Y$, regardless of the direction of causation. A directed path is a path where all arrows point in the same direction. In a directed path that starts in $X$ and ends in $Z$, $X$ is an ancestor of $Z$, and $Z$ is a descendant of $X$.
+
+A path between $X$ and $Y$ is blocked if either: (1) the path traverses a collider, and the researcher has not conditioned on that collider or its descendants; or (2) the researcher conditions on a variable in the path between $X$ and $Y$, where the conditioned variable is not a collider.
+
+Association flows along any paths between $X$ and $Y$ that are not blocked. Causal association flows along an unblocked directed path that starts in treatment $X$ and ends in outcome $Y$, denoted the causal path. Association implies causation only if all noncausal paths are blocked.
+
+This is the deeper explanation of why association does not imply causation, and why causal independence does not imply statistical independence. Two variables $X$ and $Y$ are d-separated by a (possibly empty) set of variables $S$ if, upon conditioning on $S$, all paths between $X$ and $Y$ are blocked. The set $S$ d-separates $X$ and $Y$ if and only if $X$ and $Y$ are conditionally independent given $S$. For a proof of this statement, see Koller and Friedman (2009, chapter 3).
+
+This important result, sometimes called the global Markov condition in Bayesian network theory,[^21] allows researchers to assume that $SSB = 0$, and estimate $ATE$ as
+
+$$
+\begin{align*}
+ATE &= E[Y|do(X = x_1)] - E[Y|do(X = x_0)] \\
+&= E[E[Y|S, X = x_1] - E[Y|S, X = x_0]]
+\end{align*}
+$$
+
+The catch is, deciding which variables belong in $S$ requires knowledge of the causal graph that comprises all the paths between $X$ and $Y$. Using the above concepts, it is possible to define various specific controls for confounding variables, including: (a) the backdoor adjustment; (b) the front-door adjustment; and (c) the method of instrumental variables (Pearl 2009). This is not a comprehensive list of adjustments, and I have selected these three adjustments in particular because I will refer to them in the sections ahead.
+
+#### 4.3.2.2 Backdoor Adjustment
+
+A backdoor path between $X$ and $Y$ is an unblocked noncausal path that connects those two variables. The term backdoor is inspired by the fact that this kind of paths have an arrow pointing into the treatment ($X$). For example, Figure 2 (left) contains a backdoor path (colored in red, $Y \leftarrow Z \rightarrow X$), and a causal path (colored in green, $Y \rightarrow X$).
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![Figure 2](/static/courses/Causal-Factor-Investing/Figure-2.png)
+</div>
+> Figure 2 Example of a causal graph that satisfies the backdoor criterion, before (left) and after (right)
+conditioning on Z (shaded node)
+
+Backdoor paths can be blocked by conditioning on a set of variables $S$ that satisfies the backdoor criterion. The backdoor criterion is useful when controlling for observable confounders.[^22] A set of variables $S$ satisfies the backdoor criterion with regards to treatment $X$ and outcome $Y$ if the following two conditions are true:
+
+- (i) conditioning on $S$ blocks all backdoor paths between $X$ and $Y$; and
+- (ii) $S$ does not contain any descendants of $X$. Then, $S$ is a sufficient adjustment set, and the causal effect of $X$ on $Y$ can be estimated as:
+
+$$
+P[Y=y|do[X=x]] = \sum_s P[Y=y|X=x, S=s]P[S=s]
+$$
+
+Intuitively, condition (i) blocks all noncausal paths, while condition (ii) keeps open all causal paths. In Figure 2, the only sufficient adjustment set $S$ is $\{Z\}$. Set $S$ is sufficient because conditioning on $Z$ blocks that backdoor path $Y \leftarrow Z \rightarrow X$, and $Z$ is not a descendant of $X$. The result is that the only remaining association is the one flowing through the causal path, thus adjusting the observations in a way that simulates a do-operation on $X$. In general, there can be multiple sufficient adjustment sets that satisfy the backdoor criterion for any given graph.
+
+#### 4.3.2.3 Front-Door Adjustment
+
+Sometimes researchers may not be able to condition on a variable that satisfies the backdoor criterion, for instance when that variable is latent (unobservable). In that case, under certain conditions, the front-door criterion allows researchers to estimate the causal effect with the help of a mediator.
+
+A set of variables $S$ satisfies the front-door criterion in regard to treatment $X$ and outcome $Y$ if the following three conditions are true:
+
+- (i) all causal paths from $X$ to $Y$ go through $S$;
+- (ii) there is no backdoor path between $X$ and $S$;
+- (iii) all backdoor paths between $S$ and $Y$ are blocked by conditioning on $X$. Then, $S$ is a sufficient adjustment set, and the causal effect of $X$ on $Y$ can be estimated as:
+
+$$P[Y=y|do[X=x]] = \sum_s P[S=s|X=x] \sum_{x'} P[Y=y|S=s, X=x']P[X=x']$$
+
+Intuitively, condition (i) ensures that $S$ completely mediates the effect of $X$ on $Y$, condition (ii) applies the backdoor criterion on $X \rightarrow S$, and condition (iii) applies the backdoor criterion on $S \rightarrow Y$.
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![Figure 3](/static/courses/Causal-Factor-Investing/Figure-3.png)
+</div>
+> Figure 3 Example of a causal graph that satisfies the front-door criterion, before (left) and after
+(right) adjustment
+
+Figure 3 provides an example of a causal graph with a latent variable $Z$ (represented as a dashed oval) that confounds the effect of $X$ on $Y$. There is a backdoor path between $X$ and $Y$ (colored in red, $Y \leftarrow Z \rightarrow X$), and a causal path (colored in green, $X \rightarrow M \rightarrow Y$). The first condition of the backdoor criterion is violated (it is not possible to condition on $Z$), however $S = \{M\}$ satisfies the front-door criterion, because $M$ mediates the only causal path ($X \rightarrow M \rightarrow Y$), the path between $X$ and $M$ is blocked by collider $Y$ ($M \rightarrow Y \leftarrow Z \rightarrow X$), and conditioning on $X$ blocks the backdoor path between $M$ and $Y$ ($Y \leftarrow Z \rightarrow X \rightarrow M$). The adjustment accomplishes that the only remaining association is the one flowing through the causal path.
+
+#### 4.3.2.4 Instrumental Variables
+
+The front-door adjustment controls for a latent confounder when a mediator exists. In the absence of a mediator, the instrumental variables method allows researchers to control for a latent confounder $Z$, as long as researchers can find a variable $W$ that turns $X$ into a collider, thus blocking the backdoor path through $Z$.
+
+A variable $W$ satisfies the instrumental variable criterion relative to treatment $X$ and outcome $Y$ if the following three conditions are true:
+
+- (i) there is an arrow $W \rightarrow X$;
+- (ii) the causal effect of $W$ on $Y$ is fully mediated by $X$; and
+- (iii) there is no backdoor path between $W$ and $Y$.
+
+Intuitively, conditions (i) and (ii) ensure that $W$ can be used as a proxy for $X$, whereas condition (iii) prevents the need for an additional backdoor adjustment to de-confound the effect of $W$ on $Y$.
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![Figure 4](/static/courses/Causal-Factor-Investing/Figure-4.png)
+</div>
+> Figure 4 Example of a causal graph with an instrumental variable W, before (left) and after (right)
+adjustment
+
+Figure 4 provides an example of a causal graph with a latent variable $Z$ that confounds the effect of $X$ on $Y$. There is a backdoor path between $X$ and $Y$ (colored in red, $Y \leftarrow Z \rightarrow X$), and a causal path (colored in green, $X \rightarrow Y$). The first condition of the backdoor criterion is violated (it is not possible to condition on $Z$), and the first condition of the front-door criterion is violated (there is no mediator between $X$ and $Y$). Variable $W$ is an instrument, because there is an arrow $W \rightarrow X$ (arrow number 4), $X$ mediates the only causal path from $W$ to $Y$ ($W \rightarrow X \rightarrow Y$), and there is no backdoor path between $W$ and $Y$.
+
+Assuming that Figure 4 represents a linear causal model, the coefficient $\frac{cov(X,Y)}{cov(X,X)}$ provides a biased estimate of the effect $X \rightarrow Y$, due to the confounding effect of $Z$. To estimate the unconfounded coefficient of effect $X \rightarrow Y$, the instrumental variables method estimates first the coefficient of the effect $W \rightarrow X \rightarrow Y$ as the slope of the regression line of $Y$ on $W$, $r_{YW} = \frac{cov(Y,W)}{cov(W,W)}$, which is the product of coefficients of effects (3) and (4) in Figure 4. The coefficient of effect (4) can be estimated from the slope of the regression line of $X$ on $W$, $r_{XW} = \frac{cov(W,X)}{cov(W,W)}$. Finally, the adjusted (unconfounded) coefficient of effect $X \rightarrow Y$ can be estimated as $\frac{r_{YW}}{r_{XW}}$. For further reading, see Hernán and Robins (2020, chapter 16).
+
+[^17]: In a case–control study, a researcher compares the incidence of a supposed causal attribute among two groups of units that differ in an outcome. For example, one group may be composed of individuals with lung cancer, and a second group by individuals without lung cancer. From the estimation of the odds ratio, the researcher may theorize (without proof) that smoking contrib- utes to lung cancer.
+[^18]: A cohort study is a longitudinal study where a researcher categorizes a cohort (a group of units who share a characteristic) into different subgroups based on their exposure to a particular factor, and then follows them over time to assess the incidence of the outcome of interest. Cohort studies can be retrospective (historical) or prospective (ongoing). Retrospective cohort studies are usually cheap and fast, however they are more vulnerable to publication bias and survivorship bias, among other problems.
+[^19]: A synthetic control study is a longitudinal study where a researcher generates a synthetic control group. To do that, the researcher finds the linear combination of untreated units that is most similar to a treated unit before treatment, according to some common features. The treatment effect is computed as the difference between the observed outcome of the treated unit and the predicted outcome of the treatment on the synthetic control group. For a discussion, see Abadie (2021).
+[^20]: These concepts are formally defined in Sections 7.1, 7.2, and 7.3.
+[^21]: A Bayesian network is directed acyclic graph endowed with a set of conditional probability distributions. The conditional probability distributions specify the probability of each variable given its parent variables in the graph.
+[^22]: I use here the nomenclature popularized by Pearl (2009); however, this form of adjustment was fully developed by Robins (1986) under the term g-formula.

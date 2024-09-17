@@ -1,0 +1,45 @@
+---
+title: Association does not imply Causation!
+draft: false
+summary: Backtest statistics are essential for evaluating the efficacy of investment strategies.
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+# 2 Association vs Causation
+
+Every student of statistics, and by extension econometrics, learns that association does not imply causation. This statement, while superficially true, does not explain why association exists, and its relation to causation. Two discrete random variables $X$ and $Y$ are statistically independent if and only if $P[X=x, Y=y]=P[X=x] P[Y=y], \forall x, y$, where $P[\cdot]$ is the probability of the event described inside the squared brackets. Conversely, two discrete random variables $X$ and $Y$ are said to be statistically associated (or codependent) when, for some $(x, y)$, they satisfy that $P[X=x, Y=y] \neq P[X=x] P[Y=y]$. The conditional probability expression $P[Y=y \mid X=x]=P[X=x, Y=y] / P[X=x]$ represents the probability that $Y=y$ among the subset of the population where $X=x$. When two variables are associated, observing the value of one conveys information about the value of the other: $P[Y=y \mid X=x] \neq P[Y=y]$, or equivalently, $P[X=x \mid Y=y] \neq P[X=x]$. For example, monthly drownings $(Y)$ and ice cream sales $(X)$ are strongly associated, because the probability that $y$ people drown in a month conditional on observing $x$ ice cream sales in that same month does not equal the unconditional probability of $y$ drownings in a month for some $(x, y)$. However, the expression $P[Y=y \mid X=x] \neq P[Y=y]$ does not tell us whether ice cream sales cause drownings. Answering that question requires the introduction of a more nuanced concept than conditional probability: an intervention.
+
+A data-generating process is a physical process responsible for generating the observed data, where the process is characterized by a system of structural equations. Within that system, a variable $X$ is said to cause a variable $Y$ when $Y$ is a function of $X$. The structural equation by which $X$ causes $Y$ is called a causal mechanism. Unfortunately, the data-generating process responsible for observations is rarely known. Instead, researchers must rely on probabilities, estimated on a sample of observations, to deduce the causal structure of a system. Probabilistically, a variable $X$ is said to cause a variable $Y$ when setting the value of $X$ to $x$ increases the likelihood that $Y$ will take the value $y$. Econometrics lacks the language to represent interventions, that is, setting the value of $X$ (Chen and Pearl 2013). To avoid confusion between conditioning by $X=x$ and setting the value of $X=x$, Pearl (1995) introduced the do-operator, $do[X=x]$, which denotes the intervention that sets the value of $X$ to $x$. With this new notation, causation can be formally defined as follows: $X=x$ causes $Y=y$ if and only if $P[Y=y \mid do[X=x]]>P[Y=y]$.[^3]
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![Figure 1](/static/courses/Causal-Factor-Investing/Figure-1.png)
+</div>
+> Figure 1 Causal graph of a confounder ($Z$), before (left) and after (right) a do-operation
+
+an association between $X$ and $Y$, even though there is no arrow between $X$ and $Y$. For this reason, this type of association is denoted noncausal. Following with the previous example, weather $(Z)$ influences ice cream sales $(X)$ and the number of swimmers, hence drownings $(Y)$. The intervention that sets ice cream sales removes arrow (1), because it gives full control of $X$ to the researcher ($X$ is no longer a function of $Z$), while keeping all other things equal (literally, ceteris paribus). And because $X$ does not cause $Y$, setting $X=x$ (e.g., banning the sale of ice cream, $X=0$) has no effect on the probability of $Y=y$. As shown later, noncausal association can occur for a variety of additional reasons that do not involve confounders.
+
+Five conclusions can be derived from this exposition. First, causality is an extra-statistical (in the sense of beyond observational) concept, connected to mechanisms and interventions, and distinct from the concept of association. As a consequence, researchers cannot describe causal systems with the associational language of conditional probabilities. Failure to use the do-operator has led to confusion between associational and causal statements, in econometrics and elsewhere. Second, association does not imply causation, however causation does imply association because setting $X=x$ through an intervention is associated with the outcome $Y=y$.[^6] Third, unlike association, causality is directional, as represented by the arrows of the causal graph. The statement "$X$ causes $Y$" implies that $P[Y=y \mid do[X=x]]>P[Y=y]$, but not that $P[X=x \mid do[Y=y]]>P[X=x]$. Fourth, unlike association, causality is sequential. "$X$ causes $Y$" implies that the value of $X$ is set first, and only after that $Y$ adapts. Fifth, the ceteris paribus assumption simulates an intervention (do-operation), whose implications can only be understood with knowledge of the causal graph. The causal graph shows what "other things" are kept equal by the intervention.
+
+[^3]:
+    At first, it may seem counterintuitive that causality is defined in terms of a strict inequality (" $>$ "), in contrast to the difference (" $\neq$ ") used to define association. The reason is, there is no need to consider the " $<$ " case, due to complementary probabilities. For example, let $X=1$ represent receiving a vaccine against COVID-19, and $Y=1$ represent developing COVID-19. For an effective vaccine, two causal statements are true. First, $P[Y=1 \mid do[X=1]]<P[Y=1]$, which means that receiving the vaccine $(X=1)$ reduces the likelihood of developing the disease $(Y=1)$. Second, $P[Y=0 \mid do[X=1]]>P[Y=0]$, which means that receiving the vaccine $(X=1)$ increases the likelihood of not developing the disease $(Y=0)$. One statement cannot be true without the other, and the redundancy is resolved by picking the latter.
+    For example, setting ice cream sales to $x$ will not make $y$ drownings more likely than its unconditional probability for any pair $(x, y)$, hence ice cream sales are not a cause of drownings. In contrast, smoking tobacco is a cause of lung cancer, because the probability that $y$ individuals develop lung cancer among a collective where the level of tobacco smoking is set to $x$ (through an intervention) is greater than the unconditional probability of $y$ individuals developing lung cancer, for some pair $(x, y)$.[^4]
+
+[^4]:
+    A variable $X$ may be a necessary cause of $Y$, a sufficient cause of $Y$, a necessary-and-sufficient cause of $Y$, or neither a necessary-nor-sufficient cause of $Y$ (also known as a contributory cause). I do not explain the difference in this Element because it is not required for the discussion that follows.
+    Variables $X$ and $Y$ may be part of a more complex system, involving additional variables. The causal structure of a system can be represented through a directed acyclic graph, also denoted a causal graph.[^5] While a causal graph does not fully characterize the data-generating process, it conveys topological information essential to estimate causal effects. Causal graphs declare the variables involved in a system, which variables influence each other, and the direction of causality (Pearl 2009, p. 12). Causal graphs help visualize do-operations as the action of removing all arrows pointing toward $X$ in the causal graph, so that the full effect on $Y$ can be attributed to setting $X=x$. This is the meaning of the ceteris paribus assumption, which is of critical importance to economists. The causal graph in Figure 1 tells us that $Z$ causes $X$, and $Z$ causes $Y$. In the language of causal inference, $Z$ is a confounder, because this variable introduces
+
+[^5]: Acyclic graphs have the advantage of allowing the factorization of the joint probability as a product of conditional probabilities between ancestors and descendants only. However, cyclic graphs may be preferred for representing bidirectional causality. Representing bidirectional causal relationships with acyclic graphs requires explicit temporal modeling and duplication of the graph over multiple time steps. Neither representation (cyclic or acyclic) is better, and it depends on the modeler's objectives. This Element focuses on the treatment of acyclic graphs, without dismissing the usefulness of cyclic graphical models.
+[^6]: Here I am referring to direct causes (a single link in the causal graph). There are causal structures where one cause may cancel another, resulting in total causation without association.

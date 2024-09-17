@@ -1,4 +1,4 @@
-import ListLayout from '@/layouts/MDX/ListLayout';
+import BlogPostsListLayout from '@/layouts/MDX/BlogPostsListLayout';
 import MainLayout from '@/layouts/MainLayout';
 import { sortedBlogPost } from '@/lib/utils/contentlayer';
 // import { POSTS_PER_PAGE } from '@/types/default';
@@ -14,7 +14,7 @@ export default function Blog() {
 
   return (
     <MainLayout>
-      <ListLayout posts={sortedBlogPost(activePosts)} />
+      <BlogPostsListLayout posts={sortedBlogPost(activePosts)} />
     </MainLayout>
   );
 }

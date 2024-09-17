@@ -2,7 +2,7 @@ import PageTitle from '@/components/PageTitle';
 import PostNavigation from '@/components/PostNavigation';
 import { CoreContent } from '@/lib/utils/contentlayer';
 import siteMetadata from 'content/siteMetadata';
-import type { Blog, Authors } from 'contentlayer/generated';
+import type { Blog, Authors, Courses } from 'contentlayer/generated';
 import { ReactNode } from 'react';
 import AuthorLayout from '@/layouts/MDX/AuthorLayout';
 
@@ -13,7 +13,7 @@ const postDateTemplate: Intl.DateTimeFormatOptions = {
 };
 
 interface Props {
-  content: CoreContent<Blog>;
+  content: CoreContent<Blog> | CoreContent<Courses>;
   author: CoreContent<Authors>;
   children: ReactNode;
   next?: { slug: string; title: string };
@@ -36,8 +36,7 @@ export default function PostLayout({ content, author, children, next, prev }: Pr
                   {`${new Date(date).toLocaleDateString(siteMetadata.locale, postDateTemplate)}`}
                 </time>
               </div>
-              <span className="hidden sm:block">-</span>
-              <span>{readingTime.text}</span>
+              <span className={'text-gray-500 text-lg font-serif'}>{readingTime.text}</span>
             </dd>
           </dl>
         </AuthorLayout>

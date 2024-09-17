@@ -1,0 +1,62 @@
+---
+title: Stationary and Weakly Dependent Time Series
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+### **Stationary and Weakly Dependent Time Series**
+
+In time series econometrics, understanding the properties of the data is crucial for model specification and inference. Two important concepts in this context are stationarity and weak dependence. These properties help determine the appropriate methods for analyzing time series data.
+
+#### **Stationarity**
+
+A time series is said to be stationary if its statistical properties, such as mean, variance, and autocovariance, are constant over time. Stationarity is a key assumption in many time series models because it implies that the behavior of the series does not change over time, making it easier to predict future values based on past behavior.
+
+**Types of Stationarity:**
+
+1. **Strict Stationarity**: A time series is strictly stationary if the joint distribution of any set of observations is the same regardless of the time at which they are observed. This is a strong condition that requires all statistical properties to be invariant over time.
+
+2. **Weak (or Covariance) Stationarity**: A weaker form of stationarity that requires only the first two moments (mean and variance) to be constant over time, and the covariance between two observations depends only on the time lag between them, not on their actual time points.
+
+Mathematically, a weakly stationary process $$\{Y_t\}$$ satisfies:
+
+- $$E(Y_t) = \mu$$ for all $$t$$
+- $$\text{Var}(Y_t) = \sigma^2$$ for all $$t$$
+- $$\text{Cov}(Y_t, Y_{t-k}) = \gamma_k$$ for all $$t$$ and lag $$k$$
+
+#### **Nonstationary Time Series**
+
+Nonstationary time series have properties that change over time, such as trends or seasonality. These series can lead to spurious regression results if not properly addressed. Common methods to handle nonstationarity include differencing the data or using models like cointegration for series that move together over time.
+
+### **Stationary and Nonstationary Time Series**
+
+Understanding whether a time series is stationary or nonstationary is crucial for selecting appropriate modeling techniques.
+
+**Stationary Time Series:**
+
+- Suitable for models like ARMA (AutoRegressive Moving Average), which assume constant mean and variance.
+- Easier to forecast because past behavior is indicative of future behavior.
+
+**Nonstationary Time Series:**
+
+- Often exhibit trends or unit roots, requiring transformation before analysis.
+- Common transformations include differencing (to remove trends) or detrending methods.
+
+**Testing for Stationarity:**
+
+- **Augmented Dickey-Fuller (ADF) Test**: A statistical test used to determine whether a unit root is present in an autoregressive model.
+- **Phillips-Perron Test**: Another test for unit roots that adjusts for serial correlation and heteroskedasticity in errors.
+
+By identifying whether a time series is stationary or nonstationary, econometricians can apply appropriate models and techniques to ensure valid inference and accurate predictions.
+
+[^1]: https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/30626316/2be59c8f-ac44-43e7-a595-38c5bea42df7/Jeffrey_M_Wooldridge_Introductory_Econometrics_A_Modern_Approach.pdf
+[^2]: https://otexts.com/fpp2/stationarity.html
+[^3]: https://hex.tech/blog/stationarity-in-time-series/
+[^4]: https://sites.ualberta.ca/~priemaza/Econ%20399/Econ%20399%20Chapter11a.ppt
+[^5]: https://www.timescale.com/learn/stationary-time-series-analysis
+[^6]: https://people.stfx.ca/tleo/ECON370Term2Lec6.pdf
+[^7]: https://projecteuclid.org/journals/bernoulli/volume-18/issue-3/Model-selection-for-weakly-dependent-time-series-forecasting/10.3150/11-BEJ359.short

@@ -1,0 +1,136 @@
+---
+title: Smooth Transition AR (STAR) Model
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Smooth Transition AR (STAR) Model
+
+The smooth transition autoregressive (STAR) model is a nonlinear time series model that allows for smooth transitions between different regimes. It can be seen as a generalization of the threshold autoregressive (TAR) model, where the transition between regimes is abrupt. The STAR model was introduced by Chan and Tong (1986) and further developed by Teräsvirta (1994).
+
+### Model Specification
+
+A general STAR model of order $p$ can be written as:
+
+$$
+r_t = \left(\phi_{0,1} + \sum_{i=1}^p \phi_{i,1} r_{t-i}\right)(1 - G(s_t; \gamma, c)) + \left(\phi_{0,2} + \sum_{i=1}^p \phi_{i,2} r_{t-i}\right)G(s_t; \gamma, c) + \epsilon_t
+$$
+
+where:
+
+- $r_t$ is the time series of interest
+- $\phi_{0,j}$ and $\phi_{i,j}$ ($j = 1, 2$) are the autoregressive parameters for the two regimes
+- $G(s_t; \gamma, c)$ is the transition function, bounded between 0 and 1
+- $s_t$ is the transition variable
+- $\gamma$ is the smoothness parameter
+- $c$ is the threshold parameter
+- $\epsilon_t$ is a white noise process with zero mean and constant variance $\sigma^2$
+
+The transition function $G(s_t; \gamma, c)$ determines the degree of membership in each regime. As $G(s_t; \gamma, c)$ approaches 1, the model behaves more like the second regime, and as it approaches 0, the model behaves more like the first regime.
+
+### Transition Functions
+
+Two common choices for the transition function are:
+
+1. Logistic STAR (LSTAR) model:
+
+$$
+G(s_t; \gamma, c) = \frac{1}{1 + \exp(-\gamma(s_t - c))}
+$$
+
+2. Exponential STAR (ESTAR) model:
+
+$$
+G(s_t; \gamma, c) = 1 - \exp(-\gamma(s_t - c)^2)
+$$
+
+The logistic function allows for asymmetric behavior in the two regimes, while the exponential function implies symmetric behavior.
+
+### Properties of STAR Models
+
+1. **Smooth Transition**: Unlike TAR models, STAR models allow for a smooth transition between regimes, which can be more realistic in many applications.
+
+2. **Nesting Linear Models**: When $\gamma \to 0$, the STAR model reduces to a linear AR model. When $\gamma \to \infty$, the LSTAR model becomes a TAR model.
+
+3. **Flexibility**: STAR models can capture a wide range of nonlinear dynamics, including asymmetric cycles and multiple equilibria.
+
+4. **Interpretability**: The parameters have clear interpretations in terms of the behavior in different regimes.
+
+### Estimation
+
+Estimation of STAR models is typically done using nonlinear least squares or maximum likelihood methods. The procedure often involves the following steps:
+
+1. Specify the linear AR model as a starting point.
+2. Test for linearity against STAR nonlinearity.
+3. Choose between LSTAR and ESTAR models.
+4. Estimate the parameters of the chosen STAR model.
+5. Evaluate the model using diagnostic tests.
+
+The likelihood function for a STAR model, assuming Gaussian errors, is given by:
+
+$$
+L(\theta) = \prod_{t=1}^T \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(r_t - \mu_t(\theta))^2}{2\sigma^2}\right)
+$$
+
+where $\theta$ represents all the parameters of the model, and $\mu_t(\theta)$ is the conditional mean of $r_t$ given by the STAR model.
+
+### Linearity Testing
+
+Before estimating a STAR model, it's important to test for the presence of nonlinearity. A common approach is to use a Taylor series expansion of the transition function around $\gamma = 0$. This leads to an auxiliary regression of the form:
+
+$$
+r_t = \beta_0 + \sum_{i=1}^p \beta_i r_{t-i} + \sum_{i=1}^p \beta_{i+p} r_{t-i} s_t + \sum_{i=1}^p \beta_{i+2p} r_{t-i} s_t^2 + \sum_{i=1}^p \beta_{i+3p} r_{t-i} s_t^3 + \epsilon_t
+$$
+
+The null hypothesis of linearity corresponds to $\beta_{i+p} = \beta_{i+2p} = \beta_{i+3p} = 0$ for all $i$. This can be tested using an F-test or LM-test.
+
+### Model Selection
+
+Choosing between LSTAR and ESTAR models can be based on the auxiliary regression above. If only the second-order terms are significant, an ESTAR model is suggested. If the first- or third-order terms are significant, an LSTAR model is more appropriate.
+
+### Forecasting
+
+Forecasting with STAR models is more complex than with linear models due to the nonlinearity. One-step-ahead forecasts can be computed as:
+
+$$
+\hat{r}_{T+1|T} = E[r_{T+1}|F_T] = \left(\phi_{0,1} + \sum_{i=1}^p \phi_{i,1} r_{T+1-i}\right)(1 - E[G(s_{T+1}; \gamma, c)|F_T]) + \left(\phi_{0,2} + \sum_{i=1}^p \phi_{i,2} r_{T+1-i}\right)E[G(s_{T+1}; \gamma, c)|F_T]
+$$
+
+where $F_T$ represents the information available at time $T$. For multi-step forecasts, simulation methods are often used due to the nonlinearity of the model.
+
+### Applications in Finance
+
+STAR models have found various applications in finance, including:
+
+1. **Exchange Rate Modeling**: Capturing nonlinear dynamics in exchange rate movements, particularly the different behavior near and far from equilibrium levels.
+
+2. **Stock Return Prediction**: Modeling regime-switching behavior in stock returns, where market dynamics may differ in bull and bear markets.
+
+3. **Interest Rate Modeling**: Describing the nonlinear adjustment of interest rates, which may exhibit different behavior for small and large deviations from equilibrium.
+
+4. **Volatility Forecasting**: Extending STAR models to capture smooth transitions in volatility regimes.
+
+### Example: STAR Model for Stock Returns
+
+Consider a LSTAR(2) model for monthly stock returns:
+
+$$
+r_t = (0.02 + 0.3r_{t-1} - 0.1r_{t-2})(1 - G(r_{t-1}; 5, 0)) + (-0.01 + 0.1r_{t-1} + 0.2r_{t-2})G(r_{t-1}; 5, 0) + \epsilon_t
+$$
+
+$$
+G(r_{t-1}; 5, 0) = \frac{1}{1 + \exp(-5r_{t-1})}
+$$
+
+This model suggests two regimes:
+
+1. When $r_{t-1}$ is negative (bear market), the process behaves more like the first AR(2) model with higher persistence.
+2. When $r_{t-1}$ is positive (bull market), the process transitions towards the second AR(2) model with lower persistence and a negative intercept.
+
+The smooth transition allows for a gradual change between these regimes, capturing the idea that market dynamics don't change abruptly but rather evolve over time.
+
+In conclusion, STAR models provide a flexible framework for modeling nonlinear dynamics in financial time series, allowing for smooth transitions between different regimes. Their ability to nest both linear AR models and threshold models makes them a versatile tool for capturing complex patterns in financial data.

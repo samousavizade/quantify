@@ -1,0 +1,199 @@
+---
+title: Detecting Structural Breaks in Financial Markets
+draft: false
+summary: Structural breaks in financial markets refer to a shift from one type of market behavior to another, like from a mean-reverting to a momentum pattern.
+---
+
+<TOCInline
+  toc={props.toc}
+  exclude="Detecting Structural Breaks in Financial Markets"
+  asDisclosure
+/>
+
+<div style={{ marginBottom: '2rem' }} />
+
+# Detecting Structural Breaks in Financial Markets
+
+Structural breaks in financial markets refer to a shift from one type of market behavior to another, like from a mean-reverting to a momentum pattern. Such changes often catch market participants off guard, leading them to make costly mistakes. By analyzing these structural breaks, you can make more informed trading decisions. We'll focus on two types of tests for detecting structural breaks: CUSUM tests and explosiveness tests.
+
+## Types of Structural Break Tests
+
+- **CUSUM tests**: These tests measure if the cumulative forecasting errors significantly deviate from random behavior.
+- **Explosiveness tests**: These tests identify whether the process shows exponential growth or decline, which would be inconsistent with a random walk or stationary process.
+
+### Brown-Durbin-Evans CUSUM Test on Recursive Residuals
+
+The Brown-Durbin-Evans CUSUM test evaluates structural breaks by using recursive least squares (RLS) estimates. The formula for the RLS is as follows:
+
+$$
+y_{t} = \beta_{t}^{\prime} x_{t} + \varepsilon_{t}
+$$
+
+We compute standardized 1-step ahead recursive residuals using:
+
+$$
+\hat{\omega}_{t} = \frac{y_{t} - \hat{\beta}_{t-1}^{\prime} x_{t}}{\sqrt{f_{t}}}
+$$
+
+$$
+f_{t} = \hat{\sigma}_{\varepsilon}^{2}\left[1+x_{t}^{\prime}\left(X_{t}^{\prime} X_{t}\right)^{-1} x_{t}\right]
+$$
+
+Finally, the CUSUM statistic is calculated as:
+
+$$
+S_{t} = \sum_{j=k+1}^{t} \frac{\hat{\omega}_{j}}{\hat{\sigma}_{\omega}}
+$$
+
+<div style={{display: 'flex', justifyContent: 'center'}}>
+    <table style={{tableLayout: 'fixed', width: '90%'}}>
+        <thead>
+        <tr>
+            <th style={{width: '50%', textAlign: 'center'}}>Python</th>
+            <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```python
+                def brown_durbin_evans_cusum_test(y: np.ndarray, x: np.ndarray) -> float:
+                ```
+
+            </td>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```julia
+                function brown_durbin_evans_cusum_test(y::Array{Float64}, x::Array{Float64})::Float64
+                ```
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+View More: [Python](https://www.github.com/risklabai/RiskLabAI.py) | [Julia](https://www.github.com/risklabai/RiskLabAI.jl)
+
+### Simplified CUSUM Test
+
+A simplified version of the Brown-Durbin-Evans test focuses only on price levels, making it computationally less expensive. It calculates the standardized departure of log-price $y_t$ relative to a reference price $y_n$:
+
+$$
+S_{n, t} = \frac{y_{t} - y_{n}}{\hat{\sigma}_{t} \sqrt{t-n}}
+$$
+
+<div style={{display: 'flex', justifyContent: 'center'}}>
+    <table style={{tableLayout: 'fixed', width: '90%'}}>
+        <thead>
+        <tr>
+            <th style={{width: '50%', textAlign: 'center'}}>Python</th>
+            <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```python
+                def simplified_cusum_test(y: np.ndarray) -> float:
+                ```
+
+            </td>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```julia
+                function simplified_cusum_test(y::Array{Float64})::Float64
+                ```
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+View More: [Python](https://www.github.com/risklabai/RiskLabAI.py) | [Julia](https://www.github.com/risklabai/RiskLabAI.jl)
+
+When studying financial time series data, using log prices is often more appropriate than using raw prices. Using raw prices can yield results that aren't time-invariant, leading to structural heteroscedasticity. On the other hand, log prices give a more reliable statistical framework for understanding price behaviors.
+
+Mathematically, using raw prices yields a model like:
+
+$$
+\frac{y_{t}}{y_{t-1}} - 1
+$$
+
+Whereas using log prices can be modeled as:
+
+$$ \Delta \log [y_{t}] \propto \log [y_{t-1}] $$
+
+Using log prices also handles changing economic conditions, bubbles, or other economic phases better, especially for data that spans multiple years.
+
+## Computational Complexity
+
+The SADF algorithm's computational cost is $ O(n^2) $. This complexity can quickly become a bottleneck for larger datasets. For example, a full SADF time series for a dataset with $ (T, N) = (356631, 3) $ requires around $ 242 $ PFLOPs of operations. Using a High-Performance Computing (HPC) cluster may be necessary for computations within a reasonable time frame.
+
+## Conditions for Exponential Behavior
+
+There are three potential states for the system based on log prices: steady, unit-root, and explosive. The behaviors are largely defined by the $ \beta $ parameter in the equation:
+
+$$ \Delta \log [y_{t}] = \alpha + \beta \log [y_{t-1}] + \epsilon\_{t} $$
+
+## Quantile ADF and Conditional ADF
+
+Two robust alternatives to SADF are Quantile ADF (QADF) and Conditional ADF (CADF). These methods provide measures of centrality and dispersion of high ADF values, reducing sensitivity to outliers and data specifics.
+
+## SADF Algorithm Implementation
+
+Below is an example of how SADF is implemented in the RiskLabAI library.
+
+<div style={{display: 'flex', justifyContent: 'center'}}>
+    <table style={{tableLayout: 'fixed', width: '90%'}}>
+        <thead>
+        <tr>
+            <th style={{width: '50%', textAlign: 'center'}}>Python</th>
+            <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```python
+                def GenericAugmentedDickeyFullerTest(
+                data: DataFrame,
+                minSampleLength: int,
+                constant: str,
+                lags: List[int],
+                type: str
+                ) -> float:
+                ```
+
+            </td>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```julia
+                function GenericAugmentedDickeyFullerTest(
+                data::DataFrame,
+                minSampleLength::Int,
+                constant::String,
+                lags::Array{Int},
+                type::String
+                ) -> Float64
+                ```
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+This implementation takes seven inputs such as the data frame of close prices (`data`), minimum sample length (`minSampleLength`), the type of constant to use (`constant`), lag values (`lags`), and the type of ADF test (`type`).
+
+### References
+
+1. De Prado, M. L. (2018). Advances in financial machine learning. John Wiley & Sons.
+2. De Prado, M. M. L. (2020). Machine learning for asset managers. Cambridge University Press.

@@ -1,0 +1,261 @@
+---
+title: Cross-Validation in Finance Challenges and Solutions
+draft: false
+summary: In traditional settings, cross-validation is an effective tool for evaluating a machine learning model's performance. However, the complexities of financial data pose unique challenges.
+---
+
+<TOCInline
+  toc={props.toc}
+  exclude="Cross-Validation in Finance: Challenges and Solutions"
+  asDisclosure
+/>
+
+<div style={{ marginBottom: '2rem' }} />
+
+## Cross-Validation in Finance: Challenges and Solutions
+
+### The Shortcomings of Ordinary Cross-Validation in Finance
+
+In traditional settings, cross-validation is an effective tool for evaluating a machine learning model's performance. However, the complexities of financial data pose unique challenges:
+
+1. **Data Dependency**: Financial observations are often not independently and identically distributed (IID), contradicting a key assumption of cross-validation.
+
+2. **Repeated Testing**: Using the test set multiple times during model development can lead to selection bias.
+
+3. **Data Leakage**: This occurs when training and testing datasets share information, affecting the model's predictive accuracy.
+
+### K-Fold Cross-Validation: A Closer Look
+
+In k-fold cross-validation, the data is partitioned into $k$ subsets. One subset is used for validation, while the rest are used for training. This is repeated $k$ times, and the performance metrics are averaged.
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![kfoldcv](/static/Figs/financial-modeling/kFoldCV.png)
+</div>
+
+### Overcoming Challenges: Purging and Embargo
+
+#### Purging
+
+To mitigate the issue of data leakage, one solution is "purging." Purging involves eliminating observations from the training set that have labels overlapping in time with those in the testing set.
+
+<div style={{display: 'flex', justifyContent: 'center'}}>
+    <table style={{tableLayout: 'fixed', width: '90%'}}>
+        <thead>
+        <tr>
+            <th style={{width: '50%', textAlign: 'center'}}>Python</th>
+            <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```python
+                def purged_train_times(
+                data: pd.Series,
+                test: pd.Series
+                ) -> pd.Series:
+                ```
+
+            </td>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```julia
+                function purgedTrainTimes(
+                data::TimeArray,
+                test::TimeArray
+                ) ::TimeArray
+                ```
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+View More: [Python](https://www.github.com/risklabai/RiskLabAI.py) | [Julia](https://www.github.com/risklabai/RiskLabAI.jl)
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![purging](/static/Figs/financial-modeling/Purging.png)
+</div>
+
+#### Embargo
+
+An additional step, known as "embargo," can be implemented to further eliminate data leakage. This involves excluding observations from the training set that immediately follow an observation in the testing set.
+
+<div style={{display: 'flex', justifyContent: 'center'}}>
+    <table style={{tableLayout: 'fixed', width: '90%'}}>
+        <thead>
+        <tr>
+            <th style={{width: '50%', textAlign: 'center'}}>Python</th>
+            <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```python
+                def embargo_times(
+                times: pd.Series,
+                percent_embargo: float
+                ) -> pd.Series:
+                ```
+
+            </td>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```julia
+                function embargoTimes(
+                times::Array,
+                percentEmbargo::Float64
+                )::TimeArray
+                ```
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+View More: [Python](https://www.github.com/risklabai/RiskLabAI.py) | [Julia](https://www.github.com/risklabai/RiskLabAI.jl)
+
+## Purged K-Fold Class in RiskLabAI
+
+When building a machine learning model, it's essential to avoid data leakage between the training and test sets. The Purged K-Fold method in RiskLabAI is designed for this purpose. It takes into account parameters like the number of K-Fold splits, observation times, and the size of the embargo.
+
+<div style={{display: 'flex', justifyContent: 'center'}}>
+    <table style={{tableLayout: 'fixed', width: '90%'}}>
+        <thead>
+        <tr>
+            <th style={{width: '50%', textAlign: 'center'}}>Python</th>
+            <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```python
+                class PurgedKFold(KFold):
+                def __init__(self,
+                n_splits: int,
+                times: pd.Series,
+                percent_embargo: float
+                ):
+                def split(self,
+                data: pd.DataFrame,
+                labels: pd.Series=None,
+                groups=None
+                ):
+                ```
+
+            </td>
+            <td style={{border: '1px solid transparent'}}>
+
+
+                ```julia
+                mutable struct PurgedKFold
+                nSplits::Int64
+                times::TimeArray
+                percentEmbargo::Float64
+                end
+                function purgedKFoldSplit(self::PurgedKFold,
+                data::TimeArray
+                )::Tuple
+                end
+
+
+                ```
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+View More: [Python](https://www.github.com/risklabai/RiskLabAI.py) | [Julia](https://www.github.com/risklabai/RiskLabAI.jl)
+
+These functionalities are available in both Python and Julia in the RiskLabAI library.
+
+<div style={{display: 'flex', justifyContent: 'center'}}>
+    <table style={{tableLayout: 'fixed', width: '90%'}}>
+        <thead>
+        <tr>
+            <th style={{width: '50%', textAlign: 'center'}}>Python</th>
+            <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```python
+                def cross_validation_score(classifier: ClassifierMixin,
+                data: pd.DataFrame,
+                labels: pd.Series=None,
+                sample_weight: np.ndarray=None,
+                scoring='neg_log_loss',
+                times: pd.Series=None,
+                n_splits: int=None,
+                cross_validation_generator: BaseCrossValidator=None,
+                percent_embargo: float=0.0
+                ) -> np.array:
+
+                ```
+
+            </td>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```julia
+                function crossValidationScore(classifier,
+                data::TimeArray,
+                labels::TimeArray,
+                sampleWeights::Array,
+                scoring::String,
+                times::TimeArray,
+                crossValidationGenerator::PurgedKFold,
+                nSplits::Int,
+                percentEmbargo::Float64
+                )::Array
+
+                ```
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+View More: [Python](https://www.github.com/risklabai/RiskLabAI.py) | [Julia](https://www.github.com/risklabai/RiskLabAI.jl)
+
+These functionalities are available in both Python and Julia in the RiskLabAI library.
+
+### References
+
+1. De Prado, M. L. (2018). Advances in financial machine learning. John Wiley & Sons.
+2. De Prado, M. M. L. (2020). Machine learning for asset managers. Cambridge University Press.

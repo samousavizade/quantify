@@ -1,0 +1,77 @@
+---
+title: Testing for AR(1) Serial Correlation without Strictly Exogenous Regressors
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+### Testing for AR(1) Serial Correlation without Strictly Exogenous Regressors
+
+#### Introduction
+
+In time series econometrics, testing for serial correlation in the error terms is crucial for ensuring the validity of regression results. When regressors are not strictly exogenous, traditional tests like the Durbin-Watson test may not be appropriate. This section explores methods for testing AR(1) serial correlation when the regressors are endogenous or predetermined, which is a common scenario in dynamic models where past values of the dependent variable are included as regressors.
+
+#### Understanding Endogeneity and Predetermined Variables
+
+1. **Endogenous Regressors**: These are variables that are correlated with the error term in a regression model. This correlation can arise from omitted variables, measurement errors, or simultaneous causality.
+
+2. **Predetermined Variables**: These are variables that are determined by past values and are uncorrelated with future error terms but may be correlated with past errors.
+
+In models with such regressors, the assumption that regressors are uncorrelated with the error term (strict exogeneity) does not hold, complicating the detection of serial correlation.
+
+#### The Problem with Traditional Tests
+
+Traditional tests like the Durbin-Watson test assume that regressors are strictly exogenous. When this assumption is violated, these tests can produce misleading results:
+
+- **Bias**: The test statistics may be biased, leading to incorrect conclusions about the presence of serial correlation.
+- **Power**: The power of these tests to detect serial correlation diminishes when regressors are endogenous or predetermined.
+
+#### Alternative Testing Approaches
+
+When dealing with endogenous or predetermined regressors, alternative methods must be used to test for AR(1) serial correlation effectively:
+
+###### 1. **Breusch-Godfrey Test**
+
+The Breusch-Godfrey test is more flexible than the Durbin-Watson test because it allows for lagged dependent variables and higher-order autoregressive processes.
+
+- **Procedure**:
+
+1. Estimate the original model using OLS and obtain residuals.
+2. Regress these residuals on all original regressors and lagged residuals up to a specified order.
+3. Perform an F-test or LM test on the coefficients of the lagged residuals to determine if they are jointly significant.
+
+- **Advantages**:
+- Can handle models with lagged dependent variables.
+- Suitable for higher-order autocorrelation.
+
+###### 2. **Instrumental Variables Approach**
+
+For models with endogenous regressors, using instrumental variables (IV) can help address endogeneity issues:
+
+- **Steps**:
+
+1. Identify valid instruments that are correlated with endogenous regressors but uncorrelated with the error term.
+2. Use these instruments in a two-stage least squares (2SLS) regression to obtain consistent estimates.
+3. Test for serial correlation in the residuals of the IV regression using a method like Breusch-Godfrey.
+
+- **Challenges**:
+- Finding valid instruments can be difficult.
+- The choice of instruments significantly affects the results.
+
+###### 3. **Generalized Method of Moments (GMM)**
+
+GMM is another approach suitable for dynamic panel data models where endogeneity is present:
+
+- **Methodology**:
+- Use moment conditions derived from model assumptions to estimate parameters.
+- Test for serial correlation in GMM residuals using robust standard errors.
+
+- **Benefits**:
+- GMM is flexible and can handle various forms of endogeneity and autocorrelation.
+
+#### Conclusion
+
+Testing for AR(1) serial correlation in models without strictly exogenous regressors requires careful consideration of endogeneity and predetermined variables. Methods like the Breusch-Godfrey test, instrumental variables approach, and GMM offer robust alternatives to traditional tests like Durbin-Watson. These methods ensure valid inference by accounting for complexities introduced by endogenous or predetermined regressors in time series data.

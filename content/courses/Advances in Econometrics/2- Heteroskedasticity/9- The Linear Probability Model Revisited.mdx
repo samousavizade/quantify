@@ -1,0 +1,71 @@
+---
+title: The Linear Probability Model Revisited
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+### The Linear Probability Model Revisited
+
+#### **Overview**
+
+The Linear Probability Model (LPM) is a type of regression model used when the dependent variable is binary, meaning it takes on values of 0 or 1. This model is particularly useful in econometrics for estimating the probability of an event occurring based on one or more independent variables. In this section, we revisit the LPM to discuss its applications, limitations, and potential solutions to its drawbacks.
+
+#### **The Linear Probability Model**
+
+The LPM is a straightforward application of ordinary least squares (OLS) regression to a binary dependent variable. The model can be expressed as:
+
+$$
+P(Y = 1 | X) = \beta_0 + \beta_1 X_1 + \beta_2 X_2 + \ldots + \beta_k X_k + u
+$$
+
+where:
+
+- $$ Y $$ is the binary dependent variable.
+- $$ X_1, X_2, \ldots, X_k $$ are the independent variables.
+- $$ \beta_0, \beta_1, \ldots, \beta_k $$ are the coefficients to be estimated.
+- $$ u $$ is the error term.
+
+#### **Advantages of LPM**
+
+- **Simplicity**: The LPM is easy to estimate using OLS and interpret. The coefficients directly represent the change in probability associated with a one-unit change in the independent variable.
+- **Ease of Implementation**: It can be implemented using standard regression software without requiring specialized techniques.
+
+#### **Limitations of LPM**
+
+1. **Predicted Probabilities**: The LPM can predict probabilities outside the $[0, 1]$ range, which is not meaningful since probabilities must lie within this interval.
+
+2. **Heteroskedasticity**: The variance of the error term in an LPM is not constant (heteroskedastic), as it depends on the value of the independent variables. This violates one of the key assumptions of OLS, leading to inefficient estimates and biased standard errors.
+
+3. **Non-Linearity**: The relationship between the independent variables and the probability of the dependent event occurring may not be linear, which the LPM assumes.
+
+#### **Addressing Limitations**
+
+To address these limitations, econometricians often turn to alternative models like logistic regression or probit models, which naturally handle binary outcomes and ensure predicted probabilities lie within [^0, 1]. These models also account for non-linearity in relationships between variables.
+
+###### **Example Application**
+
+Consider a study examining whether individuals purchase health insurance (Y = 1 if purchased, 0 otherwise) based on their income level (X). Using an LPM:
+
+$$
+P(\text{Insurance} = 1 | \text{Income}) = \beta_0 + \beta_1 \times \text{Income} + u
+$$
+
+- **Interpretation**: If $$\beta_1$$ is estimated as 0.005, a $1,000 increase in income increases the probability of purchasing insurance by 0.5%.
+
+- **Limitations**: If income varies widely across individuals, some predicted probabilities might fall below 0 or exceed 1. Additionally, variability in purchasing behavior at different income levels may lead to heteroskedasticity.
+
+#### **Conclusion**
+
+While the Linear Probability Model provides a simple framework for binary outcome modeling, its limitations necessitate careful consideration and often require alternative approaches for more accurate and reliable inference.
+
+[^1]: https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/30626316/2be59c8f-ac44-43e7-a595-38c5bea42df7/Jeffrey_M_Wooldridge_Introductory_Econometrics_A_Modern_Approach.pdf
+[^2]: https://murraylax.org/rtutorials/linearprob.html
+[^3]: https://www.econometrics-with-r.org/11.1-binary-dependent-variables-and-the-linear-probability-model.html
+[^4]: https://homework.study.com/explanation/1-what-are-the-two-disadvantages-of-the-linear-probability-model-2-how-do-logit-and-probit-models-solve-the-two-disadvantages-of-the-plm-3-in-the-plm-the-response-probability-is-a-linear-in-a-set.html
+[^5]: https://spureconomics.com/linear-probability-model-lpm-meaning-and-problems/
+[^6]: https://ideas.repec.org/p/boc/scon20/1.html
+[^7]: https://arxiv.org/abs/2308.15338

@@ -1,0 +1,69 @@
+---
+title: Weakly Dependent Time Series
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+### **Weakly Dependent Time Series**
+
+In time series econometrics, weak dependence is a concept used to describe the relationship between observations in a time series. Unlike strong dependence, where observations are highly correlated over time, weak dependence implies that the correlation between observations decreases as the time lag between them increases. This concept is crucial for ensuring that statistical methods used in time series analysis remain valid.
+
+#### **Understanding Weak Dependence**
+
+Weak dependence, sometimes referred to as "short memory," implies that the influence of past values on future values diminishes as the time gap increases. This property is essential for many asymptotic results in time series analysis, such as the consistency and asymptotic normality of estimators.
+
+**Key Characteristics:**
+
+- **Diminishing Correlation**: The correlation between observations decreases as the lag between them increases.
+- **Finite Dependence**: The effect of a shock to the system fades over time, meaning that past shocks have a limited impact on future values.
+
+#### **Mathematical Representation**
+
+A time series $$\{Y_t\}$$ is said to be weakly dependent if it satisfies certain conditions that ensure the diminishing influence of past observations on future ones. These conditions can be formulated in terms of autocovariances or mixing conditions.
+
+**Autocovariance Condition**:
+
+- The autocovariance function $$\gamma(k) = \text{Cov}(Y_t, Y_{t+k})$$ should satisfy:
+  $$
+  \sum_{k=-\infty}^{\infty} |\gamma(k)| < \infty
+  $$
+  This condition ensures that the sum of absolute autocovariances is finite, implying that correlations diminish sufficiently fast.
+
+**Mixing Conditions**:
+
+- Mixing conditions provide a more general framework for defining weak dependence. They involve technical conditions on how quickly the joint distribution of observations at different times converges to the product of their marginal distributions as the lag increases.
+
+#### **Implications for Time Series Analysis**
+
+1. **Modeling**:
+
+- Weak dependence is a common assumption in models like ARMA (AutoRegressive Moving Average), which rely on past values and errors to predict future values.
+- It ensures that models do not overfit by capturing only short-term dependencies rather than long-term trends.
+
+2. **Statistical Inference**:
+
+- Many statistical properties, such as consistency and asymptotic normality of estimators, depend on weak dependence.
+- It allows for the use of standard inferential techniques, assuming that past influences do not persist indefinitely.
+
+3. **Forecasting**:
+
+- Weakly dependent series are easier to forecast because their future values are less influenced by distant past values.
+- Forecasts based on weakly dependent models tend to be more stable and reliable over short horizons.
+
+### **Conclusion**
+
+Weak dependence is a fundamental concept in time series econometrics that ensures the validity of statistical methods and models used for analysis and forecasting. By understanding and identifying weak dependence in data, econometricians can apply appropriate models and make reliable inferences about economic relationships over time.
+
+[^1]: https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/30626316/2be59c8f-ac44-43e7-a595-38c5bea42df7/Jeffrey_M_Wooldridge_Introductory_Econometrics_A_Modern_Approach.pdf
+[^2]: https://www.youtube.com/watch?v=7xJ8mT6gZb4
+[^3]: https://people.stfx.ca/tleo/ECON370Term2Lec6.pdf
+[^4]: https://en.wikipedia.org/wiki/Weakly_dependent_random_variables
+[^5]: https://static1.squarespace.com/static/5940de096a49639dc3501cea/t/5e4fe062e28b674d65400d3e/1582293091674/Time-Series%2B1.pdf
+[^6]: https://www.kaggle.com/general/319075
+[^7]: https://www.investopedia.com/articles/trading/07/stationary.asp
+[^8]: https://sites.ualberta.ca/~priemaza/Econ%20399/Econ%20399%20Chapter11a.ppt
+[^9]: https://otexts.com/fpp2/stationarity.html

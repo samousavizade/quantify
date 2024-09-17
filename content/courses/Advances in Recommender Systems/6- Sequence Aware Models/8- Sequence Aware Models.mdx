@@ -1,0 +1,435 @@
+---
+title: Sequence-Aware Recommender Systems
+draft: false
+summary: Backtest statistics are essential for evaluating the efficacy of investment strategies.
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Sequence-Aware Recommender Systems
+
+### Overview
+
+The primary focus of sequence-aware recommender systems is to utilize the sequence of user interactions, which are often timestamped, to better understand and predict user preferences. This approach helps in capturing users' temporal behavioral patterns and interest drifts over time. The model discussed in this section is called **Caser** (Convolutional Sequence Embedding Recommendation Model), which leverages convolutional neural networks (CNNs) to analyze these sequential patterns.
+
+### Caser Model
+
+The Caser model aims to capture both point-level and union-level sequence patterns:
+
+- **Point-Level Patterns**: These patterns assess the impact of a single item in the user's historical sequence on the target item.
+- **Union-Level Patterns**: These patterns evaluate the influence of a combination of previous actions on the subsequent target item. For instance, purchasing both milk and butter might increase the likelihood of purchasing flour compared to buying just one of these items.
+
+### Model Components
+
+1. **Horizontal Convolutional Network**: This component captures union-level patterns by analyzing sequences of user actions.
+2. **Vertical Convolutional Network**: This component focuses on point-level patterns by examining individual items in the sequence.
+
+Both networks work together to provide a comprehensive understanding of user behavior by modeling both short-term activities and long-term preferences. The final layers of the model integrate these insights to form a holistic view of user interests.
+
+### Significance
+
+By incorporating sequential data, the Caser model enhances the ability to predict the next item a user might be interested in, based on their recent interactions. This approach is particularly useful in scenarios where user preferences change over time, allowing for more dynamic and personalized recommendations. The sequence-aware recommender systems, exemplified by the Caser model, offer a sophisticated method to capture and utilize the temporal dynamics of user interactions, leading to more accurate and personalized recommendations.
+
+### 21.7.1 Model Architectures
+
+In the context of sequence-aware recommender systems, section 21.7.1 focuses on the architecture of the Caser model, which is designed to capture both short-term and long-term user preferences using convolutional neural networks (CNNs).
+
+![](/static/courses/Advances-in-Recomender-Systems/rec-caser.svg)
+
+#### User Interaction Sequence
+
+Each user is associated with a sequence of items they have interacted with over time. This sequence is denoted as $ S^u = (S*1^u, ..., S*{|S_u|}^u) $. The goal of the Caser model is to recommend items by considering both the user's general tastes and short-term intentions.
+
+#### Embedding Matrix
+
+To model user interactions, an embedding matrix $ E(u, t) $ is constructed for a given time step $ t $, considering the previous $ L $ items in the sequence:
+
+$$
+E(u, t) = \left[q_{S_{t-L}^u}, ..., q_{S_{t-2}^u}, q_{S_{t-1}^u}\right]^T
+$$
+
+Here, $ \mathbf{Q} \in \mathbb{R}^{n \times k} $ represents item embeddings, and $ q_i $ denotes the $ i^{th} $ row of $ \mathbf{Q} $. The matrix $ E(u, t) \in \mathbb{R}^{L \times k} $ is used to infer the transient interest of user $ u $ at time-step $ t $.
+
+#### Convolutional Layers
+
+The input matrix $ E(u, t) $ is treated as an image, which is processed by two types of convolutional layers:
+
+- **Horizontal Convolutional Layer**: This layer uses $ d $ horizontal filters $ F_j \in \mathbb{R}^{h \times k} $ for $ 1 \leq j \leq d $ and $ h \in \{1, ..., L\} $. It captures union-level patterns by analyzing sequences of user actions.
+- **Vertical Convolutional Layer**: This layer employs $ d' $ vertical filters $ G_j \in \mathbb{R}^{L \times 1} $ for $ 1 \leq j \leq d' $. It focuses on point-level patterns by examining individual items in the sequence.
+
+After convolutional and pooling operations, the outputs are:
+
+$$
+o = HConv(E(u, t), F)
+$$
+
+$$
+o' = VConv(E(u, t), G)
+$$
+
+Here, $ o \in \mathbb{R}^d $ is the output of the horizontal convolutional network, and $ o' \in \mathbb{R}^{kd'} $ is the output of the vertical convolutional network.
+
+#### Fully Connected Layer
+
+The outputs from the convolutional layers are concatenated and fed into a fully connected neural network layer to obtain high-level representations:
+
+$$
+z = \phi(W[o, o']^T + b)
+$$
+
+Where $ W \in \mathbb{R}^{k \times (d + kd')} $ is the weight matrix, and $ b \in \mathbb{R}^k $ is the bias. The vector $ z \in \mathbb{R}^k $ represents the user's short-term intent.
+
+#### Prediction Function
+
+Finally, the prediction function combines the user's short-term and general tastes:
+
+$$
+\hat{y}_{ui}^t = v_i \cdot [z, p_u]^T + b_i'
+$$
+
+Where $ \mathbf{V} \in \mathbb{R}^{n \times 2k} $ is another item embedding matrix, $ b' \in \mathbb{R}^n $ is the item-specific bias, and $ \mathbf{P} \in \mathbb{R}^{m \times k} $ is the user embedding matrix for general tastes. The model can be trained using Bayesian Personalized Ranking (BPR) or Hinge loss.
+
+This architecture allows the Caser model to effectively capture and utilize both short-term and long-term user preferences for improved recommendation accuracy.
+
+### Architecture Overview
+
+The Caser model, or Convolutional Sequence Embedding Recommendation Model, uses convolutional neural networks (CNNs) to enhance sequential recommendation tasks by capturing both point-level and union-level sequential patterns. Here's an illustration of its architecture:
+
+![Caser](/static/courses/Advances-in-Recomender-Systems/SequenceAwareCaser.svg)
+
+> Illustration of the Caser Model Architecture
+
+1. **Embedding Layer**:
+
+- The model begins with an embedding layer that transforms user-item interactions into a matrix, treating the sequence of past interactions as an "image" in the time and latent spaces. This matrix serves as the input for the convolutional layers.
+
+2. **Convolutional Layers**:
+
+- **Vertical Convolutional Filters**: These filters slide vertically across the embedding matrix. They capture point-level sequential patterns by aggregating the latent embeddings of previous items, effectively performing a weighted sum over these items' representations.
+- **Horizontal Convolutional Filters**: These filters slide horizontally and are designed to capture union-level sequential patterns. They analyze the collective influence of several previous actions on the target action, similar to how CNNs are used in text classification.
+
+3. **Max Pooling**:
+
+- A max pooling operation is applied to the outputs of the convolutional layers. This operation helps in increasing the receptive field and managing varying input sequence lengths by preserving the most significant features.
+
+4. **Fully Connected Layer**:
+
+- The pooled outputs are then fed into a fully connected layer, which combines the captured sequential patterns with the user's general preferences to form a comprehensive user interest representation.
+
+5. **Prediction Layer**:
+
+- The final layer combines the user's short-term intent (captured by the convolutional layers) and long-term preferences (captured by the latent factor model) to predict the next item the user is likely to interact with.
+
+### Model Features
+
+- **Point-Level Patterns**: These patterns assess the impact of individual items in the user's historical sequence on the target item.
+- **Union-Level Patterns**: These patterns evaluate the influence of combinations of previous actions on the subsequent target item.
+- **General Preferences**: In addition to capturing sequential patterns, the Caser model also accounts for users' long-term preferences, which are less likely to change quickly.
+
+### 21.7.2 Model Implementation
+
+This section provides an implementation of the Caser model, which is designed to capture sequential patterns in user interactions for recommendation purposes. The implementation leverages convolutional neural networks (CNNs) to process sequences of user-item interactions.
+
+#### Key Components of the Implementation
+
+1. **Embedding Layers**:
+
+- Two embedding layers are used: one for users and one for items. These layers map user and item IDs to dense vector representations, which serve as the input to the convolutional layers.
+
+2. **Vertical Convolutional Layer**:
+
+- This layer applies vertical convolutional filters to the input sequence. The filters have a height equal to the sequence length (L) and a width of 1. This setup captures point-level sequential patterns by aggregating the latent embeddings of previous items.
+
+3. **Horizontal Convolutional Layer**:
+
+- Horizontal filters are applied to capture union-level sequential patterns. These filters slide over the sequence with varying heights, allowing the model to detect patterns involving multiple items.
+
+4. **Pooling Layers**:
+
+- Max pooling is used after the horizontal convolutions to reduce the dimensionality of the feature maps and retain the most significant features.
+
+5. **Fully Connected Layer**:
+
+- The outputs from the convolutional layers are concatenated and passed through a fully connected layer. This layer integrates the extracted features to form a comprehensive representation of the user's short-term intent.
+
+6. **Dropout Layer**:
+
+- A dropout layer is included to prevent overfitting by randomly setting a fraction of the input units to zero during training.
+
+7. **Output Layer**:
+
+- The final layer combines the user's short-term intent with their general preferences to predict the likelihood of interaction with a target item.
+
+#### Code Implementation
+
+The implementation is encapsulated in a class named `Caser`, which extends the `nn.Block` class from the MXNet library. The class constructor initializes the various components, and the `forward` method defines the forward pass through the network. Here's a brief overview of the code structure:
+
+```python
+import random
+import mxnet as mx
+from mxnet import gluon, np, npx
+from mxnet.gluon import nn
+from d2l import mxnet as d2l
+
+npx.set_np()
+
+class Caser(nn.Block):
+    def __init__(self, num_factors, num_users, num_items, L=5, d=16, d_prime=4, drop_ratio=0.05, **kwargs):
+        super(Caser, self).__init__(**kwargs)
+        self.P = nn.Embedding(num_users, num_factors)
+        self.Q = nn.Embedding(num_items, num_factors)
+        self.d_prime, self.d = d_prime, d
+
+        # Vertical convolution layer
+        self.conv_v = nn.Conv2D(d_prime, (L, 1), in_channels=1)
+
+        # Horizontal convolution layer
+        h = [i + 1 for i in range(L)]
+        self.conv_h, self.max_pool = nn.Sequential(), nn.Sequential()
+        for i in h:
+            self.conv_h.add(nn.Conv2D(d, (i, num_factors), in_channels=1))
+            self.max_pool.add(nn.MaxPool1D(L - i + 1))
+
+        # Fully connected layer
+        self.fc1_dim_v, self.fc1_dim_h = d_prime * num_factors, d * len(h)
+        self.fc = nn.Dense(in_units=d_prime * num_factors + d * L, activation='relu', units=num_factors)
+        self.Q_prime = nn.Embedding(num_items, num_factors * 2)
+        self.b = nn.Embedding(num_items, 1)
+        self.dropout = nn.Dropout(drop_ratio)
+
+    def forward(self, user_id, seq, item_id):
+        item_embs = np.expand_dims(self.Q(seq), 1)
+        user_emb = self.P(user_id)
+        out, out_h, out_v, out_hs = None, None, None, []
+
+        if self.d_prime:
+            out_v = self.conv_v(item_embs)
+            out_v = out_v.reshape(out_v.shape[0], self.fc1_dim_v)
+
+        if self.d:
+            for conv, maxp in zip(self.conv_h, self.max_pool):
+                conv_out = np.squeeze(npx.relu(conv(item_embs)), axis=3)
+                t = maxp(conv_out)
+                pool_out = np.squeeze(t, axis=2)
+                out_hs.append(pool_out)
+            out_h = np.concatenate(out_hs, axis=1)
+
+        out = np.concatenate([out_v, out_h], axis=1)
+        z = self.fc(self.dropout(out))
+        x = np.concatenate([z, user_emb], axis=1)
+        q_prime_i = np.squeeze(self.Q_prime(item_id))
+        b = np.squeeze(self.b(item_id))
+        res = (x * q_prime_i).sum(1) + b
+        return res
+```
+
+This implementation highlights how the Caser model processes user-item interaction sequences to predict future interactions by capturing both short-term and long-term user preferences.
+
+### 21.7.3 Sequential Dataset with Negative Sampling
+
+Section 21.7.3 discusses the creation of a sequential dataset with negative sampling for training sequence-aware recommender systems. This approach is crucial for effectively modeling user interactions over time and improving recommendation accuracy.
+
+#### Sequential Dataset
+
+The dataset is structured to capture the sequence of user interactions with items. For each user, the interactions are organized chronologically. The dataset is designed to output:
+
+- **User Identity**: The unique identifier for each user.
+- **Previous Interactions**: A sequence of the last $$ L $$ items the user interacted with.
+- **Target Item**: The next item the user interacts with, which serves as the prediction target.
+
+#### Negative Sampling
+
+Negative sampling is employed to enhance the learning process by providing the model with examples of items the user did not interact with. This technique helps the model distinguish between relevant and irrelevant items, thereby improving its predictive capabilities.
+
+- **Negative Samples**: For each user interaction sequence, negative samples are generated by selecting items that the user has not interacted with. These are used alongside the positive samples (actual interactions) to train the model.
+
+#### Dataset Implementation
+
+The implementation involves creating a custom dataset class, `SeqDataset`, which handles the data preparation and sampling process. The class is responsible for:
+
+1. **Sorting User Interactions**: Organizing interactions in chronological order for each user.
+2. **Generating Training Samples**: Creating sequences of $$ L $$ items for training, with each sequence paired with its subsequent item as the target.
+3. **Including Negative Samples**: For each training sample, a negative sample is randomly selected from items not interacted with by the user.
+
+Here is a simplified version of the code for the `SeqDataset` class:
+
+```python
+class SeqDataset(gluon.data.Dataset):
+    def __init__(self, user_ids, item_ids, L, num_users, num_items, candidates):
+        user_ids, item_ids = np.array(user_ids), np.array(item_ids)
+        sort_idx = np.array(sorted(range(len(user_ids)), key=lambda k: user_ids[k]))
+        u_ids, i_ids = user_ids[sort_idx], item_ids[sort_idx]
+        temp, u_ids, self.cand = {}, u_ids.asnumpy(), candidates
+        self.all_items = set([i for i in range(num_items)])
+        [temp.setdefault(u_ids[i], []).append(i) for i, _ in enumerate(u_ids)]
+        temp = sorted(temp.items(), key=lambda x: x[0])
+        u_ids = np.array([i[0] for i in temp])
+        idx = np.array([i[1][0] for i in temp])
+        self.ns = ns = int(sum([c - L if c >= L + 1 else 1 for c in np.array([len(i[1]) for i in temp])]))
+        self.seq_items = np.zeros((ns, L))
+        self.seq_users = np.zeros(ns, dtype='int32')
+        self.seq_tgt = np.zeros((ns, 1))
+        self.test_seq = np.zeros((num_users, L))
+        test_users, _uid = np.empty(num_users), None
+        for i, (uid, i_seq) in enumerate(self._seq(u_ids, i_ids, idx, L + 1)):
+            if uid != _uid:
+                self.test_seq[uid][:] = i_seq[-L:]
+                test_users[uid], _uid = uid, uid
+            self.seq_tgt[i][:] = i_seq[-1:]
+            self.seq_items[i][:], self.seq_users[i] = i_seq[:L], uid
+
+    def _win(self, tensor, window_size, step_size=1):
+        if len(tensor) - window_size >= 0:
+            for i in range(len(tensor), 0, - step_size):
+                if i - window_size >= 0:
+                    yield tensor[i - window_size:i]
+                else:
+                    break
+        else:
+            yield tensor
+
+    def _seq(self, u_ids, i_ids, idx, max_len):
+        for i in range(len(idx)):
+            stop_idx = None if i >= len(idx) - 1 else int(idx[i + 1])
+            for s in self._win(i_ids[int(idx[i]):stop_idx], max_len):
+                yield (int(u_ids[i]), s)
+
+    def __len__(self):
+        return self.ns
+
+    def __getitem__(self, idx):
+        neg = list(self.all_items - set(self.cand[int(self.seq_users[idx])]))
+        i = random.randint(0, len(neg) - 1)
+        return (self.seq_users[idx], self.seq_items[idx], self.seq_tgt[idx], neg[i])
+```
+
+This section highlights the importance of structuring data effectively for sequence-aware recommendation tasks and demonstrates how negative sampling can be integrated into the dataset preparation process to enhance model training.
+
+### 21.7.4 Load the MovieLens 100K Dataset
+
+Section 21.7.4 focuses on preparing the MovieLens 100K dataset for sequence-aware recommendation tasks. This involves reading, splitting, and loading the dataset in a way that aligns with the requirements of sequence-aware models like Caser.
+
+#### Dataset Preparation
+
+1. **Reading the Dataset**:
+
+- The MovieLens 100K dataset is read using a utility function `d2l.read_data_ml100k()`, which returns the data along with the number of users and items.
+
+2. **Splitting the Dataset**:
+
+- The dataset is split into training and testing sets using `d2l.split_data_ml100k()`. This function organizes the data in a sequence-aware mode, ensuring that the temporal order of interactions is maintained.
+
+3. **Loading Data**:
+
+- The training and testing data are loaded with a sequential data loader. This loader is implemented to handle the sequential nature of the interactions, using the `SeqDataset` class defined in the previous section.
+
+#### Implementation Details
+
+The code snippet below demonstrates how the MovieLens 100K dataset is processed and loaded:
+
+```python
+TARGET_NUM, L, batch_size = 1, 5, 4096
+df, num_users, num_items = d2l.read_data_ml100k()
+train_data, test_data = d2l.split_data_ml100k(df, num_users, num_items, 'seq-aware')
+users_train, items_train, ratings_train, candidates = d2l.load_data_ml100k(
+    train_data, num_users, num_items, feedback="implicit")
+users_test, items_test, ratings_test, test_iter = d2l.load_data_ml100k(
+    test_data, num_users, num_items, feedback="implicit")
+
+train_seq_data = SeqDataset(users_train, items_train, L, num_users, num_items, candidates)
+train_iter = gluon.data.DataLoader(train_seq_data, batch_size, True, last_batch="rollover", num_workers=d2l.get_dataloader_workers())
+test_seq_iter = train_seq_data.test_seq
+train_seq_data[0]
+```
+
+- **Parameters**:
+- `TARGET_NUM` is set to 1, indicating the number of target items per sequence.
+- `L` is the length of the sequence considered for each user.
+- `batch_size` defines the number of samples per batch during training.
+
+- **Data Loading**:
+- `train_seq_data` is an instance of `SeqDataset`, which organizes the training data into sequences of length `L`.
+- `train_iter` is a data loader that iterates over the training sequences, facilitating the training process.
+
+#### Output Structure
+
+The training data structure includes:
+
+- **User Identity**: The unique identifier for each user.
+- **Sequence of Items**: The last `L` items the user interacted with.
+- **Target Item**: The item the user interacted with immediately after the sequence.
+
+This setup ensures that the model can learn from the sequential patterns in user interactions, improving its ability to make accurate recommendations.
+
+### 21.7.5 Training and Evaluating the Model
+
+Section 21.7.5 focuses on the process of training and evaluating the Caser model, a sequence-aware recommender system. This section outlines the configuration of the training environment, the optimization process, and the evaluation metrics used to assess the model's performance.
+
+#### Training Configuration
+
+1. **Model Initialization**:
+
+- The Caser model is initialized with specific hyperparameters, including the number of latent factors, sequence length, and convolutional filter sizes. The model is set up to run on available GPUs for efficient computation.
+
+2. **Hyperparameters**:
+
+- Learning rate, number of epochs, weight decay, and optimizer type are specified. For instance, the learning rate might be set to 0.04, with a weight decay of 1e-5, and the Adam optimizer is used for training.
+
+3. **Loss Function**:
+
+- The Bayesian Personalized Ranking (BPR) loss is employed, which is suitable for implicit feedback data and focuses on maximizing the difference between positive and negative item predictions.
+
+#### Training Process
+
+- The training loop involves iterating over batches of user-item sequences, updating model parameters to minimize the BPR loss. The process is repeated for a predefined number of epochs to ensure convergence.
+
+- **Data Iterators**:
+- Training and testing data iterators are used to feed batches of data into the model during training and evaluation.
+
+#### Evaluation
+
+1. **Metrics**:
+
+- The model's performance is evaluated using ranking metrics such as Hit Rate (HR) and Normalized Discounted Cumulative Gain (NDCG) at a specified cutoff (e.g., top 10). These metrics assess how well the model ranks relevant items higher than irrelevant ones.
+
+2. **Evaluation Function**:
+
+- A function is defined to compute these metrics by comparing the model's predictions against the ground truth in the test dataset. The evaluation is conducted periodically during training to monitor progress and adjust hyperparameters if necessary.
+
+3. **Testing**:
+
+- After training, the model is tested on a separate test dataset to evaluate its generalization ability. The test results provide insights into the model's effectiveness in real-world scenarios.
+
+#### Implementation Details
+
+The training and evaluation process is typically implemented using a deep learning framework like MXNet or PyTorch. The following pseudocode outlines the key steps:
+
+```python
+# Initialize model and training parameters
+net = Caser(num_factors, num_users, num_items, L)
+net.initialize(ctx=devices, force_reinit=True, init=mx.init.Normal(0.01))
+trainer = gluon.Trainer(net.collect_params(), 'adam', {"learning_rate": lr, 'wd': wd})
+
+# Training loop
+for epoch in range(num_epochs):
+    for batch in train_iter:
+        with autograd.record():
+            # Forward pass
+            loss = d2l.BPRLoss()
+            # Backward pass and parameter update
+            loss.backward()
+        trainer.step(batch_size)
+
+    # Periodic evaluation
+    if epoch % eval_step == 0:
+        hr, ndcg = d2l.evaluate_ranking(net, test_iter, num_users, num_items)
+        print(f'Epoch {epoch}, HR: {hr}, NDCG: {ndcg}')
+
+# Final evaluation on test data
+final_hr, final_ndcg = d2l.evaluate_ranking(net, test_iter, num_users, num_items)
+print(f'Final HR: {final_hr}, Final NDCG: {final_ndcg}')
+```
+
+This section emphasizes the importance of a well-structured training and evaluation process in developing effective sequence-aware recommender systems, ensuring that the model can accurately predict user preferences based on sequential interaction data.

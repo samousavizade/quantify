@@ -1,0 +1,150 @@
+---
+title: Application
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Application
+
+In this section, we apply some of the nonlinear models discussed in this chapter to analyze the monthly excess returns of stocks. The data used are monthly returns of IBM stock and S&P 500 index from January 1926 to December 2008. The excess returns are obtained by subtracting the 1-month Treasury bill rate from the simple returns. There are 996 observations.
+
+### Data Analysis
+
+Let $r_t$ be the excess return series of IBM stock. The mean of $r_t$ is 0.626% and the standard deviation is 7.15%. The excess return series has skewness -0.566 and excess kurtosis 9.96. The Jarque-Bera test statistic for normality is 3975.8, which has a p-value less than $10^{-6}$, indicating that the excess returns are highly non-normal. The first five sample autocorrelations of $r_t$ are 0.104, -0.039, -0.027, 0.017, and 0.005, respectively. Only the lag-1 autocorrelation is statistically significant at the 5% level.
+
+For the squared series $r_t^2$, the first five sample autocorrelations are 0.199, 0.172, 0.145, 0.183, and 0.101. They are all statistically significant at the 5% level, indicating strong conditional heteroscedasticity in the data. The Ljung-Box statistics of $r_t^2$ give $Q(10) = 204.5$ and $Q(20) = 292.1$, confirming the presence of conditional heteroscedasticity.
+
+### Linear Models
+
+We begin with fitting a simple AR(1) model to the data:
+
+$$r_t = 0.00626 + 0.104r_{t-1} + a_t, \quad \hat{\sigma}_a = 0.0711$$
+
+where standard errors of the estimates are 0.00226 and 0.0316, respectively. The Ljung-Box statistics of the residuals give $Q(10) = 5.8$ and $Q(20) = 18.4$ with p-values 0.83 and 0.56, respectively. Thus, the AR(1) model is adequate in modeling the linear dependence in the mean equation. However, the model fails to describe the nonlinear dependence in the conditional variance.
+
+### GARCH Models
+
+To capture the conditional heteroscedasticity, we consider a GARCH(1,1) model:
+
+$$
+\begin{aligned}
+r_t &= \mu + a_t \\
+a_t &= \sigma_t \epsilon_t \\
+\sigma_t^2 &= \alpha_0 + \alpha_1 a_{t-1}^2 + \beta_1 \sigma_{t-1}^2
+\end{aligned}
+$$
+
+where $\{\epsilon_t\}$ is a sequence of independent and identically distributed random variables with zero mean and unit variance. We consider two cases: (a) $\epsilon_t$ follows a standard normal distribution, and (b) $\epsilon_t$ follows a standardized Student-t distribution with $v$ degrees of freedom. The fitted models are:
+
+1. Normal GARCH(1,1) model:
+
+$$
+\begin{aligned}
+r_t &= 0.00812 + a_t \\
+\sigma_t^2 &= 0.000047 + 0.1124a_{t-1}^2 + 0.8714\sigma_{t-1}^2
+\end{aligned}
+$$
+
+where the standard errors of the estimates are 0.00185, 0.000015, 0.0163, and 0.0188, respectively. The Ljung-Box statistics of the standardized residuals $\hat{a}_t/\hat{\sigma}_t$ give $Q(10) = 9.7$ and $Q(20) = 23.1$ with p-values 0.47 and 0.28. For the squared standardized residuals, we have $Q(10) = 4.1$ and $Q(20) = 10.9$ with p-values 0.94 and 0.95. Thus, the model adequately describes both the mean and volatility equations of the excess returns.
+
+2. Student-t GARCH(1,1) model:
+
+$$
+\begin{aligned}
+r_t &= 0.00777 + a_t \\
+\sigma_t^2 &= 0.000036 + 0.1009a_{t-1}^2 + 0.8872\sigma_{t-1}^2
+\end{aligned}
+$$
+
+where the standard errors of the estimates are 0.00176, 0.000013, 0.0171, and 0.0178, respectively. The estimated degrees of freedom is $\hat{v} = 6.09$ with standard error 0.86. The Ljung-Box statistics of the standardized residuals give $Q(10) = 9.8$ and $Q(20) = 23.2$ with p-values 0.46 and 0.28. For the squared standardized residuals, we have $Q(10) = 3.8$ and $Q(20) = 10.4$ with p-values 0.96 and 0.96. Again, the model is adequate.
+
+Comparing the two GARCH models, we see that they are similar. However, the Student-t GARCH model has a slightly higher log-likelihood value (-2645.8 versus -2651.5). The likelihood ratio test statistic for testing normal versus Student-t distribution is 11.4, which is highly significant based on a chi-squared distribution with 1 degree of freedom. Therefore, the Student-t GARCH model is preferred.
+
+### Threshold Models
+
+Next, we consider a threshold model for the excess returns. Define the threshold variable as $z_t = r_{m,t} - r_{f,t}$, where $r_{m,t}$ is the return of S&P 500 index and $r_{f,t}$ is the 1-month Treasury bill rate. This threshold variable represents the excess return of the market portfolio. We use a 2-regime threshold model:
+
+$$
+r_t = \begin{cases}
+\phi_{10} + \phi_{11} r_{t-1} + a_{1t}, & \text{if } z_{t-1} \leq r_0 \\
+\phi_{20} + \phi_{21} r_{t-1} + a_{2t}, & \text{if } z_{t-1} > r_0
+\end{cases}
+$$
+
+where $r_0$ is the threshold value to be determined empirically.
+
+Using the method discussed in Section 4.1.2, we obtain $\hat{r}_0 = -0.0263$ with a 95% confidence interval (-0.0373, -0.0217). The fitted threshold model is:
+
+$$
+r_t = \begin{cases}
+-0.0148 + 0.0183r_{t-1} + a_{1t}, & \text{if } z_{t-1} \leq -0.0263 \\
+(0.0056) \quad (0.0534) & \hat{\sigma}_1 = 0.0893 \\
+0.0140 + 0.1136r_{t-1} + a_{2t}, & \text{if } z_{t-1} > -0.0263 \\
+(0.0025) \quad (0.0378) & \hat{\sigma}_2 = 0.0621
+\end{cases}
+$$
+
+where the numbers in parentheses are standard errors of the estimates. There are 284 observations in the lower regime and 711 observations in the upper regime.
+
+The threshold model shows some interesting results:
+
+1. The AR coefficient in the lower regime (0.0183) is not statistically significant, but it is significant in the upper regime (0.1136).
+
+2. The intercept is negative in the lower regime but positive in the upper regime.
+
+3. The standard deviation of the shock is much higher in the lower regime (0.0893 versus 0.0621).
+
+These results indicate that the behavior of IBM stock excess returns depends on the market condition. When the market excess return is below -2.63%, the excess return of IBM stock tends to be negative with higher volatility and shows no serial correlation. On the other hand, when the market excess return is above -2.63%, the excess return of IBM stock tends to be positive with lower volatility and shows positive serial correlation.
+
+To check the adequacy of the fitted threshold model, we compute the Ljung-Box statistics of the standardized residuals. We obtain $Q(10) = 4.7$ and $Q(20) = 16.9$ with p-values 0.91 and 0.66, respectively. For the squared standardized residuals, we have $Q(10) = 31.6$ and $Q(20) = 49.4$ with p-values 0.0005 and 0.0003. The results show that the threshold model fails to describe the conditional heteroscedasticity in the data.
+
+### Threshold GARCH Models
+
+To overcome the weakness of the simple threshold model, we consider a threshold GARCH model that allows for both threshold effects in the mean equation and conditional heteroscedasticity in the volatility equation. Specifically, we use the following model:
+
+$$
+\begin{aligned}
+r_t &= \begin{cases}
+\phi_{10} + \phi_{11} r_{t-1} + a_{1t}, & \text{if } z_{t-1} \leq r_0 \\
+\phi_{20} + \phi_{21} r_{t-1} + a_{2t}, & \text{if } z_{t-1} > r_0
+\end{cases} \\
+a_{it} &= \sigma_{it} \epsilon_t, \quad i = 1, 2 \\
+\sigma_{it}^2 &= \alpha_{i0} + \alpha_{i1} a_{t-1}^2 + \beta_{i1} \sigma_{t-1}^2, \quad i = 1, 2
+\end{aligned}
+$$
+
+where $\{\epsilon_t\}$ is assumed to follow a standardized Student-t distribution with $v$ degrees of freedom. The fitted model is:
+
+$$
+\begin{aligned}
+r_t &= \begin{cases}
+-0.0141 + 0.0067r_{t-1} + a_{1t}, & \text{if } z_{t-1} \leq -0.0263 \\
+(0.0052) \quad (0.0469) & \\
+0.0132 + 0.1254r_{t-1} + a_{2t}, & \text{if } z_{t-1} > -0.0263 \\
+(0.0024) \quad (0.0355) &
+\end{cases} \\
+\sigma_{1t}^2 &= 0.000194 + 0.1013a_{t-1}^2 + 0.8510\sigma_{t-1}^2 \\
+&(0.000118) \quad (0.0383) \quad (0.0508) \\
+\sigma_{2t}^2 &= 0.000025 + 0.0916a_{t-1}^2 + 0.8977\sigma_{t-1}^2 \\
+&(0.000013) \quad (0.0193) \quad (0.0203)
+\end{aligned}
+$$
+
+where the numbers in parentheses are standard errors of the estimates. The estimated degrees of freedom is $\hat{v} = 6.55$ with standard error 0.98.
+
+The Ljung-Box statistics of the standardized residuals give $Q(10) = 7.8$ and $Q(20) = 20.6$ with p-values 0.65 and 0.42. For the squared standardized residuals, we have $Q(10) = 2.9$ and $Q(20) = 8.7$ with p-values 0.98 and 0.99. These results show that the threshold GARCH model adequately describes both the conditional mean and conditional variance of the excess returns.
+
+The threshold GARCH model confirms the findings of the simple threshold model:
+
+1. The AR coefficient is not significant in the lower regime but significant in the upper regime.
+2. The intercept is negative in the lower regime but positive in the upper regime.
+3. The volatility persistence ($\alpha_{i1} + \beta_{i1}$) is slightly higher in the upper regime (0.9893 versus 0.9523).
+4. The unconditional variance is much higher in the lower regime (0.00406 versus 0.00233).
+
+These results provide strong evidence of nonlinearity in both the conditional mean and conditional variance of IBM stock excess returns.
+
+In summary, this application demonstrates the usefulness of nonlinear models in capturing complex dynamics in financial time series. The threshold GARCH model, which combines both threshold effects and conditional heteroscedasticity, provides a more comprehensive description of the data compared to simpler linear or nonlinear models.

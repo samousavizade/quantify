@@ -1,0 +1,159 @@
+---
+title: Simple AR Models
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Simple AR Models
+
+Autoregressive (AR) models are fundamental tools in time series analysis, particularly useful for modeling financial data. They capture the linear dependencies between a variable and its lagged values. This section explores the properties, identification, estimation, and forecasting of simple AR models.
+
+### Properties of AR Models
+
+#### AR(1) Model
+
+An autoregressive model of order 1, denoted as AR(1), is defined as:
+
+$$
+r_t = \phi_0 + \phi_1 r_{t-1} + a_t
+$$
+
+where $\{a_t\}$ is a white noise series with mean zero and variance $\sigma_a^2$. The model implies that the current value $r_t$ depends linearly on its immediate past value $r_{t-1}$ and a random shock $a_t$.
+
+**Stationarity Condition:**
+
+For the AR(1) model to be weakly stationary, the absolute value of the autoregressive parameter must be less than one:
+
+$$
+|\phi_1| < 1
+$$
+
+This condition ensures that the influence of past values diminishes over time.
+
+**Mean and Variance:**
+
+Under stationarity, the mean and variance of $r_t$ are given by:
+
+$$
+E(r_t) = \mu = \frac{\phi_0}{1 - \phi_1}
+$$
+
+$$
+Var(r_t) = \frac{\sigma_a^2}{1 - \phi_1^2}
+$$
+
+**Autocorrelation Function (ACF):**
+
+The autocorrelation function for an AR(1) model decays exponentially:
+
+$$
+\rho_\ell = \phi_1^\ell
+$$
+
+for $\ell \geq 0$. This property allows us to identify AR(1) models by examining the pattern of decay in the sample ACF.
+
+#### AR(2) Model
+
+An autoregressive model of order 2, denoted as AR(2), is defined as:
+
+$$
+r_t = \phi_0 + \phi_1 r_{t-1} + \phi_2 r_{t-2} + a_t
+$$
+
+**Stationarity Condition:**
+
+For stationarity, the roots of the characteristic equation must lie outside the unit circle:
+
+$$
+1 - \phi_1 x - \phi_2 x^2 = 0
+$$
+
+**Mean and Variance:**
+
+The mean of an AR(2) process is:
+
+$$
+E(r_t) = \mu = \frac{\phi_0}{1 - \phi_1 - \phi_2}
+$$
+
+**Autocorrelation Function (ACF):**
+
+The ACF satisfies a second-order difference equation:
+
+$$
+\rho_\ell = \phi_1 \rho_{\ell-1} + \phi_2 \rho_{\ell-2}
+$$
+
+for $\ell > 0$. The behavior of the ACF depends on the nature of the roots of the characteristic equation.
+
+### Identifying AR Models in Practice
+
+#### Partial Autocorrelation Function (PACF)
+
+The PACF is used to identify the order $p$ of an AR model. For an AR($p$) process, the PACF cuts off after lag $p$. This means that for lags greater than $p$, the PACF values should be approximately zero.
+
+#### Information Criteria
+
+Information criteria such as Akaike Information Criterion (AIC) and Bayesian Information Criterion (BIC) are used to determine the optimal order $p$:
+
+- **AIC:**
+
+$$
+AIC(p) = \ln(\hat{\sigma}^2_p) + \frac{2p}{T}
+$$
+
+- **BIC:**
+
+$$
+BIC(p) = \ln(\hat{\sigma}^2_p) + \frac{p\ln(T)}{T}
+$$
+
+where $\hat{\sigma}^2_p$ is the estimated variance of residuals for an AR($p$) model, and $T$ is the sample size.
+
+### Estimation
+
+Parameters of an AR model can be estimated using conditional least squares or maximum likelihood estimation. The estimates are obtained by minimizing the sum of squared residuals.
+
+### Forecasting
+
+Forecasting with AR models involves predicting future values based on past observations. For an AR($p$) model, forecasts are computed recursively using:
+
+#### One-Step-Ahead Forecast
+
+The one-step-ahead forecast at time $h$ is given by:
+
+$$
+\hat{r}_h(1) = E(r_{h+1} | F_h) = \phi_0 + \sum_{i=1}^{p} \phi_i r_{h+1-i}
+$$
+
+where $F_h$ denotes information available at time $h$.
+
+#### Multi-Step-Ahead Forecasts
+
+For multi-step-ahead forecasts ($\ell > 1$), we use:
+
+$$
+\hat{r}_h(\ell) = E(r_{h+\ell} | F_h)
+$$
+
+which can be computed recursively using previous forecasts.
+
+**Forecast Error:**
+
+The variance of forecast errors increases with forecast horizon $\ell$, reflecting increased uncertainty.
+
+### Example: U.S. Quarterly Real GNP Growth Rate
+
+Consider fitting an AR(3) model to U.S. quarterly real GNP growth rates:
+
+$$
+r_t = 0.0047 + 0.348 r_{t-1} + 0.179 r_{t-2} - 0.142 r_{t-3} + a_t
+$$
+
+The characteristic equation has complex roots, indicating cyclical behavior with an average cycle length of approximately three years.
+
+This section provides foundational knowledge on simple AR models, essential for understanding more complex time series models used in financial econometrics.

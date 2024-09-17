@@ -1,0 +1,66 @@
+---
+title: The Durbin-Watson Test under Classical Assumptions
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## The Durbin-Watson Test under Classical Assumptions
+
+### Introduction
+
+The Durbin-Watson (DW) test is a widely used statistical test for detecting the presence of first-order serial correlation in the residuals of a regression analysis. Serial correlation, or autocorrelation, occurs when the residuals of a regression model are correlated across time, which can lead to inefficient estimates and invalid inference. The DW test is particularly useful for time series data where the classical assumptions of the linear regression model apply.
+
+### Classical Assumptions
+
+Before delving into the mechanics of the Durbin-Watson test, it's important to understand the classical assumptions underlying its application:
+
+1. **Linearity**: The relationship between the dependent variable and the independent variables is linear.
+2. **Homoskedasticity**: The variance of the error terms is constant across observations.
+3. **Independence**: The error terms are independent of each other.
+4. **Normality**: The error terms are normally distributed.
+
+The DW test specifically addresses the third assumption by testing for independence of error terms, focusing on first-order autocorrelation.
+
+### The Durbin-Watson Statistic
+
+The DW statistic is calculated using the residuals from an Ordinary Least Squares (OLS) regression. Let $$ \hat{u}\_t $$ be the residual at time $$ t $$ from an OLS regression model. The DW statistic is given by:
+
+$$
+DW = \frac{\sum_{t=2}^{n} (\hat{u}_t - \hat{u}_{t-1})^2}{\sum_{t=1}^{n} \hat{u}_t^2}
+$$
+
+where $$ n $$ is the number of observations.
+
+### Interpretation of the Durbin-Watson Statistic
+
+The DW statistic ranges from 0 to 4:
+
+- A value near 2 suggests no first-order autocorrelation.
+- A value approaching 0 indicates positive autocorrelation.
+- A value approaching 4 indicates negative autocorrelation.
+
+### Hypothesis Testing with Durbin-Watson
+
+The null hypothesis ($$ H_0 $$) for the DW test is that there is no first-order autocorrelation ($$ \rho = 0 $$), while the alternative hypothesis ($$ H_a $$) is that there is first-order autocorrelation ($$ \rho \neq 0 $$).
+
+#### Decision Rule
+
+- If $$ DW < d_L $$, reject $$ H_0 $$ in favor of positive autocorrelation.
+- If $$ DW > d_U $$, fail to reject $$ H_0 $$.
+- If $$ d_L < DW < d_U $$, the test is inconclusive.
+
+Here, $$ d_L $$ and $$ d_U $$ are lower and upper critical values from the Durbin-Watson tables, which depend on the sample size and number of regressors in the model.
+
+### Limitations of the Durbin-Watson Test
+
+1. **Applicability**: The DW test is primarily applicable to models with strictly exogenous regressors and may not be suitable for models with lagged dependent variables.
+2. **Inconclusive Region**: There exists a region where the test does not provide a clear decision regarding autocorrelation.
+3. **Higher-Order Autocorrelation**: The DW test only detects first-order autocorrelation and may not identify higher-order patterns.
+
+### Conclusion
+
+The Durbin-Watson test remains a fundamental tool for detecting first-order serial correlation in time series data under classical linear regression assumptions. While it provides valuable insights into potential issues with autocorrelation, researchers should be aware of its limitations and consider complementary tests or methods when dealing with more complex models or higher-order correlations.

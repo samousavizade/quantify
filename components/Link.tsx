@@ -13,17 +13,25 @@ const CustomLink = ({
 
   if (isInternalLink) {
     return (
-      <Link href={href} legacyBehavior>
+      <Link href={href} legacyBehavior className={'no-underline'}>
         <LinkButton {...rest} />
       </Link>
     );
   }
 
   if (isAnchorLink) {
-    return <LinkButton href={href} {...rest} />;
+    return <LinkButton href={href} {...rest} className={'no-underline'} />;
   }
 
-  return <LinkButton target="_blank" rel="noopener noreferrer" href={href} {...rest} />;
+  return (
+    <LinkButton
+      target="_blank"
+      rel="noopener noreferrer"
+      href={href}
+      className={'no-underline'}
+      {...rest}
+    />
+  );
 };
 
 export default CustomLink;

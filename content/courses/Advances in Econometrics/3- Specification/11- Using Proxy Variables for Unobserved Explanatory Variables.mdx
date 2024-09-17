@@ -1,0 +1,127 @@
+---
+title: Using Proxy Variables for Unobserved Explanatory Variables
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+### **Using Proxy Variables for Unobserved Explanatory Variables**
+
+In econometric models, it is common to encounter situations where some explanatory variables are unobserved. These unobserved variables can lead to omitted variable bias if they are correlated with both the dependent variable and the included explanatory variables. One way to address this issue is by using proxy variables, which serve as substitutes for the unobserved variables.
+
+#### **What is a Proxy Variable?**
+
+A proxy variable is an observable variable that is used in place of an unobservable one. The idea is that the proxy variable captures enough of the variation in the unobserved variable to mitigate the bias caused by its omission.
+
+### **Using Lagged Dependent Variables as Proxy Variables**
+
+One approach to using proxy variables is to employ lagged dependent variables. This method is particularly useful in time-series data, where past values of the dependent variable can provide information about unobserved factors affecting current outcomes.
+
+#### **Intuition and Application**
+
+- **Lagged Dependent Variable**: In a model where the current value of a dependent variable depends on its past values, including a lagged dependent variable can help control for unobserved factors that persist over time.
+
+- **Example**: Consider a model predicting current consumption based on income and past consumption. The past consumption acts as a proxy for unobserved preferences or habits that influence current consumption.
+
+### **A Different Slant on Multiple Regression**
+
+In multiple regression analysis, using proxy variables can be seen as an extension of including additional explanatory variables to control for omitted factors.
+
+#### **Key Points**
+
+- **Augmenting Models**: By adding proxy variables, we aim to capture the effect of unobserved variables indirectly.
+
+- **Improved Estimates**: Including proxies can lead to more accurate estimates of the coefficients of interest by reducing omitted variable bias.
+
+### **Potential Outcomes and Proxy Variables**
+
+The concept of potential outcomes in econometrics relates to causal inference and understanding what would happen under different scenarios or treatments.
+
+#### **Role of Proxy Variables**
+
+- **Causal Inference**: Proxy variables can be crucial in causal models where direct measurement of certain factors is not possible.
+
+- **Example**: In evaluating the impact of education on earnings, innate ability might be unobservable. A proxy such as test scores or parental education could be used to account for this unobserved factor.
+
+## In Depth:
+
+### **Mathematical Representation**
+
+Consider a simple linear regression model:
+
+$$
+Y = \beta_0 + \beta_1 X_1 + \epsilon
+$$
+
+where:
+
+- $$ Y $$ is the dependent variable.
+- $$ X_1 $$ is an observed explanatory variable.
+- $$ \epsilon $$ is the error term, which includes the effect of an unobserved variable $$ Z $$.
+
+If $$ Z $$ is correlated with both $$ Y $$ and $$ X_1 $$, omitting it will bias the estimate of $$ \beta_1 $$. To mitigate this bias, we introduce a proxy variable $$ P $$ for $$ Z $$:
+
+$$
+Y = \beta_0 + \beta_1 X_1 + \gamma P + u
+$$
+
+where:
+
+- $$ P $$ is the proxy for the unobserved variable $$ Z $$.
+- $$ u $$ is a new error term that ideally has no correlation with the included variables.
+
+### **Properties of a Good Proxy Variable**
+
+For a proxy variable to be effective, it should satisfy the following conditions:
+
+1. **Correlation with Unobserved Variable**: The proxy should be correlated with the unobserved variable it represents.
+2. **Uncorrelated with Error Term**: The proxy should not be correlated with the error term in the regression equation.
+3. **Exogeneity**: The proxy should not be influenced by the dependent variable or other independent variables in ways that introduce endogeneity.
+
+### **Using Lagged Dependent Variables as Proxy Variables**
+
+In time-series data, lagged dependent variables can serve as proxies for unobserved factors that persist over time. For example, if past values of a dependent variable are correlated with current values due to unobserved persistent factors, including lagged values can help control for these effects.
+
+#### **Example**
+
+Consider a model predicting current consumption based on income and past consumption:
+
+$$
+C_t = \alpha + \beta Y_t + \gamma C_{t-1} + v_t
+$$
+
+where:
+
+- $$ C_t $$ is current consumption.
+- $$ Y_t $$ is current income.
+- $$ C\_{t-1} $$ is past consumption (the lagged dependent variable).
+- Including $$ C\_{t-1} $$ helps account for unobserved preferences or habits.
+
+#### **Example in Causal Models**
+
+In evaluating the impact of education on earnings, innate ability might be unobservable. A proxy such as test scores or parental education could be used to account for this unobserved factor, improving causal estimates of education's effect on earnings.
+
+### **Conclusion**
+
+Proxy variables are a practical solution for addressing omitted variable bias in econometric models. By carefully selecting proxies that correlate with unobservable factors, researchers can improve their model's accuracy and reliability. However, it is essential to ensure that proxies are valid representations of the unobserved variables they intend to replace to avoid introducing new biases.
+
+[^1]: https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/30626316/2be59c8f-ac44-43e7-a595-38c5bea42df7/Jeffrey_M_Wooldridge_Introductory_Econometrics_A_Modern_Approach.pdf
+[^2]: https://deepblue.lib.umich.edu/bitstream/handle/2027.42/75114/j.1467-9574.1991.tb01295.x.pdf?sequence=1
+[^3]: https://direct.mit.edu/rest/article-abstract/88/3/549/57624/Interpretation-of-Regressions-with-Multiple?redirectedFrom=fulltext
+[^4]: https://docs.iza.org/dp10057.pdf
+[^5]: http://fmwww.bc.edu/EC-C/F2014/2228/ECON2228_2014_8.slides.pdf
+[^6]: https://statisticsbyjim.com/regression/proxy-variables/
+[^7]: https://economics.yale.edu/sites/default/files/proxy_controls_and_panel_data.pdf
+[^8]: https://orbi.uliege.be/bitstream/2268/266529/5/Lecture%20Notes%20Ch%209%20-%20RegressionWithCrossSectionalData-4.pdf
+[^9]: http://fmwww.bc.edu/ec-c/F2007/228/EC228.f2005.nn09.pdf
+[^10]: https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/30626316/2be59c8f-ac44-43e7-a595-38c5bea42df7/Jeffrey_M_Wooldridge_Introductory_Econometrics_A_Modern_Approach.pdf
+[^11]: https://web.ics.purdue.edu/~bvankamm/Files/360%20Notes/08%20-%20Specification%20and%20Data%20Issues.pdf
+[^12]: https://en.wikipedia.org/wiki/Proxy_%28statistics%29
+[^13]: https://deepblue.lib.umich.edu/bitstream/handle/2027.42/75114/j.1467-9574.1991.tb01295.x.pdf?sequence=1
+[^14]: https://weallcount.com/2020/06/12/introduction-to-proxy-variables/
+[^15]: https://economics.yale.edu/sites/default/files/proxy_controls_and_panel_data.pdf
+[^16]: https://direct.mit.edu/rest/article-abstract/88/3/549/57624/Interpretation-of-Regressions-with-Multiple?redirectedFrom=fulltext
+[^17]: http://fmwww.bc.edu/ec-c/F2007/228/EC228.f2005.nn09.pdf

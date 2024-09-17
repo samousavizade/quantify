@@ -3,27 +3,22 @@ import Intro from '@/components/Intro';
 import { ScrollProvider } from '@/components/Providers/ScrollProvider';
 import RecentPosts from '@/components/RecentPosts';
 import SectionContainer from '@/components/SectionContainer';
-import TopTracks from '@/components/Spotify/TopTracks';
 import Works from '@/components/Work/Works';
 import { allCoreContent, sortedBlogPost } from '@/lib/utils/contentlayer';
-// @ts-ignore
 import { allBlogs } from 'contentlayer/generated';
-import { Suspense } from 'react';
+import ThreeScene from '@/components/ThreeScene';
 
-export default function Page() {
+export default async function Page() {
   const sortedPosts = sortedBlogPost(allBlogs);
   const posts = allCoreContent(sortedPosts);
 
   return (
     <ScrollProvider>
-      <Hero />
+      <Hero threeDScene={<ThreeScene />} />
       <Intro />
       <Works />
       <SectionContainer>
         <RecentPosts posts={posts} />
-        <Suspense fallback="loading..">
-          <TopTracks />
-        </Suspense>
       </SectionContainer>
     </ScrollProvider>
   );

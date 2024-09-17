@@ -1,0 +1,102 @@
+---
+title: AutoRec
+draft: false
+summary: Backtest statistics are essential for evaluating the efficacy of investment strategies.
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## AutoRec: Rating Prediction with Auto-Encoders
+
+AutoRec is a nonlinear neural network model designed for collaborative filtering, which addresses the limitations of traditional matrix factorization models by incorporating nonlinear transformations. This model uses an autoencoder architecture to handle explicit feedback in recommendation systems.
+
+## Auto-Encoder Structure
+
+AutoRec shares the basic structure of an autoencoder, consisting of:
+
+- Input Layer: Takes columns (or rows) of the interaction matrix.
+- Hidden Layer: Encodes the input into a low-dimensional representation.
+- Output Layer: Reconstructs the interaction matrix.
+
+Unlike traditional auto-encoders that focus on learning hidden representations, AutoRec emphasizes reconstructing the output layer to fill in missing entries for recommendation purposes.
+
+## Model Definition
+
+The model uses the following neural architecture:
+
+$$
+h(R^*_i) = f(W \cdot g(VR^*_i + \mu) + b)
+$$
+
+- $$f(\cdot)$$ and $$g(\cdot)$$: Activation functions.
+- $$W$$ and $$V$$: Weight matrices.
+- $$\mu$$ and $$b$$: Biases.
+
+Here, $$h(R^*_i)$$ is the reconstructed output of the $$i$$-th column of the rating matrix $$R$$.
+
+## Objective Function
+
+The objective is to minimize the reconstruction error:
+
+$$
+\text{argmin}_{W,V,\mu,b} \sum_{i=1}^{M} \|R^*_i - h(R^*_i)\|_O^2 + \lambda(\|W\|_F^2 + \|V\|_F^2)
+$$
+
+- $$\|\cdot\|_O$$: Consider only observed ratings, updating weights associated with observed inputs.
+- $$\lambda$$: Regularization parameter to prevent overfitting.
+
+## Model Implementation
+
+The implementation involves creating an encoder and decoder using fully connected layers. The encoder applies a sigmoid activation, while no activation is used for the decoder. Dropout is included to mitigate overfitting, and gradients of unobserved inputs are masked to ensure only observed ratings influence learning.
+
+```python
+class AutoRec(nn.Block):
+    def __init__(self, num_hidden, num_users, dropout=0.05):
+        super(AutoRec, self).__init__()
+        self.encoder = nn.Dense(num_hidden, activation='sigmoid', use_bias=True)
+        self.decoder = nn.Dense(num_users, use_bias=True)
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, input):
+        hidden = self.dropout(self.encoder(input))
+        pred = self.decoder(hidden)
+        if autograd.is_training():  # Mask the gradient during training
+            return pred * np.sign(input)
+        else:
+            return pred
+```
+
+## Evaluation
+
+The model's performance is evaluated using Root Mean Square Error (RMSE). The evaluation function computes the RMSE by comparing the reconstructed ratings with the test data.
+
+```python
+def evaluator(network, inter_matrix, test_data, devices):
+    scores = []
+    for values in inter_matrix:
+        feat = gluon.utils.split_and_load(values, devices, even_split=False)
+        scores.extend([network(i).asnumpy() for i in feat])
+    recons = np.array([item for sublist in scores for item in sublist])
+    rmse = np.sqrt(np.sum(np.square(test_data - np.sign(test_data) * recons)) / np.sum(np.sign(test_data)))
+    return float(rmse)
+```
+
+## Training and Evaluation
+
+AutoRec is trained and evaluated on the MovieLens dataset. The model demonstrates superior performance compared to matrix factorization, as evidenced by a lower test RMSE.
+
+```python
+devices = d2l.try_all_gpus()
+# Load the MovieLens 100K dataset
+df, num_users, num_items = d2l.read_data_ml100k()
+train_data, test_data = d2l.split_data_ml100k(df, num_users, num_items)
+# Model initialization, training, and evaluation
+net = AutoRec(500, num_users)
+net.initialize(ctx=devices, force_reinit=True, init=mx.init.Normal(0.01))
+lr, num_epochs, wd, optimizer = 0.002, 25, 1e-5, 'adam'
+loss = gluon.loss.L2Loss()
+trainer = gluon.Trainer(net.collect_params(), optimizer, {"learning_rate": lr, 'wd': wd})
+d2l.train_recsys_rating(net, train_iter, test_iter, loss, trainer, num_epochs, devices, evaluator, inter_mat=test_inter_mat)
+```

@@ -1,0 +1,41 @@
+---
+title: Overview of Recommender Systems
+draft: false
+summary: Backtest statistics are essential for evaluating the efficacy of investment strategies.
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+Recommender systems have become an essential part of the digital landscape, significantly influencing how users interact with online services. These systems are designed to filter and suggest items—such as movies, books, or products—based on user preferences, thereby enhancing the user experience and increasing engagement on platforms like Amazon, Netflix, and YouTube.
+
+## Overview of Recommender Systems
+
+In the past decade, the internet has transformed into a hub for large-scale online services, altering our communication, consumption, and purchasing habits. With the vast number of items available online, recommender systems serve as powerful tools to help users discover preferred content, reducing the problem of information overload. These systems not only simplify the user experience but also add significant business value by driving revenue and retaining users.
+
+## Collaborative Filtering
+
+Collaborative filtering (CF) is a cornerstone technique in recommender systems, initially conceptualized by the Tapestry system. It involves leveraging the collective preferences of users to filter and recommend items. CF can be divided into:
+
+- **Memory-Based CF**: This approach uses user-item interaction data to find similarities between users or items. Techniques like user-based and item-based nearest neighbor algorithms are common but struggle with data sparsity and scalability.
+
+- **Model-Based CF**: This method employs latent factor models, such as matrix factorization, to uncover hidden patterns in user-item interactions. Model-based CF is more effective in handling sparse datasets and can be enhanced with neural networks for better scalability and flexibility.
+
+## Explicit vs. Implicit Feedback
+
+Recommender systems rely on user feedback to gauge preferences, which can be explicit or implicit:
+
+- **Explicit Feedback**: Direct input from users, such as ratings or reviews, provides precise preference data but is often hard to collect due to user reluctance.
+
+- **Implicit Feedback**: Inferred from user behavior, such as clicks or purchase history, implicit feedback is abundant but less precise. Despite its noisiness, implicit feedback is valuable due to its volume and is widely used in modern systems.
+
+## Recommendation Tasks
+
+Different recommendation tasks have been developed to cater to various domains and data types:
+
+- **Rating Prediction**: Predicting explicit ratings for items.
+- **Top-N Recommendation**: Ranking items based on implicit feedback.
+- **Sequence-Aware Recommendation**: Incorporating time-stamped data to understand user behavior over time.
+- **Click-Through Rate Prediction**: Estimating the likelihood of user interaction with items based on implicit feedback.
+- **Cold-Start Recommendation**: Addressing the challenge of recommending for new users or items.

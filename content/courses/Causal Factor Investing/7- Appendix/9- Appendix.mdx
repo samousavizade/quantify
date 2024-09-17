@@ -1,0 +1,252 @@
+---
+title: Appendix
+draft: false
+summary: Backtest statistics are essential for evaluating the efficacy of investment strategies.
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+# Appendix
+
+## Appendix A.1 Proof of Proposition in Section 6.4.2.1
+
+Consider a data-generating process with equations:
+
+$$
+X := Z\delta + v
+$$
+
+$$
+Y := X\beta + Z\gamma + u
+$$
+
+where $\gamma \neq 0$, $\delta \neq 0$, and variables $u, v, Z$ are independent and identically distributed as a standard Normal, $u, v, Z \sim N[0, I]$. The causal graph for this process is displayed in Figure 10 (bottom). The process is unknown to observers, who attempt to estimate the causal effect of $X$ on $Y$ by fitting the equation $Y = X\beta + \epsilon$ on a sample produced by the process. Then, the expression $E[\hat{\beta} \mid X]$ is,
+
+$$
+E[\hat{\beta} \mid X] = (X'X)^{-1}X'E[Y \mid X]
+$$
+
+Replacing $Y$, we obtain
+
+$$
+E[\hat{\beta} \mid X] = (X'X)^{-1}X'E[X\beta + Z\gamma + u \mid X]
+$$
+
+Since the expected value is conditioned by $X$, we replace $Z$ to obtain
+
+$$
+E[\hat{\beta} \mid X] = (X'X)^{-1}X'[X\beta + \gamma\delta^{-1}(X - v) + u]
+$$
+
+Knowledge of $X$ does not convey information on $u$, hence $E[u \mid X] = 0$, however, knowledge of $X$ conveys information on $v$, since $X := Z\delta + v$. Accordingly, we can reduce the above expression to
+
+$$
+E[\hat{\beta} \mid X] = \beta + \gamma\delta^{-1}(1 - (X'X)^{-1}X'E[v \mid X])
+$$
+
+This leaves us with an expression $E[v \mid X]$ that we would like to simplify. Note that variables $v, X$ follow a Gaussian distribution with known mean and variance,
+
+$$
+v, X \sim N\left(\begin{bmatrix} 0 \\ 0 \end{bmatrix}, \begin{bmatrix} 1 & 1 \\ 1 & 1 + \delta^2 \end{bmatrix}\right)
+$$
+
+$$
+v \mid X = x \sim N(\mu, \Sigma)
+$$
+
+We can compute $E[v \mid X]$ explicitly, using the formulas for the conditional Gaussian distribution,
+
+$$
+\mu = \mu_1 + \Sigma_{1,2}\Sigma_{2,2}^{-1}(x - \mu_2) = 0 + \frac{1}{1 + \delta^2}(x - 0) = \frac{x}{1 + \delta^2}
+$$
+
+For completeness, we can derive the variance $\Sigma$ as
+
+$$
+\Sigma = \Sigma_{1,1} - \Sigma_{1,2}\Sigma_{2,2}^{-1}\Sigma_{2,1} = 1 - \frac{1}{1 + \delta^2} = \frac{\delta^2}{\delta^2 + 1}
+$$
+
+Using the above results, the expression of $E[\hat{\beta} \mid X]$ reduces to,
+
+$$
+E[\hat{\beta} \mid X] = \beta + \frac{\gamma\delta}{1 + \delta^2}
+$$
+
+This completes the proof.
+
+The Appendix A.1 in the document provides a proof for a proposition related to the bias in estimating causal effects when there is a missing confounder in a data-generating process. The proof involves a mathematical derivation that shows how the expected value of the estimated coefficient $\hat{\beta}$ is biased due to the presence of a confounder $Z$ that is not included in the regression model. The proof demonstrates that the bias is a function of the coefficients of the confounder in the equations for both $X$ and $Y$.
+
+## Appendix A.2 Proof of Proposition in Section 7.2
+
+Consider the data-generating process with equations:
+
+$$
+X_t := \epsilon_t
+$$
+
+$$
+Y_t := \zeta_t
+$$
+
+$$
+Z_t := X_t + Y_t + \xi_t
+$$
+
+where $\xi_t, \epsilon_t, \zeta_t$ are three independent random variables that follow a standard Normal distribution, $\xi_t, \epsilon_t, \zeta_t \sim N[0, I]$. The random variable $(X, Y, Z)$ is still Gaussian,
+
+$$
+\begin{bmatrix}
+X \\
+Y \\
+Z
+\end{bmatrix}
+\sim N\left(
+\begin{bmatrix}
+0 \\
+0 \\
+0
+\end{bmatrix},
+\begin{bmatrix}
+1 & 0 & 1 \\
+0 & 1 & 1 \\
+1 & 1 & 3
+\end{bmatrix}
+\right)
+$$
+
+The conditional distribution has the form
+
+$$
+\begin{bmatrix}
+X \\
+Y
+\end{bmatrix}
+\mid Z = z \sim N(\mu, \Sigma)
+$$
+
+where the parameters can be derived using the formulas for the conditional Gaussian distribution,
+
+$$
+\mu = \begin{bmatrix}
+0 \\
+0
+\end{bmatrix}
++ \begin{bmatrix}
+1 \\
+1
+\end{bmatrix}
+3^{-1}z = \begin{bmatrix}
+z/3 \\
+z/3
+\end{bmatrix}
+$$
+
+$$
+\Sigma = \begin{bmatrix}
+1 & 0 \\
+0 & 1
+\end{bmatrix}
+- \begin{bmatrix}
+1 \\
+1
+\end{bmatrix}
+3^{-1}
+\begin{bmatrix}
+1 & 1
+\end{bmatrix}
+= \begin{bmatrix}
+2/3 & -1/3 \\
+-1/3 & 2/3
+\end{bmatrix}
+$$
+
+Then, the covariance between $X$ and $Y$ conditional on $Z$ is
+
+$$
+\text{Cov}[X, Y \mid Z] = -\frac{1}{3}
+$$
+
+This completes the proof.
+
+The Appendix A.2 in the document provides a proof for a proposition related to a data-generating process involving three independent random variables $X$, $Y$, and $Z$, which are normally distributed. The proof demonstrates how conditioning on a collider variable $Z$ can introduce a noncausal association between $X$ and $Y$.
+
+## Appendix B.1 Code for Experiment in Section 7.1
+
+### Snippet 1: FALSE POSITIVE DUE TO A COLLIDER
+
+This Python 3 code snippet simulates a fork structure to demonstrate a FALSE POSITIVE DUE TO A COLLIDER.
+
+```python
+import numpy as np
+import statsmodels.api as sm
+
+# Set data-generating process
+np.random.seed(0)
+z = np.random.normal(size=5000)  # observable confounder
+x = z + np.random.normal(size=z.shape)  # false cause
+y = z + np.random.normal(size=z.shape)  # false effect
+
+# Correct estimate of X->Y
+X = np.column_stack((x, z))
+ols1 = sm.OLS(y, sm.add_constant(X)).fit()
+print(ols1.summary(xname=['const', 'X', 'Z'], yname='Y'))  # true negative
+
+# Incorrect estimate of X->Y
+ols0 = sm.OLS(y, sm.add_constant(x)).fit()
+print(ols0.summary(xname=['const', 'X'], yname='Y'))  # false positive
+```
+
+## Appendix B.2 Code for Experiment in Section 7.2
+
+### Snippet 2: False Positive Due to a Collider
+
+This Python 3 code snippet simulates an immorality structure to demonstrate a false positive due to a collider.
+
+```python
+import numpy as np
+import statsmodels.api as sm
+
+# Set data-generating process
+np.random.seed(0)
+x = np.random.normal(size=5000)  # false cause
+y = np.random.normal(size=x.shape)  # false effect
+z = x + y + np.random.normal(size=x.shape)  # collider
+
+# Correct estimate of X->Y
+ols0 = sm.OLS(y, sm.add_constant(x)).fit()
+print(ols0.summary(xname=['const', 'X'], yname='Y'))  # true negative
+
+# Incorrect estimate of X->Y
+X = np.column_stack((x, z))
+ols1 = sm.OLS(y, sm.add_constant(X)).fit()
+print(ols1.summary(xname=['const', 'X', 'Z'], yname='Y'))  # false positive
+```
+
+## Appendix B.3 Code for Experiment in Section 7.3
+
+### Snippet 3: False Positive Due to a Confounded Mediator
+
+This Python 3 code snippet simulates a chain structure to demonstrate a false positive due to a confounded mediator.
+
+```python
+import numpy as np
+import statsmodels.api as sm
+
+# Set data-generating process
+np.random.seed(0)
+x = np.random.normal(size=5000)  # cause
+w = np.random.normal(size=x.shape)  # confounder
+z = x + w + np.random.normal(size=x.shape)  # mediator
+y = z + w + np.random.normal(size=x.shape)  # effect
+
+# Correct estimate of X->Y
+ols1 = sm.OLS(y, sm.add_constant(x)).fit()
+print(ols1.summary(xname=['const', 'X'], yname='Y'))  # true positive
+
+# Incorrect estimate of X->Y
+X = np.column_stack((x, z))
+ols2 = sm.OLS(y, sm.add_constant(X)).fit()
+print(ols2.summary(xname=['const', 'X', 'Z'], yname='Y'))  # false positive
+```

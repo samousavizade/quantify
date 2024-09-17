@@ -1,0 +1,159 @@
+---
+title: The GARCH Model
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## The GARCH Model
+
+The generalized ARCH (GARCH) model of Bollerslev (1986) is an extension of the ARCH model that allows for a more flexible lag structure. The GARCH(m,s) model is defined as:
+
+$$
+\begin{aligned}
+r_t &= \mu_t + a_t, \quad a_t = \sigma_t \epsilon_t \\
+\sigma_t^2 &= \alpha_0 + \sum_{i=1}^m \alpha_i a_{t-i}^2 + \sum_{j=1}^s \beta_j \sigma_{t-j}^2
+\end{aligned}
+$$
+
+where $\epsilon_t$ is a sequence of independent and identically distributed random variables with mean zero and variance 1, $\alpha_0 > 0$, $\alpha_i \geq 0$, $\beta_j \geq 0$, and $\sum_{i=1}^{\max(m,s)} (\alpha_i + \beta_i) < 1$, where $\alpha_i = 0$ for $i > m$ and $\beta_j = 0$ for $j > s$. The last constraint on $\alpha_i + \beta_i$ implies that the unconditional variance of $a_t$ is finite, whereas its conditional variance $\sigma_t^2$ evolves over time.
+
+### Properties of GARCH Models
+
+We focus on the simple GARCH(1,1) model:
+
+$$
+\sigma_t^2 = \alpha_0 + \alpha_1 a_{t-1}^2 + \beta_1 \sigma_{t-1}^2
+$$
+
+where $\alpha_0 > 0$, $\alpha_1 \geq 0$, $\beta_1 \geq 0$, and $\alpha_1 + \beta_1 < 1$.
+
+#### Unconditional Moments
+
+Taking expectations on both sides of the variance equation:
+
+$$
+E(\sigma_t^2) = \alpha_0 + \alpha_1 E(a_{t-1}^2) + \beta_1 E(\sigma_{t-1}^2)
+$$
+
+For weakly stationary $a_t$ series, we have $E(a_t^2) = E(a_{t-1}^2) = E(\sigma_t^2)$. Therefore,
+
+$$
+E(a_t^2) = \frac{\alpha_0}{1 - \alpha_1 - \beta_1}
+$$
+
+provided that $\alpha_1 + \beta_1 < 1$. This result shows that:
+
+1. The unconditional variance of $a_t$ is finite if $\alpha_1 + \beta_1 < 1$.
+2. The unconditional variance of $a_t$ is greater than $\alpha_0$.
+
+To obtain the kurtosis of $a_t$, we assume that $\epsilon_t$ follows a standard normal distribution. Then:
+
+$$
+E(a_t^4) = E[\sigma_t^4 \epsilon_t^4] = 3E(\sigma_t^4)
+$$
+
+Using the variance equation, we have:
+
+$$
+\begin{aligned}
+E(\sigma_t^4) &= E[(\alpha_0 + \alpha_1 a_{t-1}^2 + \beta_1 \sigma_{t-1}^2)^2] \\
+&= \alpha_0^2 + 2\alpha_0\alpha_1 E(a_{t-1}^2) + 2\alpha_0\beta_1 E(\sigma_{t-1}^2) \\
+&\quad + \alpha_1^2 E(a_{t-1}^4) + 2\alpha_1\beta_1 E(a_{t-1}^2\sigma_{t-1}^2) + \beta_1^2 E(\sigma_{t-1}^4)
+\end{aligned}
+$$
+
+Substituting $E(a_t^2) = \alpha_0 / (1 - \alpha_1 - \beta_1)$ into the prior equation and solving for $E(a_t^4)$, we obtain:
+
+$$
+E(a_t^4) = \frac{3\alpha_0^2(1 + \alpha_1 + \beta_1)}{(1 - \alpha_1 - \beta_1)(1 - \beta_1^2 - 2\alpha_1\beta_1 - 3\alpha_1^2)}
+$$
+
+provided that $1 - \beta_1^2 - 2\alpha_1\beta_1 - 3\alpha_1^2 > 0$ or $\alpha_1^2 + \beta_1^2 + 2\alpha_1\beta_1 < 1$. The kurtosis of $a_t$ is then:
+
+$$
+K(a_t) = \frac{E(a_t^4)}{[E(a_t^2)]^2} = \frac{3(1 - (\alpha_1 + \beta_1)^2)}{1 - 2\alpha_1^2 - (\alpha_1 + \beta_1)^2} > 3
+$$
+
+This result shows that the GARCH(1,1) model has a heavier tail than the normal distribution.
+
+#### Autocorrelation Function
+
+The ACF of $a_t$ is zero, but the ACF of $a_t^2$ is not. To see this, consider:
+
+$$
+\begin{aligned}
+Cov(a_t^2, a_{t-k}^2) &= E(a_t^2 a_{t-k}^2) - [E(a_t^2)]^2 \\
+&= E[\sigma_t^2 \epsilon_t^2 a_{t-k}^2] - [E(a_t^2)]^2 \\
+&= E[\sigma_t^2 a_{t-k}^2] - [E(a_t^2)]^2
+\end{aligned}
+$$
+
+For $k = 1$, we have:
+
+$$
+\begin{aligned}
+E[\sigma_t^2 a_{t-1}^2] &= E[(\alpha_0 + \alpha_1 a_{t-1}^2 + \beta_1 \sigma_{t-1}^2)a_{t-1}^2] \\
+&= \alpha_0 E(a_{t-1}^2) + \alpha_1 E(a_{t-1}^4) + \beta_1 E(a_{t-1}^2\sigma_{t-1}^2)
+\end{aligned}
+$$
+
+Using $E(a_t^2\sigma_t^2) = E(a_t^4) / 3$, we can show that:
+
+$$
+\rho_1 = Corr(a_t^2, a_{t-1}^2) = \alpha_1 + \frac{\alpha_1^2\beta_1}{1 - 2\alpha_1\beta_1 - \beta_1^2}
+$$
+
+For $k > 1$, we can show that:
+
+$$
+\rho_k = (\alpha_1 + \beta_1)^{k-1} \rho_1
+$$
+
+Thus, the ACF of $a_t^2$ of a GARCH(1,1) model decays exponentially with $(\alpha_1 + \beta_1)$ as the base.
+
+### Estimation
+
+Maximum likelihood estimation is commonly used to estimate GARCH models. Assuming that $\epsilon_t$ follows a standard normal distribution, the conditional log-likelihood function of the GARCH(1,1) model given the initial values $a_0$ and $\sigma_0^2$ is:
+
+$$
+l(\Theta) = -\frac{1}{2} \sum_{t=1}^T \left[ \log(2\pi) + \log(\sigma_t^2) + \frac{a_t^2}{\sigma_t^2} \right]
+$$
+
+where $\Theta$ denotes the parameter vector of the model.
+
+### Forecasting
+
+For a GARCH(1,1) model, the 1-step ahead forecast of volatility at forecast origin h is:
+
+$$
+\sigma_h^2(1) = \alpha_0 + \alpha_1 a_h^2 + \beta_1 \sigma_h^2
+$$
+
+The l-step ahead forecast for $l > 1$ is:
+
+$$
+\sigma_h^2(l) = \alpha_0 + (\alpha_1 + \beta_1) \sigma_h^2(l-1)
+$$
+
+As $l$ increases, the forecast $\sigma_h^2(l)$ converges to the unconditional variance $\sigma^2 = \alpha_0 / (1 - \alpha_1 - \beta_1)$.
+
+### Example: S&P 500 Index Returns
+
+Consider the daily returns of S&P 500 index from January 3, 2000 to December 31, 2008 with 2267 observations. The fitted GARCH(1,1) model is:
+
+$$
+\begin{aligned}
+r_t &= 0.00014 + a_t, \quad a_t = \sigma_t \epsilon_t \\
+\sigma_t^2 &= 1.52 \times 10^{-6} + 0.0757 a_{t-1}^2 + 0.9162 \sigma_{t-1}^2
+\end{aligned}
+$$
+
+The persistence measure $\alpha_1 + \beta_1 = 0.9919$ is close to 1, indicating high persistence in volatility. The unconditional variance of daily returns is $1.52 \times 10^{-6} / (1 - 0.0757 - 0.9162) = 1.88 \times 10^{-4}$, or about 1.37% in standard deviation.
+
+The ACF of $a_t^2$ and $a_t / \sigma_t$. The standardized residuals $a_t / \sigma_t$ show no serial correlation, indicating the adequacy of the fitted GARCH(1,1) model in describing the volatility dynamics.
+
+This example demonstrates the effectiveness of GARCH models in capturing volatility clustering and persistence in financial return series. The high persistence measure indicates that shocks to volatility have long-lasting effects, a common feature in many financial time series.

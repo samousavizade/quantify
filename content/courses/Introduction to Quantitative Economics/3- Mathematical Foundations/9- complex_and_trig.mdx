@@ -1,0 +1,1203 @@
+---
+title: Complex Numbers and Trigonometry
+draft: false
+summary: Backtest statistics are essential for evaluating the efficacy of investment strategies.
+---
+
+# Linear Equations and Matrix Algebra
+
+## Introduction
+
+In economics and finance, solving linear equations is often essential.
+
+This lecture will cover linear equations and their uses.
+
+We start with a simple two-good model of supply and demand to highlight the relevance of linear equations. This basic example allows for manual calculations.
+
+However, real-world scenarios frequently involve markets with numerous goods, resulting in complex systems of linear equations with many variables and equations.
+
+To manage such complex systems, we require:
+
+- Matrix algebra (and the ability to apply it effectively)
+- Computational tools to implement matrix algebra solutions
+
+This lecture will address both aspects.
+
+We will utilize the following packages:
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+```
+
+## A Two-Good Example
+
+In this section, we explore a basic two-good example and solve it using:
+
+1. Manual calculations
+2. Matrix algebra
+
+The second approach is more versatile, as we'll demonstrate.
+
+### Manual Calculation
+
+Consider two related goods, such as:
+
+- Propane and ethanol
+- Rice and wheat
+
+For simplicity, we label them as Good 0 and Good 1.
+
+The demand for each good depends on the prices of both goods:
+
+$$
+\begin{aligned}
+q_0^d &= 100 - 10 p_0 - 5 p_1 \\
+q_1^d &= 50 - p_0 - 10 p_1
+\end{aligned} \tag{8.1}
+$$
+
+(This assumes that demand decreases when the price of either good increases, though other scenarios are possible.)
+
+Supply is given by:
+
+$$
+\begin{aligned}
+q_0^s &= 10 p_0 + 5 p_1 \\
+q_1^s &= 5 p_0 + 10 p_1
+\end{aligned} \tag{8.2}
+$$
+
+Equilibrium occurs when supply matches demand ($ q_0^s = q_0^d $ and $ q_1^s = q_1^d $).
+
+This leads to the following system of linear equations:
+
+$$
+\begin{aligned}
+100 - 10 p_0 - 5 p_1 &= 10 p_0 + 5 p_1 \\
+50 - p_0 - 10 p_1 &= 5 p_0 + 10 p_1
+\end{aligned} \tag{8.3}
+$$
+
+Solving this manually, we find:
+
+$$
+p_0 = 4.41 \quad \text{and} \quad p_1 = 1.18
+$$
+
+Substituting these values into either [(8.1)](#equation-two-eq-demand) or [(8.2)](#equation-two-eq-supply) provides the equilibrium quantities:
+
+$$
+q_0 = 50 \quad \text{and} \quad q_1 = 33.82
+$$
+
+### Looking Ahead
+
+Manual methods work well for simple cases like the two-good scenario.
+
+However, for problems involving many goods, matrix algebra becomes necessary.
+
+Before diving into matrix algebra, let’s review the fundamentals of vectors and matrices, both in theory and practice.
+
+## Vectors
+
+A **vector** of length $ n $ is a sequence (or array, or tuple) of $ n $ numbers, denoted as $ x = (x_1, \ldots, x_n) $ or $ x = \begin{bmatrix}x_1, \ldots, x_n\end{bmatrix} $.
+
+Vectors can be written horizontally or vertically, but in matrix operations, we generally assume vectors are column vectors.
+
+The set of all $ n $-dimensional vectors is represented by $ \mathbb{R}^n $.
+
+- $ \mathbb{R}^2 $ refers to the plane, consisting of pairs $ (x_1, x_2) $.
+- $ \mathbb{R}^3 $ represents three-dimensional space, consisting of vectors $ (x_1, x_2, x_3) $.
+
+Vectors are often visualized as arrows from the origin to a point.
+
+Here is a visual representation.
+
+```python
+fig, ax = plt.subplots()
+# Set the axes through the origin
+for spine in ['left', 'bottom']:
+    ax.spines[spine].set_position('zero')
+for spine in ['right', 'top']:
+    ax.spines[spine].set_color('none')
+
+ax.set(xlim=(-5, 5), ylim=(-5, 5))
+
+vecs = ((2, 4), (-3, 3), (-4, -3.5))
+for v in vecs:
+    ax.annotate('', xy=v, xytext=(0, 0),
+                arrowprops=dict(facecolor='blue',
+                shrink=0,
+                alpha=0.7,
+                width=0.5))
+    ax.text(1.1 * v[0], 1.1 * v[1], str(v))
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/Introduction-to-Quantitative-Economics/complex_and_trig_files/complex_and_trig_8_0.png)
+
+### Vector Operations
+
+Vectors can be modified through various operations. The two most common operations are addition and scalar multiplication, which we'll explain here.
+
+To add two vectors, we perform element-wise addition.
+
+For example:
+
+$$
+\begin{bmatrix}
+4 \\
+-2
+\end{bmatrix}
++
+\begin{bmatrix}
+3 \\
+3
+\end{bmatrix}
+=
+\begin{bmatrix}
+4 + 3 \\
+-2 + 3
+\end{bmatrix}
+=
+\begin{bmatrix}
+7 \\
+1
+\end{bmatrix}
+$$
+
+In general, if we have two vectors $ x $ and $ y $:
+
+$$
+x + y =
+\begin{bmatrix}
+x_1 \\
+x_2 \\
+\vdots \\
+x_n
+\end{bmatrix} +
+\begin{bmatrix}
+y_1 \\
+y_2 \\
+\vdots \\
+y_n
+\end{bmatrix} =
+\begin{bmatrix}
+x_1 + y_1 \\
+x_2 + y_2 \\
+\vdots \\
+x_n + y_n
+\end{bmatrix}
+$$
+
+We can visualize vector addition in $ \mathbb{R}^2 $ as shown below.
+
+```python
+fig, ax = plt.subplots()
+# Set the axes through the origin
+for spine in ['left', 'bottom']:
+    ax.spines[spine].set_position('zero')
+for spine in ['right', 'top']:
+    ax.spines[spine].set_color('none')
+
+ax.set(xlim=(-2, 10), ylim=(-4, 4))
+# ax.grid()
+vecs = ((4, -2), (3, 3), (7, 1))
+tags = ('(x1, x2)', '(y1, y2)', '(x1+x2, y1+y2)')
+colors = ('blue', 'green', 'red')
+for i, v in enumerate(vecs):
+    ax.annotate('', xy=v, xytext=(0, 0),
+                arrowprops=dict(color=colors[i],
+                shrink=0,
+                alpha=0.7,
+                width=0.5,
+                headwidth=8,
+                headlength=15))
+    ax.text(v[0] + 0.2, v[1] + 0.1, tags[i])
+
+for i, v in enumerate(vecs):
+    ax.annotate('', xy=(7, 1), xytext=v,
+                arrowprops=dict(color='gray',
+                shrink=0,
+                alpha=0.3,
+                width=0.5,
+                headwidth=5,
+                headlength=20))
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/Introduction-to-Quantitative-Economics/complex_and_trig_files/complex_and_trig_11_0.png)
+
+Scalar multiplication is an operation that scales a vector $ x $ by a scalar value, applying the multiplication element-wise.
+
+For example:
+
+$$
+-2
+\begin{bmatrix}
+3 \\
+-7
+\end{bmatrix}
+=
+\begin{bmatrix}
+-2 \times 3 \\
+-2 \times -7
+\end{bmatrix}
+=
+\begin{bmatrix}
+-6 \\
+14
+\end{bmatrix}
+$$
+
+In general, scalar multiplication takes a scalar $ \gamma $ and a vector $ x $, and produces:
+
+$$
+\gamma x :=
+\begin{bmatrix}
+\gamma x_1 \\
+\gamma x_2 \\
+\vdots \\
+\gamma x_n
+\end{bmatrix}
+$$
+
+Scalar multiplication is depicted in the following figure.
+
+```python
+fig, ax = plt.subplots()
+# Set the axes through the origin
+for spine in ['left', 'bottom']:
+    ax.spines[spine].set_position('zero')
+for spine in ['right', 'top']:
+    ax.spines[spine].set_color('none')
+
+ax.set(xlim=(-5, 5), ylim=(-5, 5))
+x = (2, 2)
+ax.annotate('', xy=x, xytext=(0, 0),
+            arrowprops=dict(facecolor='blue',
+            shrink=0,
+            alpha=1,
+            width=0.5))
+ax.text(x[0] + 0.4, x[1] - 0.2, '$x$', fontsize='16')
+
+scalars = (-2, 2)
+x = np.array(x)
+
+for s in scalars:
+    v = s * x
+    ax.annotate('', xy=v, xytext=(0, 0),
+                arrowprops=dict(facecolor='red',
+                shrink=0,
+                alpha=0.5,
+                width=0.5))
+    ax.text(v[0] + 0.4, v[1] - 0.2, f'${s} x$', fontsize='16')
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/Introduction-to-Quantitative-Economics/complex_and_trig_files/complex_and_trig_14_0.png)
+
+In Python, vectors can be represented using lists or tuples, like `x = [2, 4, 6]` or `x = (2, 4, 6)`.
+
+However, it is more common to use NumPy arrays for vector representation.
+
+NumPy arrays offer a more natural syntax for operations such as scalar multiplication and addition.
+
+```python
+x = np.ones(3)            # Vector of three ones
+y = np.array((2, 4, 6))   # Converts tuple (2, 4, 6) into a NumPy array
+x + y                     # Add (element-by-element)
+```
+
+    array([3., 5., 7.])
+
+```python
+4 * x                     # Scalar multiply
+```
+
+    array([4., 4., 4.])
+
+### Inner Product and Norm
+
+The **inner product** of vectors $ x, y \in \mathbb{R}^n $ is given by
+
+$$
+x^\top y =
+\begin{bmatrix}
+x_1 & x_2 & \cdots & x_n
+\end{bmatrix}
+\begin{bmatrix}
+y_1 \\
+y_2 \\
+\vdots \\
+y_n
+\end{bmatrix}
+= x_1 y_1 + x_2 y_2 + \cdots + x_n y_n
+:= \sum_{i=1}^n x_i y_i.
+$$
+
+The **norm** of a vector $ x $ represents its “length” (i.e., the distance from the zero vector) and is defined as
+
+$$
+\| x \| := \sqrt{x^\top x} := \left( \sum_{i=1}^n x_i^2 \right)^{1/2}.
+$$
+
+The expression $ \| x - y \| $ represents the “distance” between vectors $ x $ and $ y $.
+
+The inner product and norm can be computed as follows:
+
+```python
+np.sum(x*y)      # Inner product of x and y
+```
+
+    12.0
+
+```python
+x @ y            # Another way to compute the inner product
+```
+
+    12.0
+
+```python
+np.sqrt(np.sum(x**2))  # Norm of x, method one
+```
+
+    1.7320508075688772
+
+```python
+np.linalg.norm(x)      # Norm of x, method two
+```
+
+    1.7320508075688772
+
+## Matrix Operations
+
+Matrix algebra is similar to arithmetic with numbers but applied to matrices. This section covers essential operations with matrices.
+
+### Addition and Scalar Multiplication
+
+Matrices can be added, subtracted, and multiplied by scalars, extending the operations we previously discussed for vectors.
+
+For scalar multiplication, a matrix is multiplied by a scalar element-wise:
+
+$$
+3
+\begin{bmatrix}
+2 & -13 \\
+0 & 5
+\end{bmatrix}
+=
+\begin{bmatrix}
+6 & -39 \\
+0 & 15
+\end{bmatrix}.
+$$
+
+In general, for a scalar $ \gamma $ and matrix $ A $,
+
+$$
+\gamma A =
+\gamma
+\begin{bmatrix}
+a_{11} & \cdots & a_{1k} \\
+\vdots & \vdots & \vdots \\
+a_{n1} & \cdots & a_{nk}
+\end{bmatrix} =
+\begin{bmatrix}
+\gamma a_{11} & \cdots & \gamma a_{1k} \\
+\vdots & \vdots & \vdots \\
+\gamma a_{n1} & \cdots & \gamma a_{nk}
+\end{bmatrix}.
+$$
+
+For matrix addition,
+
+$$
+\begin{bmatrix}
+1 & 5 \\
+7 & 3
+\end{bmatrix}
++
+\begin{bmatrix}
+12 & -1 \\
+0 & 9
+\end{bmatrix}
+=
+\begin{bmatrix}
+13 & 4 \\
+7 & 12
+\end{bmatrix}.
+$$
+
+In general,
+
+$$
+A + B =
+\begin{bmatrix}
+a_{11} & \cdots & a_{1k} \\
+\vdots & \vdots & \vdots \\
+a_{n1} & \cdots & a_{nk}
+\end{bmatrix} +
+\begin{bmatrix}
+b_{11} & \cdots & b_{1k} \\
+\vdots & \vdots & \vdots \\
+b_{n1} & \cdots & b_{nk}
+\end{bmatrix} =
+\begin{bmatrix}
+a_{11} + b_{11} & \cdots & a_{1k} + b_{1k} \\
+\vdots & \vdots & \vdots \\
+a_{n1} + b_{n1} & \cdots & a_{nk} + b_{nk}
+\end{bmatrix}.
+$$
+
+Matrices must have the same dimensions to perform addition.
+
+### Matrix Multiplication
+
+Matrix multiplication is a more complex operation where each element of the resulting matrix is the inner product of the rows of the first matrix and the columns of the second matrix.
+
+For matrices $ A $ and $ B $, the product $ AB $ is formed by taking the $ i,j $-th element as the inner product of the $ i $-th row of $ A $ and the $ j $-th column of $ B $.
+
+If $ A $ is $ n \times k $ and $ B $ is $ k \times m $, then $ AB $ results in an $ n \times m $ matrix.
+
+Here's an example of multiplying a $ 2 \times 2 $ matrix by a $ 2 \times 1 $ vector:
+
+$$
+A x =
+\begin{bmatrix}
+a_{11} & a_{12} \\
+a_{21} & a_{22}
+\end{bmatrix}
+\begin{bmatrix}
+x_1 \\
+x_2
+\end{bmatrix}
+=
+\begin{bmatrix}
+a_{11}x_1 + a_{12}x_2 \\
+a_{21}x_1 + a_{22}x_2
+\end{bmatrix}.
+$$
+
+For a $ n \times k $ matrix $ A $ and a $ k \times 1 $ column vector $ x $, the result is an $ n \times 1 $ column vector:
+
+$$
+A x =
+\begin{bmatrix}
+a_{11} & a_{12} & \cdots & a_{1k} \\
+\vdots & \vdots & & \vdots \\
+a_{i1} & a_{i2} & \cdots & a_{ik} \\
+\vdots & \vdots & & \vdots \\
+a_{n1} & a_{n2} & \cdots & a_{nk}
+\end{bmatrix}
+\begin{bmatrix}
+x_{1} \\
+x_{2} \\
+\vdots \\
+x_{k}
+\end{bmatrix}
+=
+\begin{bmatrix}
+a_{11} x_1 + a_{12} x_2 + \cdots + a_{1k} x_k \\
+\vdots \\
+a_{i1} x_1 + a_{i2} x_2 + \cdots + a_{ik} x_k \\
+\vdots \\
+a_{n1} x_1 + a_{n2} x_2 + \cdots + a_{nk} x_k
+\end{bmatrix}.
+$$
+
+An illustration of matrix multiplication is:
+
+$$
+AB =
+\begin{bmatrix}
+a_{11} & a_{12} \\
+a_{21} & a_{22}
+\end{bmatrix}
+\begin{bmatrix}
+b_{11} & b_{12} \\
+b_{21} & b_{22}
+\end{bmatrix}
+=
+\begin{bmatrix}
+a_{11}b_{11} + a_{12}b_{21} & a_{11}b_{12} + a_{12}b_{22} \\
+a_{21}b_{11} + a_{22}b_{21} & a_{21}b_{12} + a_{22}b_{22}
+\end{bmatrix}.
+$$
+
+Matrix multiplication is not commutative, i.e., $ AB \neq BA $ in general.
+
+A key special case is the **identity matrix**, which has ones on the diagonal and zeros elsewhere:
+
+$$
+I =
+\begin{bmatrix}
+1 & 0 & \cdots & 0 \\
+0 & 1 & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & 1
+\end{bmatrix}.
+$$
+
+For an $ n \times k $ matrix $ A $ and the $ k \times k $ identity matrix $ I $,
+
+- $ AI = A $,
+- $ IA = A $ if $ I $ is the $ n \times n $ identity matrix.
+
+### Matrices in NumPy
+
+NumPy's arrays are commonly used to represent matrices and offer efficient functions for matrix operations. You can create NumPy arrays from tuples or lists and perform various matrix operations easily.
+
+```python
+A = ((1, 2),
+     (3, 4))
+
+type(A)
+```
+
+    tuple
+
+```python
+A = np.array(A)
+
+type(A)
+```
+
+    numpy.ndarray
+
+```python
+A.shape
+```
+
+    (2, 2)
+
+The `shape` attribute provides a tuple indicating the number of rows and columns in a matrix.
+
+To obtain the transpose of matrix `A`, you can use `A.transpose()` or the simpler `A.T`.
+
+NumPy offers various functions to create common types of matrices, such as matrices filled with zeros or ones.
+
+Since operations are performed element-wise by default in NumPy, scalar multiplication and addition are straightforward and intuitive.
+
+```python
+A = np.identity(3)    # 3 x 3 identity matrix
+B = np.ones((3, 3))   # 3 x 3 matrix of ones
+2 * A
+```
+
+    array([[2., 0., 0.],
+           [0., 2., 0.],
+           [0., 0., 2.]])
+
+```python
+A + B
+```
+
+    array([[2., 1., 1.],
+           [1., 2., 1.],
+           [1., 1., 2.]])
+
+To perform matrix multiplication in Python, use the `@` symbol.
+
+> **Note:** Specifically, `A @ B` represents matrix multiplication, while `A * B` denotes element-wise multiplication.
+
+### Two-Good Model in Matrix Form
+
+We can now revisit the two-good model and solve equation [(8.3)](#equation-two-equilibrium) numerically using matrix algebra. This method, although involving additional steps, is widely applicable, especially when extending to models with more goods.
+
+First, let's rewrite equation [(8.1)](#equation-two-eq-demand) as:
+
+$$
+q^d = D p + h
+\quad \text{where} \quad
+q^d =
+\begin{bmatrix}
+q_0^d \\
+q_1^d
+\end{bmatrix}
+\quad
+D =
+\begin{bmatrix}
+-10 & -5  \\
+-1  & -10
+\end{bmatrix}
+\quad \text{and} \quad
+h =
+\begin{bmatrix}
+100 \\
+50
+\end{bmatrix}. \tag{8.5}
+$$
+
+Here, $ p \in \mathbb{R}^2 $ represents the prices of the two goods.
+
+(Verify that $ q^d = D p + h $ aligns with the equations in [(8.1)](#equation-two-eq-demand).)
+
+Rewrite equation [(8.2)](#equation-two-eq-supply) as:
+
+$$
+q^s = C p
+\quad \text{where} \quad
+q^s =
+\begin{bmatrix}
+q_0^s \\
+q_1^s
+\end{bmatrix}
+\quad \text{and} \quad
+C =
+\begin{bmatrix}
+10 & 5  \\
+5 & 10
+\end{bmatrix}. \tag{8.6}
+$$
+
+Equating supply and demand $ q^s = q^d $ gives:
+
+$$
+C p = D p + h.
+$$
+
+Rearranging terms yields:
+
+$$
+(C - D) p = h.
+$$
+
+In matrix algebra, solving for equilibrium prices involves:
+
+$$
+p = (C - D)^{-1} h. \tag{8.7}
+$$
+
+### Extending to More Goods
+
+When dealing with more goods, such as different energy commodities, the matrix methods become particularly useful.
+
+In general:
+
+- The demand equation is $ q^d = Dp + h $, where $ q^d $ is an $ n \times 1 $ vector of demands, $ D $ is an $ n \times n $ matrix of coefficients, and $ h $ is an $ n \times 1 $ vector of constants.
+- The supply equation is $ q^s = Cp + e $, where $ q^s $ is an $ n \times 1 $ vector of supplies, $ C $ is an $ n \times n $ coefficient matrix, and $ e $ is an $ n \times 1 $ vector of constants.
+
+To find the equilibrium, solve:
+
+$$
+D p + h = C p + e,
+$$
+
+which simplifies to:
+
+$$
+(D - C) p = e - h. \tag{8.8}
+$$
+
+Thus, the price vector is:
+
+$$
+p = (D - C)^{-1} (e - h).
+$$
+
+### General Linear Systems
+
+A more general linear system looks like:
+
+$$
+\begin{matrix}
+a_{11} x_1 & + & a_{12} x_2 & + & \cdots & + & a_{1n} x_n & = & b_1 \\
+\vdots & & \vdots & & & & \vdots & & \vdots \\
+a_{n1} x_1 & + & a_{n2} x_2 & + & \cdots & + & a_{nn} x_n & = & b_n
+\end{matrix} \tag{8.9}
+$$
+
+Here, the goal is to solve for the unknowns $ x*1, \ldots, x_n $, given the coefficients $ a*{11}, \ldots, a\_{nn} $ and constants $ b_1, \ldots, b_n $. This case assumes the number of unknowns matches the number of equations, which often ensures a well-defined solution.
+
+In matrix form, this system becomes:
+
+$$
+A x = b
+\quad \text{where} \quad
+A =
+\begin{bmatrix}
+a_{11} &  \cdots & a_{1n} \\
+\vdots & \vdots  & \vdots \\
+a_{n1} &  \cdots & a_{nn}
+\end{bmatrix}
+\quad \text{and} \quad
+b =
+\begin{bmatrix}
+b_1 \\
+\vdots \\
+b_n
+\end{bmatrix}. \tag{8.10}
+$$
+
+For example, equation [(8.8)](#equation-n-eq-sys-la) fits this form with:
+
+$$
+A = D - C,
+\quad
+b = e - h
+\quad \text{and} \quad
+x = p.
+$$
+
+When solving problems like equation [(8.10)](#equation-la-gf), you need to consider:
+
+- Does a solution exist?
+- How should we compute the solution?
+
+## Solving Systems of Equations
+
+Consider the system of equations:
+
+$$
+A x = b. \tag{8.11}
+$$
+
+The challenge is to find a vector $ x \in \mathbb{R}^n $ that satisfies this equation, given $ b $ and $ A $.
+
+In some cases, there may be no solution. For example, consider:
+
+$$
+\begin{aligned}
+x + 3y &= 3 \\
+2x + 6y &= -8.
+\end{aligned}
+$$
+
+You can verify manually that this system has no solution. To illustrate why, let's plot the two lines.
+
+```python
+fig, ax = plt.subplots()
+x = np.linspace(-10, 10)
+plt.plot(x, (3-x)/3, label=f'$x + 3y = 3$')
+plt.plot(x, (-8-2*x)/6, label=f'$2x + 6y = -8$')
+plt.legend()
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/Introduction-to-Quantitative-Economics/complex_and_trig_files/complex_and_trig_43_0.png)
+
+Clearly, these lines are parallel, meaning there is no point $ x \in \mathbb{R}^2 $ where they intersect. Hence, this system has no solution.
+
+We can represent this system in matrix form as:
+
+$$
+A x = b
+\quad \text{where} \quad
+A =
+\begin{bmatrix}
+1 & 3 \\
+2 & 6
+\end{bmatrix}
+\quad \text{and} \quad
+b =
+\begin{bmatrix}
+3 \\
+-8
+\end{bmatrix}. \tag{8.12}
+$$
+
+Notice that the second row of matrix $ A = (2, 6) $ is simply a scalar multiple of the first row $ A = (1, 3) $. The rows of matrix $ A $ are therefore **linearly dependent**.
+
+Now, consider the following system:
+
+$$
+\begin{aligned}
+x - 2y &= -4 \\
+-2x + 4y &= 8.
+\end{aligned}
+$$
+
+Any vector $ v = (x, y) $ where $ x = 2y - 4 $ will solve this system. Since there are infinitely many such vectors, this system has infinitely many solutions. This occurs because the rows of the matrix:
+
+$$
+A =
+\begin{bmatrix}
+1 & -2 \\
+-2 & 4
+\end{bmatrix}. \tag{8.13}
+$$
+
+are linearly dependent.
+
+We will now discuss conditions for matrices that avoid these issues.
+
+### Nonsingular Matrices
+
+For any square matrix, we can compute a unique number called the [determinant](https://en.wikipedia.org/wiki/Determinant).
+
+For $ 2 \times 2 $ matrices, the determinant is calculated as:
+
+$$
+\begin{bmatrix}
+a & b \\
+c & d
+\end{bmatrix}
+=
+ad - bc.
+$$
+
+A matrix $ A $ is termed _nonsingular_ if its determinant is not zero. A square matrix $ A $ is nonsingular if and only if its rows and columns are linearly independent.
+
+For more on matrix inverses, see [here](https://www.mathsisfun.com/algebra/matrix-inverse.html).
+
+You can verify that the matrices in [(8.12)](#equation-no-soln) and [(8.13)](#equation-many-solns) with linearly dependent rows are singular.
+
+A matrix with a nonzero determinant has an _inverse matrix_ $ A^{-1} $ such that $ A A^{-1} = A^{-1} A = I $. Consequently, if we pre-multiply both sides of $ A x = b $ by $ A^{-1} $, we get:
+
+$$
+x = A^{-1} b. \tag{8.14}
+$$
+
+This is the solution to $ A x = b $ that we seek.
+
+### Solving Linear Equations with NumPy
+
+In the two-good example, we derived the matrix equation:
+
+$$
+p = (C - D)^{-1} h.
+$$
+
+where $ C $, $ D $, and $ h $ are defined in [(8.5)](#equation-two-eq-demand-mat) and [(8.6)](#equation-two-eq-supply-mat).
+
+This is analogous to [(8.14)](#equation-la-se-inv) with $ A = (C - D)^{-1} $, $ b = h $, and $ x = p $.
+
+We can solve for equilibrium prices using NumPy’s `linalg` submodule, which provides Python interfaces to well-established and optimized FORTRAN routines.
+
+```python
+C = ((10, 5),      # Matrix C
+     (5, 10))
+```
+
+```python
+C = np.array(C)
+```
+
+```python
+D = ((-10, -5),     # Matrix D
+     (-1, -10))
+D = np.array(D)
+```
+
+```python
+h = np.array((100, 50))   # Vector h
+h.shape = 2,1             # Transforming h to a column vector
+```
+
+```python
+from numpy.linalg import det, inv
+A = C - D
+# Check that A is nonsingular (non-zero determinant), and hence invertible
+det(A)
+```
+
+    340.0000000000001
+
+```python
+A_inv = inv(A)  # compute the inverse
+A_inv
+```
+
+    array([[ 0.05882353, -0.02941176],
+           [-0.01764706,  0.05882353]])
+
+```python
+p = A_inv @ h  # equilibrium prices
+p
+```
+
+    array([[4.41176471],
+           [1.17647059]])
+
+```python
+q = C @ p  # equilibrium quantities
+q
+```
+
+    array([[50.        ],
+           [33.82352941]])
+
+We obtain the same solutions as we did with manual calculations.
+
+Additionally, we can find $ p $ using `solve(A, h)` as shown below.
+
+```python
+from numpy.linalg import solve
+p = solve(A, h)  # equilibrium prices
+p
+```
+
+    array([[4.41176471],
+           [1.17647059]])
+
+```python
+q = C @ p  # equilibrium quantities
+q
+```
+
+    array([[50.        ],
+           [33.82352941]])
+
+Notice that we can solve for $ x = A^{-1} y $ using either `inv(A) @ y` or `solve(A, y)`. The latter method employs a different algorithm that is more numerically stable and should generally be preferred.
+
+## Exercises
+
+### Exercise 8.1
+
+Consider a market with three commodities: good 0, good 1, and good 2.
+
+The demand for each good depends on the prices of the other two goods, as given by:
+
+$$
+\begin{aligned}
+q_0^d &= 90 - 15p_0 + 5p_1 + 5p_2 \\
+q_1^d &= 60 + 5p_0 - 10p_1 + 10p_2 \\
+q_2^d &= 50 + 5p_0 + 5p_1 - 5p_2
+\end{aligned}
+$$
+
+(The demand decreases when its own price increases but increases when the prices of other goods increase.)
+
+The supply of each good is given by:
+
+$$
+\begin{aligned}
+q_0^s &= -10 + 20p_0 \\
+q_1^s &= -15 + 15p_1 \\
+q_2^s &= -5 + 10p_2
+\end{aligned}
+$$
+
+Equilibrium is achieved when supply equals demand, i.e., $ q_0^d = q_0^s $, $ q_1^d = q_1^s $, and $ q_2^d = q_2^s $.
+
+1. Set up the market as a system of linear equations.
+2. Use matrix algebra to solve for the equilibrium prices, utilizing both `numpy.linalg.solve` and `inv(A)` methods. Compare the results.
+
+## Solution to Exercise 8.1
+
+The resulting system of equations is:
+
+$$
+\begin{aligned}
+35p_0 - 5p_1 - 5p_2 &= 100 \\
+-5p_0 + 25p_1 - 10p_2 &= 75 \\
+-5p_0 - 5p_1 + 15p_2 &= 55
+\end{aligned}
+$$
+
+In matrix form, this is expressed as:
+
+$$
+Ap = b
+\quad \text{where} \quad
+A =
+\begin{bmatrix}
+35 & -5 & -5 \\
+-5 & 25 & -10 \\
+-5 & -5 & 15
+\end{bmatrix}
+, \quad p =
+\begin{bmatrix}
+p_0 \\
+p_1 \\
+p_2
+\end{bmatrix}
+\quad \text{and} \quad
+b =
+\begin{bmatrix}
+100 \\
+75 \\
+55
+\end{bmatrix}
+$$
+
+```python
+import numpy as np
+from numpy.linalg import det
+
+A = np.array([[35, -5, -5],  # matrix A
+              [-5, 25, -10],
+              [-5, -5, 15]])
+
+b = np.array((100, 75, 55))  # column vector b
+b.shape = (3, 1)
+
+det(A)  # check if A is nonsingular
+```
+
+    9999.99999999999
+
+```python
+# Using inverse
+from numpy.linalg import det
+
+A_inv = inv(A)
+
+p = A_inv @ b
+p
+```
+
+    array([[4.9625],
+           [7.0625],
+           [7.675 ]])
+
+```python
+# Using numpy.linalg.solve
+from numpy.linalg import solve
+p = solve(A, b)
+p
+```
+
+    array([[4.9625],
+           [7.0625],
+           [7.675 ]])
+
+The solution is:
+
+$$
+p_0 = 4.6925, \; p_1 = 7.0625 \;\; \text{and} \;\; p_2 = 7.675
+$$
+
+## Exercise 8.2
+
+Earlier in the lecture, we discussed cases where the system of equations $ Ax = b $ has no solution. Such a system is called an _inconsistent_ system.
+
+When dealing with an inconsistent system, we aim to find the best possible "approximate" solution. One common method for this is the **least squares method**.
+
+Consider an inconsistent system of equations:
+
+$$
+Ax = b \tag{8.15}
+$$
+
+where $ A $ is an $ m \times n $ matrix and $ b $ is an $ m \times 1 $ column vector.
+
+A **least squares solution** to equation (8.15) is an $ n \times 1 $ column vector $ \hat{x} $ such that, for all other vectors $ x \in \mathbb{R}^n $, the distance from $ A\hat{x} $ to $ b $ is minimized. In other words:
+
+$$
+\|A\hat{x} - b\| \leq \|Ax - b\|
+$$
+
+The least squares solution $ \hat{x} $ can be found using:
+
+$$
+\hat{x} = (A^T A)^{-1} A^T b \tag{8.16}
+$$
+
+Now, consider the general equation of a linear demand curve:
+
+$$
+p = m - nq
+$$
+
+where $ p $ is the price and $ q $ is the quantity demanded.
+
+Suppose we want to estimate the values of $ m $ and $ n $. We do this by observing the price and quantity over time and fitting the best values for $ m $ and $ n $ based on the relationship between $ p $ and $ q $.
+
+We have the following data points:
+
+| Price | Quantity Demanded |
+| ----- | ----------------- |
+| 1     | 9                 |
+| 3     | 7                 |
+| 8     | 3                 |
+
+For the demand curve $ p = m - nq $ to pass through all these points, we set up the following system of equations:
+
+$$
+\begin{aligned}
+1 &= m - 9n \\
+3 &= m - 7n \\
+8 &= m - 3n
+\end{aligned}
+$$
+
+This results in the system $ Ax = b $, where:
+
+$$
+A = \begin{bmatrix}
+1 & -9 \\
+1 & -7 \\
+1 & -3
+\end{bmatrix},
+\quad x = \begin{bmatrix}
+m \\
+n
+\end{bmatrix},
+\quad b = \begin{bmatrix}
+1 \\
+3 \\
+8
+\end{bmatrix}
+$$
+
+It can be verified that this system has no exact solutions (since there are three equations but only two unknowns).
+
+We will thus find the best approximate solution for $ x $.
+
+1. Use equation (8.16) and matrix algebra to find the least squares solution $ \hat{x} $.
+2. Use `numpy.linalg.lstsq` to find the least squares solution and compare the results.
+
+## Solution to Exercise 8.2
+
+```python
+import numpy as np
+from numpy.linalg import inv
+```
+
+```python
+# Using matrix algebra
+A = np.array([[1, -9],  # matrix A
+              [1, -7],
+              [1, -3]])
+
+A_T = np.transpose(A)  # transpose of matrix A
+
+b = np.array((1, 3, 8))  # column vector b
+b.shape = (3, 1)
+
+x = inv(A_T @ A) @ A_T @ b
+x
+```
+
+    array([[11.46428571],
+           [ 1.17857143]])
+
+```python
+# Using numpy.linalg.lstsq
+x, res, _, _ = np.linalg.lstsq(A, b, rcond=None)
+```
+
+```python
+print(f"x\u0302 = {x}")
+print(f"\u2016Ax\u0302 - b\u2016\u00B2 = {res[0]}")
+```
+
+    x̂ = [[11.46428571]
+     [ 1.17857143]]
+    ‖Ax̂ - b‖² = 0.07142857142857129
+
+Here is a visualization showing how the least squares method approximates the equation of a line through a set of points. This process can also be described as "fitting" a line to the points.
+
+```python
+fig, ax = plt.subplots()
+p = np.array((1, 3, 8))
+q = np.array((9, 7, 3))
+
+a, b = x
+
+ax.plot(q, p, 'o', label='observations', markersize=5)
+ax.plot(q, a - b*q, 'r', label='Fitted line')
+plt.xlabel('quantity demanded')
+plt.ylabel('price')
+plt.legend()
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/Introduction-to-Quantitative-Economics/complex_and_trig_files/complex_and_trig_75_0.png)
+
+### Additional Resources
+
+For more information, you can refer to the documentation for the numpy.linalg submodule [here](https://numpy.org/devdocs/reference/routines.linalg.html).

@@ -1,0 +1,340 @@
+---
+title: Labeling Financial Data
+draft: false
+summary: To train a machine learning model, we usually need a labeled dataset. In the world of finance, this involves creating a matrix of features, $X$, and an array of labels or values, $y$. In this blog, we'll delve into various methods of labeling financial data.
+---
+
+<TOCInline toc={props.toc} exclude="Labeling Financial Data" asDisclosure />
+
+<div style={{ marginBottom: '2rem' }} />
+
+# Labeling Financial Data
+
+To train a machine learning model, we usually need a labeled dataset. In the world of finance, this involves creating a matrix of features, $X$, and an array of labels or values, $y$. In this blog, we'll delve into various methods of labeling financial data. Whether you're using supervised or unsupervised learning techniques, understanding how to correctly label financial data is crucial for model accuracy.
+
+## Fixed-Time Horizon Method
+
+The Fixed-Time Horizon Method is a widely-used technique for labeling in financial Machine Learning literature. It considers a matrix $X$ with $I$ rows, $\left\{X_{i}\right\}_{i=1, \ldots, I}$ taken from a time series with $T$ bars, where $I \leq T$. A label $y_{i}$, which can be $-1, 0, 1$, is then associated with each row $X_{i}$.
+
+The label $y_{i}$ is defined as follows:
+
+$$
+y_{i}=
+\begin{cases}
+-1 & \text{if } r_{t_{i, 0}, t_{i, 0}+h} < -\tau \\
+0 & \text{if } \left|r_{t_{i, 0}, t_{i, 0}+h}\right| \leq \tau \\
+1 & \text{if } r_{t_{i, 0}, t_{i, 0}+h} > \tau
+\end{cases}
+$$
+
+And the price return $r_{t_{i, 0}, t_{i, 0}+h}$ is given by:
+
+$$
+r_{t_{i, 0}, t_{i, 0}+h}=\frac{p_{t_{i, 0}+h}}{p_{t_{i, 0}}}-1
+$$
+
+Despite its popularity, this method has limitations, such as the lack of robust statistical features and the use of a constant threshold $\tau$.
+
+## Computing Dynamic Thresholds
+
+Instead of a fixed $\tau$, we can compute a variable threshold based on the volatility. Below is the code snippet for calculating daily volatility.
+
+<div style={{display: 'flex', justifyContent: 'center'}}>
+    <table style={{tableLayout: 'fixed', width: '90%'}}>
+        <thead>
+        <tr>
+            <th style={{width: '50%', textAlign: 'center'}}>Python</th>
+            <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```python
+                def dailyVol(
+                close: DataFrame,
+                span: int = 63
+                ) -> Series:
+                ```
+
+            </td>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```julia
+                function dailyVol(
+                close::DataFrame,
+                span::Int = 100
+                )::Series
+                end
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+View More: [Python](https://www.github.com/risklabai/RiskLabAI.py) | [Julia](https://www.github.com/risklabai/RiskLabAI.jl)
+
+## The Triple-Barrier Method
+
+Another approach to labeling is the Triple-Barrier Method, which uses dynamic barriers based on the volatility. It involves three barriers: profit-taking, stop-loss, and a time-based barrier.
+
+### The Code Implementation
+
+<div style={{display: 'flex', justifyContent: 'center'}}>
+    <table style={{tableLayout: 'fixed', width: '90%'}}>
+        <thead>
+        <tr>
+            <th style={{width: '50%', textAlign: 'center'}}>Python</th>
+            <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```python
+                def tripleBarrier(
+                close: DataFrame,
+                events: DataFrame,
+                profitTakingStopLoss: List[float],
+                molecule: List[int]
+                ) -> DataFrame:
+                ```
+
+            </td>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```julia
+                function tripleBarrier(
+                close::DataFrame,
+                events::DataFrame,
+                profitTakingStopLoss::Vector{Float64},
+                molecule::Vector{Int}
+                )::DataFrame
+                end
+                ```
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+View More: [Python](https://www.github.com/risklabai/RiskLabAI.py) | [Julia](https://www.github.com/risklabai/RiskLabAI.jl)
+
+## Learning Side and Size
+
+The Triple-Barrier Method enables us to learn both the side and the size of the bet.
+
+### The Code for Event Function
+
+<div style={{display: 'flex', justifyContent: 'center'}}>
+    <table style={{tableLayout: 'fixed', width: '90%'}}>
+        <thead>
+        <tr>
+            <th style={{width: '50%', textAlign: 'center'}}>Python</th>
+            <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```python
+                def getEvents(
+                close: DataFrame,
+                profitTakingStopLoss: List[float],
+                molecule: List[int]
+                ) -> DataFrame:
+                ```
+
+            </td>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```julia
+                function getEvents(
+                close::DataFrame,
+                profitTakingStopLoss::Vector{Float64},
+                molecule::Vector{Int}
+                )::DataFrame
+                end
+                ```
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+View More: [Python](https://www.github.com/risklabai/RiskLabAI.py) | [Julia](https://www.github.com/risklabai/RiskLabAI.jl)
+
+# Meta-Labeling
+
+In financial machine learning (ML), it's crucial to know how to bet: whether to go long, go short, or not bet at all. This blog introduces the concept of meta-labeling, a technique that aims to answer not "which side to bet on" but rather "how much to bet". This is particularly useful for practitioners who already have a primary model for side prediction but are looking to optimize the size of their stake. In this blog, we also offer code snippets available in both Python and Julia, via our RiskLabAI library.
+
+Meta-labeling is a secondary machine learning model that takes into account the output of a primary model. While the primary model determines the side of the bet (long or short), the meta-labeling model focuses on deciding the appropriate stake size, including the option of not betting at all (zero size).
+
+Here's how you can apply meta-labeling in Python and Julia:
+
+<div style={{display: 'flex', justifyContent: 'center'}}>
+    <table style={{tableLayout: 'fixed', width: '90%'}}>
+        <thead>
+        <tr>
+            <th style={{width: '50%', textAlign: 'center'}}>Python</th>
+            <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```python
+                def eventsMeta(
+                close,
+                timeEvents,
+                ptsl,
+                target,
+                returnMin,
+                numThreads,
+                timestamp = False,
+                side = None
+                ):
+                ```
+
+            </td>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```julia
+                function eventsMeta(
+                close,
+                timeEvents,
+                ptsl,
+                target,
+                returnMin,
+                timestamp = false,
+                side = nothing
+                )
+                ```
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+View More: [Python](https://www.github.com/risklabai/RiskLabAI.py) | [Julia](https://www.github.com/risklabai/RiskLabAI.jl)
+
+These functionalities are available in both Python and Julia in the RiskLabAI library.
+
+## Why Use Meta-Labeling?
+
+1. **Quantamental Strategy**: Meta-labeling allows for the creation of machine learning models that are guided by fundamental, theory-based models. This is particularly useful for organizations aiming to combine quantitative analysis with fundamental insights.
+
+2. **Reduced Overfitting**: Since the meta-labeling model doesn't decide the side of the bet, only the size, it helps reduce overfitting.
+
+3. **Strategic Flexibility**: Meta-labeling allows for more complex strategies by separating the decision about the side from the decision about the size of the bet.
+
+4. **Optimized Sizing**: Focusing a machine learning model on the size of the bet can lead to more accurate and robust results, a crucial aspect often overlooked in traditional models.
+
+## How to Apply Meta-Labeling
+
+Meta-labeling can significantly improve the F1-score of your model. The process involves creating a primary model with high recall and then using meta-labeling to improve precision. Essentially, the secondary ML model verifies whether a 'positive' prediction from the primary model should be acted upon or not.
+
+Here are the code snippets for applying label meta-functions:
+
+<div style={{display: 'flex', justifyContent: 'center'}}>
+    <table style={{tableLayout: 'fixed', width: '90%'}}>
+        <thead>
+        <tr>
+            <th style={{width: '50%', textAlign: 'center'}}>Python</th>
+            <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```python
+                def labelMeta(
+                events,
+                close
+                ):
+                ```
+
+            </td>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```julia
+                function labelMeta(
+                events,
+                close
+                ):
+                ```
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+View More: [Python](https://www.github.com/risklabai/RiskLabAI.py) | [Julia](https://www.github.com/risklabai/RiskLabAI.jl)
+
+These functionalities are available in both Python and Julia in the RiskLabAI library.
+
+## Advanced Topics
+
+### Dropping Unnecessary Labels
+
+Sometimes, machine learning models struggle with classes that are heavily imbalanced. In such cases, you can use the `dropLabel` function to remove observations associated with infrequent labels.
+
+<div style={{display: 'flex', justifyContent: 'center'}}>
+    <table style={{tableLayout: 'fixed', width: '90%'}}>
+        <thead>
+        <tr>
+            <th style={{width: '50%', textAlign: 'center'}}>Python</th>
+            <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```python
+                def dropLabel(
+                events,
+                percentMin = .05
+                ):
+                ```
+
+            </td>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```julia
+                function dropLabel(
+                events,
+                percentMin = 0.05
+                ):
+                ```
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+View More: [Python](https://www.github.com/risklabai/RiskLabAI.py) | [Julia](https://www.github.com/risklabai/RiskLabAI.jl)
+
+These functionalities are available in both Python and Julia in the RiskLabAI library.
+
+### References
+
+1. De Prado, M. L. (2018). Advances in financial machine learning. John Wiley & Sons.
+2. De Prado, M. M. L. (2020). Machine learning for asset managers. Cambridge University Press.

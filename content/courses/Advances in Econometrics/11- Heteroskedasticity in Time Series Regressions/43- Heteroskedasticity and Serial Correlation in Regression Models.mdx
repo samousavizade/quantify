@@ -1,0 +1,87 @@
+---
+title: Heteroskedasticity and Serial Correlation in Regression Models
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+### Heteroskedasticity and Serial Correlation in Regression Models
+
+#### Introduction
+
+In time series econometrics, the presence of heteroskedasticity and serial correlation in regression models can significantly impact the efficiency and validity of parameter estimates. Heteroskedasticity refers to the non-constant variance of error terms across observations, while serial correlation (or autocorrelation) refers to the correlation of error terms across time periods. This section explores the implications of these issues in time series regression models and discusses strategies for addressing them.
+
+#### Understanding Heteroskedasticity and Serial Correlation
+
+##### Heteroskedasticity
+
+In a typical linear regression model, the assumption of homoskedasticity implies constant variance of the error terms:
+
+$$
+\text{Var}(u_t) = \sigma^2 \quad \text{for all } t.
+$$
+
+However, when heteroskedasticity is present, this assumption is violated, and the variance of the error terms changes over time:
+
+$$
+\text{Var}(u_t) = \sigma_t^2.
+$$
+
+This variability can arise due to structural changes in the data-generating process or economic events affecting volatility.
+
+###### Serial Correlation
+
+Serial correlation occurs when error terms in a regression model are correlated across time periods. In an autoregressive process of order 1 (AR(1)), the error term $$ u_t $$ is related to its lagged value:
+
+$$
+u_t = \rho u_{t-1} + \epsilon_t
+$$
+
+where $$ \epsilon_t $$ is a white noise error term. If $$ |\rho| < 1 $$, the process is stationary.
+
+#### Consequences of Heteroskedasticity and Serial Correlation
+
+1. **Inefficiency**: Ordinary Least Squares (OLS) estimators remain unbiased but become inefficient when heteroskedasticity or serial correlation is present because they do not account for varying error variances or correlations.
+
+2. **Invalid Inference**: Standard errors computed under homoskedasticity and no serial correlation assumptions are biased when these issues are present, leading to incorrect hypothesis tests and confidence intervals.
+
+3. **Model Misinterpretation**: Ignoring heteroskedasticity or serial correlation can result in misinterpretation of regression results, particularly when assessing the significance of coefficients.
+
+#### Addressing Heteroskedasticity and Serial Correlation
+
+To address heteroskedasticity and serial correlation in regression models, several strategies can be employed:
+
+##### 1. **Robust Standard Errors**
+
+Using robust standard errors can help mitigate some effects of model misspecification by providing valid inference even when error variances are not constant or errors are correlated.
+
+- **Heteroskedasticity-Robust Standard Errors**: These adjust the calculation of standard errors to account for heteroskedasticity. They are often referred to as White's standard errors.
+
+- **Newey-West Standard Errors**: These adjust for both heteroskedasticity and autocorrelation up to a specified lag length, providing consistent standard errors even if higher-order serial correlation is present.
+
+##### 2. **Feasible Generalized Least Squares (FGLS)**
+
+FGLS is an extension of GLS that can be used to correct for both heteroskedasticity and serial correlation by transforming the model based on an estimated error structure.
+
+- **Steps for FGLS**:
+
+1. Estimate initial model using OLS to obtain residuals.
+2. Estimate parameters of the error structure (e.g., autocorrelation coefficient $$ \rho $$ for AR(1) errors).
+3. Transform original regression model using estimated parameters to "whiten" errors.
+4. Apply OLS to transformed model to obtain efficient estimates.
+
+##### 3. **Testing for Heteroskedasticity and Serial Correlation**
+
+Before applying robust statistics or FGLS, it is useful to test for the presence of heteroskedasticity and serial correlation:
+
+- **Breusch-Pagan Test**: Detects heteroskedasticity by regressing squared residuals on original regressors.
+- **White Test**: A more general test that involves regressing squared residuals on all possible cross-products and powers of regressors.
+- **Durbin-Watson Test**: Tests for first-order serial correlation in models with strictly exogenous regressors.
+- **Breusch-Godfrey Test**: Allows testing for higher-order serial correlation and is applicable with lagged dependent variables.
+
+### Conclusion
+
+Heteroskedasticity and serial correlation in time series regression models can lead to inefficiencies and invalid inference if not properly addressed. By employing robust standard errors, using FGLS, conducting appropriate tests, and transforming models as needed, researchers can ensure reliable estimates and valid statistical inference despite varying error variances and correlations. Understanding and addressing these issues is crucial for accurate econometric analysis and interpretation in time series data.

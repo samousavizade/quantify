@@ -1,0 +1,141 @@
+---
+title: Simple MA Models
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Simple MA Models
+
+Moving-average (MA) models are another class of simple models useful for modeling financial return series. These models capture the linear dependencies between a variable and its past forecast errors. This section explores the properties, identification, estimation, and forecasting of simple MA models.
+
+### Properties of MA Models
+
+#### MA(1) Model
+
+A moving-average model of order 1, denoted as MA(1), is defined as:
+
+$$
+r_t = c_0 + a_t - \theta_1 a_{t-1}
+$$
+
+where $\{a_t\}$ is a white noise series with mean zero and variance $\sigma_a^2$, and $c_0$ is a constant.
+
+**Stationarity:**
+
+MA models are always weakly stationary because they are finite linear combinations of a white noise sequence.
+
+**Mean and Variance:**
+
+For an MA(1) model, the mean and variance are given by:
+
+$$
+E(r_t) = c_0
+$$
+
+$$
+Var(r_t) = (1 + \theta_1^2) \sigma_a^2
+$$
+
+**Autocorrelation Function (ACF):**
+
+For an MA(1) model, the autocorrelation function is:
+
+$$
+\rho_0 = 1, \quad \rho_1 = \frac{-\theta_1}{1 + \theta_1^2}, \quad \rho_\ell = 0 \text{ for } \ell > 1
+$$
+
+This implies that the ACF of an MA(1) model cuts off after lag 1.
+
+#### MA(2) Model
+
+A moving-average model of order 2, denoted as MA(2), is defined as:
+
+$$
+r_t = c_0 + a_t - \theta_1 a_{t-1} - \theta_2 a_{t-2}
+$$
+
+**Autocorrelation Function (ACF):**
+
+For an MA(2) model, the autocorrelation function is:
+
+$$
+\rho_0 = 1, \quad \rho_1 = \frac{-\theta_1 + \theta_1\theta_2}{1 + \theta_1^2 + \theta_2^2}, \quad \rho_2 = \frac{-\theta_2}{1 + \theta_1^2 + \theta_2^2}, \quad \rho_\ell = 0 \text{ for } \ell > 2
+$$
+
+This implies that the ACF of an MA(2) model cuts off after lag 2.
+
+### Identifying MA Order
+
+The ACF is useful for identifying the order of an MA model. For a time series $r_t$ with ACF $\rho_\ell$, if $\rho_q \neq 0$ but $\rho_\ell = 0$ for $\ell > q$, then $r_t$ follows an MA($q$) model.
+
+#### Example: CRSP Equal-Weighted Index
+
+Consider the monthly simple returns of the CRSP equal-weighted index from January 1926 to December 2008. The sample ACF shows significant values at lags 1, 3, and 9, suggesting an MA(9) model:
+
+$$
+r_t = c_0 + a_t - \theta_1 a_{t-1} - \theta_3 a_{t-3} - \theta_9 a_{t-9}
+$$
+
+### Estimation
+
+Maximum-likelihood estimation is commonly used to estimate MA models. There are two approaches for evaluating the likelihood function:
+
+- **Conditional-Likelihood Method:** Assumes initial shocks $a_t$ for $t \leq 0$ are zero.
+- **Exact-Likelihood Method:** Treats initial shocks as additional parameters.
+
+The exact method is preferred when the MA model is close to being noninvertible but requires more computation.
+
+#### Example: CRSP Equal-Weighted Index
+
+For the identified MA(9) model, conditional maximum-likelihood estimation yields:
+
+$$
+r_t = 0.012 + a_t + 0.189a_{t-1} - 0.121a_{t-3} + 0.122a_{t-9}, \quad \hat{\sigma}_a = 0.0714
+$$
+
+The exact maximum-likelihood method produces similar estimates.
+
+### Forecasting Using MA Models
+
+Forecasting with MA models involves predicting future values based on past observations and errors.
+
+#### One-Step-Ahead Forecast
+
+For an MA(1) process at forecast origin $h$:
+
+$$
+\hat{r}_h(1) = E(r_{h+1} | F_h) = c_0 - \theta_1 a_h
+$$
+
+The forecast error variance is:
+
+$$
+Var(e_h(1)) = \sigma_a^2
+$$
+
+#### Multi-Step-Ahead Forecasts
+
+For an MA($q$) model, multi-step-ahead forecasts converge to the mean after $q$ steps:
+
+$$
+\hat{r}_h(\ell) = c_0, \quad \text{for } \ell > q
+$$
+
+The variance of forecast errors also converges to the variance of the series after $q$ steps.
+
+#### Example: CRSP Equal-Weighted Index
+
+Out-of-sample forecasts for an MA(9) model at forecast origin $h=986$ (February 2008) show that forecasts quickly converge to the sample mean.
+
+### Summary
+
+Key properties of AR and MA models include:
+
+- **MA Models:** ACF cuts off at lag $q$, always stationary.
+- **AR Models:** PACF cuts off at lag $p$, stationarity requires characteristic roots less than one in modulus.
+
+This section provides foundational knowledge on simple MA models, essential for understanding more complex time series models used in financial econometrics.

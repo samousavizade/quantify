@@ -6,7 +6,7 @@
 
 /* Sidebar container */
 .sidebar {
-  width: 300px;
+  width: 275px;
   box-sizing: border-box;
   position: sticky;
   top: 0;
@@ -36,5 +36,5 @@
 .content {
   flex: 1;
   padding: 20px;
-  margin-left: 0px; /* Adjust for sidebar width + padding */
+  margin-left: 0; /* Adjust for sidebar width + padding */
 }

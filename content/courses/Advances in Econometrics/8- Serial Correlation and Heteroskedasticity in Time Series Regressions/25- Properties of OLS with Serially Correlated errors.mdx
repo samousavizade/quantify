@@ -1,0 +1,49 @@
+---
+title: Properties of OLS with Serially Correlated Errors
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+### **Properties of OLS with Serially Correlated Errors**
+
+In time series econometrics, the presence of serial correlation in the error terms of a regression model can significantly affect the properties of Ordinary Least Squares (OLS) estimators. Serial correlation, or autocorrelation, occurs when the error terms are correlated across different time periods. This section explores how serial correlation impacts the unbiasedness and consistency of OLS estimators.
+
+#### **Unbiasedness and Consistency**
+
+**Unbiasedness**: An estimator is unbiased if its expected value equals the true parameter value. In the context of OLS, this means that the expected value of the OLS estimator should equal the true coefficient value.
+
+- **Effect of Serial Correlation on Unbiasedness**: The presence of serial correlation in the error terms does not affect the unbiasedness of OLS estimators. The key assumption for unbiasedness is that the error term has a zero conditional mean given the explanatory variables. Serial correlation does not violate this assumption, so OLS estimators remain unbiased even when errors are serially correlated.
+
+**Consistency**: An estimator is consistent if it converges in probability to the true parameter value as the sample size increases. For OLS estimators to be consistent, certain assumptions must hold, including no perfect multicollinearity and a zero conditional mean of errors.
+
+- **Effect of Serial Correlation on Consistency**: Serial correlation does not inherently affect the consistency of OLS estimators. As long as other assumptions (such as no perfect multicollinearity and a zero conditional mean) are satisfied, OLS estimators will be consistent despite serial correlation in errors.
+
+#### **Implications for Regression Analysis**
+
+1. **Inference and Hypothesis Testing**:
+
+- While serial correlation does not bias or affect the consistency of OLS estimates, it does impact inference. Specifically, it leads to biased standard errors, which can result in invalid hypothesis tests and confidence intervals.
+- Correcting standard errors for serial correlation is crucial for valid inference.
+
+2. **Model Specification**:
+
+- Identifying and addressing serial correlation is essential for accurate model specification. Techniques such as adding lagged dependent variables or using autoregressive models can help account for serial correlation.
+
+3. **Diagnostic Testing**:
+
+- Tests such as the Durbin-Watson test or Breusch-Godfrey test are commonly used to detect serial correlation in regression models.
+- Addressing detected serial correlation involves methods like Generalized Least Squares (GLS) or robust standard errors.
+
+By understanding how serial correlation affects OLS properties, econometricians can take appropriate steps to ensure reliable estimation and inference in time series models. This involves using diagnostic tests to detect serial correlation and applying corrective measures to account for its presence in econometric analyses.
+
+[^1]: https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/30626316/2be59c8f-ac44-43e7-a595-38c5bea42df7/Jeffrey_M_Wooldridge_Introductory_Econometrics_A_Modern_Approach.pdf
+[^2]: https://link.springer.com/chapter/10.1057/9780230280830_25
+[^3]: https://www.quantstart.com/articles/Serial-Correlation-in-Time-Series-Analysis/
+[^4]: https://www.reed.edu/economics/parker/312/tschapters/S13_Ch_2.pdf
+[^5]: http://fmwww.bc.edu/ec-c/f2010/228/EC228.f2010.nn12.pdf
+[^6]: https://cameron.econ.ucdavis.edu/e240a/asymptotic.pdf
+[^7]: https://www.statlect.com/fundamentals-of-statistics/OLS-estimator-properties

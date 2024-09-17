@@ -1,0 +1,752 @@
+---
+title: Univariate Time Series with Matrix Algebra
+draft: false
+summary: Backtest statistics are essential for evaluating the efficacy of investment strategies.
+---
+
+# Univariate Time Series with Matrix Algebra
+
+## Overview
+
+This lecture uses matrices to solve some linear difference equations.
+
+As a running example, we’ll study a **second-order linear difference
+equation** that was the key technical tool in Paul Samuelson’s 1939
+article [[Samuelson, 1939](/courses/Introduction-to-Quantitative-Economics/References#id107)] that introduced the
+_multiplier-accelerator model_.
+
+This model became the workhorse that powered early econometric versions of
+Keynesian macroeconomic models in the United States.
+
+You can read about the details of that model
+in [Samuelson Multiplier-Accelerator](https://python.quantecon.org/samuelson.html).
+
+(That lecture also describes some technicalities about second-order linear difference equations.)
+
+In this lecture, we’ll also learn about an **autoregressive** representation and a **moving average** representation of
+a non-stationary
+univariate time series $ \{y*t\}*{t=0}^T $.
+
+We’ll also study a “perfect foresight” model of stock prices that involves solving
+a “forward-looking” linear difference equation.
+
+We will use the following imports:
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import cm
+plt.rcParams["figure.figsize"] = (11, 5)  #set default figure size
+```
+
+## Samuelson’s model
+
+Let $ t = 0, \pm 1, \pm 2, \ldots $ index time.
+
+For $ t = 1, 2, 3, \ldots, T $ suppose that
+
+$$
+y_{t} = \alpha_{0} + \alpha_{1} y_{t-1} + \alpha_{2} y_{t-2} \tag{35.1}
+$$
+
+where we assume that $ y*0 $ and $ y*{-1} $ are given numbers
+that we take as _initial conditions_.
+
+In Samuelson’s model, $ y_t $ stood for **national income** or perhaps a different
+measure of aggregate activity called **gross domestic product** (GDP) at time $ t $.
+
+Equation [(35.1)](#equation-tswm-1) is called a _second-order linear difference equation_. It is called second order
+because it depends on two lags.
+
+But actually, it is a collection of $ T $ simultaneous linear
+equations in the $ T $ variables $ y_1, y_2, \ldots, y_T $.
+
+> **Note**To be able to solve a second-order linear difference
+> equation, we require two _boundary conditions_ that can take the form
+> either of two _initial conditions_, two _terminal conditions_ or
+> possibly one of each.
+
+Let’s write our equations as a stacked system
+
+$$
+\underset{\equiv A}{\underbrace{\left[\begin{array}{cccccccc}
+1 & 0 & 0 & 0 & \cdots & 0 & 0 & 0\\
+-\alpha_{1} & 1 & 0 & 0 & \cdots & 0 & 0 & 0\\
+-\alpha_{2} & -\alpha_{1} & 1 & 0 & \cdots & 0 & 0 & 0\\
+0 & -\alpha_{2} & -\alpha_{1} & 1 & \cdots & 0 & 0 & 0\\
+\vdots & \vdots & \vdots & \vdots & \cdots & \vdots & \vdots & \vdots\\
+0 & 0 & 0 & 0 & \cdots & -\alpha_{2} & -\alpha_{1} & 1
+\end{array}\right]}}\left[\begin{array}{c}
+y_{1}\\
+y_{2}\\
+y_{3}\\
+y_{4}\\
+\vdots\\
+y_{T}
+\end{array}\right]=\underset{\equiv b}{\underbrace{\left[\begin{array}{c}
+\alpha_{0}+\alpha_{1}y_{0}+\alpha_{2}y_{-1}\\
+\alpha_{0}+\alpha_{2}y_{0}\\
+\alpha_{0}\\
+\alpha_{0}\\
+\vdots\\
+\alpha_{0}
+\end{array}\right]}}
+$$
+
+or
+
+$$
+A y = b
+$$
+
+where
+
+$$
+y = \begin{bmatrix} y_1 \cr y_2 \cr \vdots \cr y_T \end{bmatrix}
+$$
+
+Evidently $ y $ can be computed from
+
+$$
+y = A^{-1} b
+$$
+
+The vector $ y $ is a complete time path $ \{y*t\}*{t=1}^T $.
+
+Let’s put Python to work on an example that captures the flavor of
+Samuelson’s multiplier-accelerator model.
+
+We’ll set parameters equal to the same values we used
+in [Samuelson Multiplier-Accelerator](https://python.quantecon.org/samuelson.html).
+
+```python
+T = 80
+
+# parameters
+α_0 = 10.0
+α_1 = 1.53
+α_2 = -.9
+
+y_neg1 = 28. # y_{-1}
+y_0 = 24.
+```
+
+Now we construct $ A $ and $ b $.
+
+```python
+A = np.identity(T)  # The T x T identity matrix
+
+for i in range(T):
+
+    if i-1 >= 0:
+        A[i, i-1] = -α_1
+
+    if i-2 >= 0:
+        A[i, i-2] = -α_2
+
+b = np.full(T, α_0)
+b[0] = α_0 + α_1 * y_0 + α_2 * y_neg1
+b[1] = α_0 + α_2 * y_0
+```
+
+Let’s look at the matrix $ A $ and the vector $ b $ for our
+example.
+
+```python
+A, b
+```
+
+    (array([[ 1.  ,  0.  ,  0.  , ...,  0.  ,  0.  ,  0.  ],
+            [-1.53,  1.  ,  0.  , ...,  0.  ,  0.  ,  0.  ],
+            [ 0.9 , -1.53,  1.  , ...,  0.  ,  0.  ,  0.  ],
+            ...,
+            [ 0.  ,  0.  ,  0.  , ...,  1.  ,  0.  ,  0.  ],
+            [ 0.  ,  0.  ,  0.  , ..., -1.53,  1.  ,  0.  ],
+            [ 0.  ,  0.  ,  0.  , ...,  0.9 , -1.53,  1.  ]]),
+     array([ 21.52, -11.6 ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,
+             10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,
+             10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,
+             10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,
+             10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,
+             10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,
+             10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,
+             10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,
+             10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,
+             10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ,  10.  ]))
+
+Now let’s solve for the path of $ y $.
+
+If $ y_t $ is GNP at time $ t $, then we have a version of
+Samuelson’s model of the dynamics for GNP.
+
+To solve $ y = A^{-1} b $ we can either invert $ A $ directly, as in
+
+```python
+A_inv = np.linalg.inv(A)
+
+y = A_inv @ b
+```
+
+or we can use `np.linalg.solve`:
+
+```python
+y_second_method = np.linalg.solve(A, b)
+```
+
+Here make sure the two methods give the same result, at least up to floating
+point precision:
+
+```python
+np.allclose(y, y_second_method)
+```
+
+    True
+
+> **Note**In general, `np.linalg.solve` is more numerically stable than using
+> `np.linalg.inv` directly.
+> However, stability is not an issue for this small example. Moreover, we will
+> repeatedly use `A_inv` in what follows, so there is added value in computing
+> it directly.
+
+Now we can plot.
+
+```python
+plt.plot(np.arange(T)+1, y)
+plt.xlabel('t')
+plt.ylabel('y')
+
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/time_series_with_matrices_files/time_series_with_matrices_16_0.png)
+
+The **steady state** value $ y^_ $ of $ y*t $
+is obtained by setting $ y_t = y*{t-1} =
+y\_{t-2} = y^_ $ in [(35.1)](#equation-tswm-1), which yields
+
+$$
+y^* = \frac{\alpha_{0}}{1 - \alpha_{1} - \alpha_{2}}
+$$
+
+If we set the initial values to $ y*{0} = y*{-1} = y^\* $, then $ y\_{t} $ will be
+constant:
+
+```python
+y_star = α_0 / (1 - α_1 - α_2)
+y_neg1_steady = y_star # y_{-1}
+y_0_steady = y_star
+
+b_steady = np.full(T, α_0)
+b_steady[0] = α_0 + α_1 * y_0_steady + α_2 * y_neg1_steady
+b_steady[1] = α_0 + α_2 * y_0_steady
+```
+
+```python
+y_steady = A_inv @ b_steady
+```
+
+```python
+plt.plot(np.arange(T)+1, y_steady)
+plt.xlabel('t')
+plt.ylabel('y')
+
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/time_series_with_matrices_files/time_series_with_matrices_20_0.png)
+
+## Adding a random term
+
+To generate some excitement, we’ll follow in the spirit of the great economists
+[Eugen Slutsky](https://en.wikipedia.org/wiki/Eugen_Slutsky)
+and [Ragnar Frisch](https://en.wikipedia.org/wiki/Ragnar_Frisch) and replace our original second-order difference
+equation with the following **second-order stochastic linear difference
+equation**:
+
+$$
+y_{t} = \alpha_{0} + \alpha_{1} y_{t-1} + \alpha_{2} y_{t-2} + u_t \tag{35.2}
+$$
+
+where $ u*{t} \sim N\left(0, \sigma*{u}^{2}\right) $ and is IID,
+meaning independent and identically distributed.
+
+We’ll stack these $ T $ equations into a system cast in terms of
+matrix algebra.
+
+Let’s define the random vector
+
+$$
+u=\left[\begin{array}{c}
+u_{1}\\
+u_{2}\\
+\vdots\\
+u_{T}
+\end{array}\right]
+$$
+
+Where $ A, b, y $ are defined as above, now assume that $ y $ is
+governed by the system
+
+$$
+A y = b + u \tag{35.3}
+$$
+
+The solution for $ y $ becomes
+
+$$
+y = A^{-1} \left(b + u\right) \tag{35.4}
+$$
+
+Let’s try it out in Python.
+
+```python
+σ_u = 2.
+u = np.random.normal(0, σ_u, size=T)
+y = A_inv @ (b + u)
+```
+
+```python
+plt.plot(np.arange(T)+1, y)
+plt.xlabel('t')
+plt.ylabel('y')
+
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/time_series_with_matrices_files/time_series_with_matrices_23_0.png)
+
+The above time series looks a lot like (detrended) GDP series for a
+number of advanced countries in recent decades.
+
+We can simulate $ N $ paths.
+
+```python
+N = 100
+
+for i in range(N):
+    col = cm.viridis(np.random.rand())  # Choose a random color from viridis
+    u = np.random.normal(0, σ_u, size=T)
+    y = A_inv @ (b + u)
+    plt.plot(np.arange(T)+1, y, lw=0.5, color=col)
+
+plt.xlabel('t')
+plt.ylabel('y')
+
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/time_series_with_matrices_files/time_series_with_matrices_25_0.png)
+
+Also consider the case when $ y*{0} $ and $ y*{-1} $ are at
+steady state.
+
+```python
+N = 100
+
+for i in range(N):
+    col = cm.viridis(np.random.rand())  # Choose a random color from viridis
+    u = np.random.normal(0, σ_u, size=T)
+    y_steady = A_inv @ (b_steady + u)
+    plt.plot(np.arange(T)+1, y_steady, lw=0.5, color=col)
+
+plt.xlabel('t')
+plt.ylabel('y')
+
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/time_series_with_matrices_files/time_series_with_matrices_27_0.png)
+
+## Computing population moments
+
+We can apply standard formulas for multivariate normal distributions to compute the mean vector and covariance matrix
+for our time series model
+
+$$
+y = A^{-1} (b + u) .
+$$
+
+You can read about multivariate normal distributions in this
+lecture [Multivariate Normal Distribution](https://python.quantecon.org/multivariate_normal.html).
+
+Let’s write our model as
+
+$$
+y = \tilde A (b + u)
+$$
+
+where $ \tilde A = A^{-1} $.
+
+Because linear combinations of normal random variables are normal, we know that
+
+$$
+y \sim {\mathcal N}(\mu_y, \Sigma_y)
+$$
+
+where
+
+$$
+\mu_y = \tilde A b
+$$
+
+and
+
+$$
+\Sigma_y = \tilde A (\sigma_u^2 I_{T \times T} ) \tilde A^T
+$$
+
+Let’s write a Python class that computes the mean vector $ \mu_y $ and covariance matrix $ \Sigma_y $.
+
+```python
+class population_moments:
+    """
+    Compute population moments μ_y, Σ_y.
+    ---------
+    Parameters:
+    α_0, α_1, α_2, T, y_neg1, y_0
+    """
+    def __init__(self, α_0, α_1, α_2, T, y_neg1, y_0, σ_u):
+
+        # compute A
+        A = np.identity(T)
+
+        for i in range(T):
+            if i-1 >= 0:
+                A[i, i-1] = -α_1
+
+            if i-2 >= 0:
+                A[i, i-2] = -α_2
+
+        # compute b
+        b = np.full(T, α_0)
+        b[0] = α_0 + α_1 * y_0 + α_2 * y_neg1
+        b[1] = α_0 + α_2 * y_0
+
+        # compute A inverse
+        A_inv = np.linalg.inv(A)
+
+        self.A, self.b, self.A_inv, self.σ_u, self.T = A, b, A_inv, σ_u, T
+
+    def sample_y(self, n):
+        """
+        Give a sample of size n of y.
+        """
+        A_inv, σ_u, b, T = self.A_inv, self.σ_u, self.b, self.T
+        us = np.random.normal(0, σ_u, size=[n, T])
+        ys = np.vstack([A_inv @ (b + u) for u in us])
+
+        return ys
+
+    def get_moments(self):
+        """
+        Compute the population moments of y.
+        """
+        A_inv, σ_u, b = self.A_inv, self.σ_u, self.b
+
+        # compute μ_y
+        self.μ_y = A_inv @ b
+        self.Σ_y = σ_u**2 * (A_inv @ A_inv.T)
+
+        return self.μ_y, self.Σ_y
+
+
+series_process = population_moments(
+    α_0=10.0, α_1=1.53, α_2=-.9, T=80, y_neg1=28., y_0=24., σ_u=1)
+
+μ_y, Σ_y = series_process.get_moments()
+A_inv = series_process.A_inv
+```
+
+It is enlightening to study the $ \mu_y, \Sigma_y $’s implied by various parameter values.
+
+Among other things, we can use the class to exhibit how **statistical stationarity** of $ y $ prevails only for very
+special initial conditions.
+
+Let’s begin by generating $ N $ time realizations of $ y $ plotting them together with population mean $ \mu_y $ .
+
+```python
+# Plot mean
+N = 100
+
+for i in range(N):
+    col = cm.viridis(np.random.rand())  # Choose a random color from viridis
+    ys = series_process.sample_y(N)
+    plt.plot(ys[i,:], lw=0.5, color=col)
+    plt.plot(μ_y, color='red')
+
+plt.xlabel('t')
+plt.ylabel('y')
+
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/time_series_with_matrices_files/time_series_with_matrices_31_0.png)
+
+Visually, notice how the variance across realizations of $ y_t $ decreases as $ t $ increases.
+
+Let’s plot the population variance of $ y_t $ against $ t $.
+
+```python
+# Plot variance
+plt.plot(Σ_y.diagonal())
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/time_series_with_matrices_files/time_series_with_matrices_33_0.png)
+
+Notice how the population variance increases and asymptotes.
+
+Let’s print out the covariance matrix $ \Sigma_y $ for a time series $ y $.
+
+```python
+series_process = population_moments(
+    α_0=0, α_1=.8, α_2=0, T=6, y_neg1=0., y_0=0., σ_u=1)
+
+μ_y, Σ_y = series_process.get_moments()
+print("μ_y = ", μ_y)
+print("Σ_y = ", Σ_y)
+```
+
+    μ_y =  [0. 0. 0. 0. 0. 0.]
+    Σ_y =  [[1.         0.8        0.64       0.512      0.4096     0.32768   ]
+     [0.8        1.64       1.312      1.0496     0.83968    0.671744  ]
+     [0.64       1.312      2.0496     1.63968    1.311744   1.0493952 ]
+     [0.512      1.0496     1.63968    2.311744   1.8493952  1.47951616]
+     [0.4096     0.83968    1.311744   1.8493952  2.47951616 1.98361293]
+     [0.32768    0.671744   1.0493952  1.47951616 1.98361293 2.58689034]]
+
+Notice that the covariance between $ y*t $ and $ y*{t-1} $ – the elements on the superdiagonal – are _not_ identical.
+
+This is an indication that the time series represented by our $ y $ vector is not **stationary**.
+
+To make it stationary, we’d have to alter our system so that our _initial conditions_ $ (y*0, y*{-1}) $ are not fixed
+numbers but instead a jointly normally distributed random vector with a particular mean and covariance matrix.
+
+We describe how to do that in [Linear State Space Models](https://python.quantecon.org/linear_models.html).
+
+But just to set the stage for that analysis, let’s print out the bottom right corner of $ \Sigma_y $.
+
+```python
+series_process = population_moments(
+    α_0=10.0, α_1=1.53, α_2=-.9, T=80, y_neg1=28., y_0=24., σ_u=1)
+μ_y, Σ_y = series_process.get_moments()
+print("bottom right corner of Σ_y = \n", Σ_y[72:,72:])
+```
+
+    bottom right corner of Σ_y =
+     [[ 14.96526785  12.05113208   4.96949102  -3.24269762  -9.43386927
+      -11.51539213  -9.12806761  -3.60209053]
+     [ 12.05113208  14.96538003  12.05101258   4.96920722  -3.24302428
+       -9.43411364 -11.51547202  -9.12796991]
+     [  4.96949102  12.05101258  14.96550733  12.0513149    4.96955519
+       -3.24276396  -9.43402853 -11.51557609]
+     [ -3.24269762   4.96920722  12.0513149   14.9662253   12.0521413
+        4.97017342  -3.24256184  -9.43427569]
+     [ -9.43386927  -3.24302428   4.96955519  12.0521413   14.96717651
+       12.05285289   4.97040607  -3.24284632]
+     [-11.51539213  -9.43411364  -3.24276396   4.97017342  12.05285289
+       14.96770885  12.05302694   4.97019325]
+     [ -9.12806761 -11.51547202  -9.43402853  -3.24256184   4.97040607
+       12.05302694  14.96776576  12.05295736]
+     [ -3.60209053  -9.12796991 -11.51557609  -9.43427569  -3.24284632
+        4.97019325  12.05295736  14.96785084]]
+
+Please notice how the subdiagonal and superdiagonal elements seem to have converged.
+
+This is an indication that our process is asymptotically stationary.
+
+You can read about stationarity of more general linear time series models in this
+lecture [Linear State Space Models](https://python.quantecon.org/linear_models.html).
+
+There is a lot to be learned about the process by staring at the off diagonal elements of $ \Sigma_y $ corresponding to
+different time periods $ t $, but we resist the temptation to do so here.
+
+## Moving average representation
+
+Let’s print out $ A^{-1} $ and stare at its structure
+
+- is it triangular or almost triangular or $ \ldots $ ?
+
+To study the structure of $ A^{-1} $, we shall print just up to $ 3 $ decimals.
+
+Let’s begin by printing out just the upper left hand corner of $ A^{-1} $.
+
+```python
+with np.printoptions(precision=3, suppress=True):
+    print(A_inv[0:7,0:7])
+```
+
+    [[ 1.     0.    -0.    -0.     0.    -0.    -0.   ]
+     [ 1.53   1.    -0.    -0.     0.    -0.    -0.   ]
+     [ 1.441  1.53   1.     0.     0.     0.     0.   ]
+     [ 0.828  1.441  1.53   1.     0.     0.     0.   ]
+     [-0.031  0.828  1.441  1.53   1.    -0.    -0.   ]
+     [-0.792 -0.031  0.828  1.441  1.53   1.     0.   ]
+     [-1.184 -0.792 -0.031  0.828  1.441  1.53   1.   ]]
+
+Evidently, $ A^{-1} $ is a lower triangular matrix.
+
+Let’s print out the lower right hand corner of $ A^{-1} $ and stare at it.
+
+```python
+with np.printoptions(precision=3, suppress=True):
+    print(A_inv[72:,72:])
+```
+
+    [[ 1.     0.     0.     0.     0.     0.     0.     0.   ]
+     [ 1.53   1.    -0.    -0.     0.    -0.    -0.    -0.   ]
+     [ 1.441  1.53   1.     0.     0.     0.     0.     0.   ]
+     [ 0.828  1.441  1.53   1.     0.     0.     0.     0.   ]
+     [-0.031  0.828  1.441  1.53   1.    -0.    -0.    -0.   ]
+     [-0.792 -0.031  0.828  1.441  1.53   1.     0.     0.   ]
+     [-1.184 -0.792 -0.031  0.828  1.441  1.53   1.     0.   ]
+     [-1.099 -1.184 -0.792 -0.031  0.828  1.441  1.53   1.   ]]
+
+Notice how every row ends with the previous row’s pre-diagonal entries.
+
+Since $ A^{-1} $ is lower triangular, each row represents $ y_t $ for a particular $ t $ as the sum of
+
+- a time-dependent function $ A^{-1} b $ of the initial conditions incorporated in $ b $, and
+- a weighted sum of current and past values of the IID shocks $ \{u_t\} $.
+
+Thus, let $ \tilde{A}=A^{-1} $.
+
+Evidently, for $ t\geq0 $,
+
+$$
+y_{t+1}=\sum_{i=1}^{t+1}\tilde{A}_{t+1,i}b_{i}+\sum_{i=1}^{t}\tilde{A}_{t+1,i}u_{i}+u_{t+1}
+$$
+
+This is a **moving average** representation with time-varying coefficients.
+
+Just as system [(35.4)](#equation-eq-eqma) constitutes a
+**moving average** representation for $ y $, system [(35.3)](#equation-eq-eqar) constitutes an **autoregressive**
+representation for $ y $.
+
+## A forward looking model
+
+Samuelson’s model is _backward looking_ in the sense that we give it _initial conditions_ and let it
+run.
+
+Let’s now turn to model that is _forward looking_.
+
+We apply similar linear algebra machinery to study a _perfect
+foresight_ model widely used as a benchmark in macroeconomics and
+finance.
+
+As an example, we suppose that $ p_t $ is the price of a stock and
+that $ y_t $ is its dividend.
+
+We assume that $ y_t $ is determined by second-order difference
+equation that we analyzed just above, so that
+
+$$
+y = A^{-1} \left(b + u\right)
+$$
+
+Our _perfect foresight_ model of stock prices is
+
+$$
+p_{t} = \sum_{j=0}^{T-t} \beta^{j} y_{t+j}, \quad \beta \in (0,1)
+$$
+
+where $ \beta $ is a discount factor.
+
+The model asserts that the price of the stock at $ t $ equals the
+discounted present values of the (perfectly foreseen) future dividends.
+
+Form
+
+$$
+\underset{\equiv p}{\underbrace{\left[\begin{array}{c}
+p_{1}\\
+p_{2}\\
+p_{3}\\
+\vdots\\
+p_{T}
+\end{array}\right]}}=\underset{\equiv B}{\underbrace{\left[\begin{array}{ccccc}
+1 & \beta & \beta^{2} & \cdots & \beta^{T-1}\\
+0 & 1 & \beta & \cdots & \beta^{T-2}\\
+0 & 0 & 1 & \cdots & \beta^{T-3}\\
+\vdots & \vdots & \vdots & \vdots & \vdots\\
+0 & 0 & 0 & \cdots & 1
+\end{array}\right]}}\left[\begin{array}{c}
+y_{1}\\
+y_{2}\\
+y_{3}\\
+\vdots\\
+y_{T}
+\end{array}\right]
+$$
+
+```python
+β = .96
+```
+
+```python
+# construct B
+B = np.zeros((T, T))
+
+for i in range(T):
+    B[i, i:] = β ** np.arange(0, T-i)
+```
+
+```python
+B
+```
+
+    array([[1.        , 0.96      , 0.9216    , ..., 0.04314048, 0.04141486,
+            0.03975826],
+           [0.        , 1.        , 0.96      , ..., 0.044938  , 0.04314048,
+            0.04141486],
+           [0.        , 0.        , 1.        , ..., 0.04681041, 0.044938  ,
+            0.04314048],
+           ...,
+           [0.        , 0.        , 0.        , ..., 1.        , 0.96      ,
+            0.9216    ],
+           [0.        , 0.        , 0.        , ..., 0.        , 1.        ,
+            0.96      ],
+           [0.        , 0.        , 0.        , ..., 0.        , 0.        ,
+            1.        ]])
+
+```python
+σ_u = 0.
+u = np.random.normal(0, σ_u, size=T)
+y = A_inv @ (b + u)
+y_steady = A_inv @ (b_steady + u)
+```
+
+```python
+p = B @ y
+```
+
+```python
+plt.plot(np.arange(0, T)+1, y, label='y')
+plt.plot(np.arange(0, T)+1, p, label='p')
+plt.xlabel('t')
+plt.ylabel('y/p')
+plt.legend()
+
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/time_series_with_matrices_files/time_series_with_matrices_50_0.png)
+
+Can you explain why the trend of the price is downward over time?
+
+Also consider the case when $ y*{0} $ and $ y*{-1} $ are at the
+steady state.
+
+```python
+p_steady = B @ y_steady
+
+plt.plot(np.arange(0, T)+1, y_steady, label='y')
+plt.plot(np.arange(0, T)+1, p_steady, label='p')
+plt.xlabel('t')
+plt.ylabel('y/p')
+plt.legend()
+
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/time_series_with_matrices_files/time_series_with_matrices_52_0.png)

@@ -1,0 +1,716 @@
+---
+title: Value Iteration
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+# Value Iteration
+
+In this section, we will discuss how to pick the best action for the robot at each state to maximize the _return_ of the trajectory. We will describe an algorithm called Value Iteration and implement it for a simulated robot that travels over a frozen lake.
+
+## 1. Stochastic Policy
+
+A stochastic policy denoted as $\pi(a|s)$ (policy for short) is a conditional distribution over the actions $a \in A$ given the state $s \in S$, $\pi(a|s) \equiv P(a|s)$. As an example, if the robot has four actions $A = \{ \text{go left}, \text{go down}, \text{go right}, \text{go up} \}$, the policy at a state $s \in S$ for such a set of actions $A$ is a categorical distribution where the probabilities of the four actions could be $[0.4, 0.2, 0.1, 0.3]$; at some other state $s' \in S$ the probabilities $\pi(a|s')$ of the same four actions could be $[0.1, 0.1, 0.2, 0.6]$. Note that we should have $\sum_a \pi(a|s) = 1$ for any state $s$. A deterministic policy is a special case of a stochastic policy in that the distribution $\pi(a|s)$ only gives non-zero probability to one particular action, e.g., $[1, 0, 0, 0]$ for our example with four actions.
+
+To make the notation less cumbersome, we will often write $\pi(s)$ as the conditional distribution instead of $\pi(a|s)$.
+
+## 2. Value Iteration Overview
+
+Value Iteration is a dynamic programming algorithm used in Markov Decision Processes (MDPs) to find the optimal policy by iteratively improving the value function until it converges to the optimal value function. The algorithm is based on the principle of optimality and the Bellman equation.
+
+### Key Steps in Value Iteration:
+
+1. **Initialization**: Start by initializing the value function arbitrarily (often to zero) for all states $s \in S$.
+
+$$
+V_0(s) = 0, \forall s \in S
+$$
+
+2. **Bellman Update Equation**: The value function is updated using the Bellman optimality equation:
+
+$$
+V_{k+1}(s) = \max_{a \in A} \sum_{s'} P(s'|s, a) [ R(s, a, s') + \gamma V_k(s') ]
+$$
+
+where:
+
+- $P(s'|s, a)$ is the state transition probability
+- $R(s, a, s')$ is the reward function
+- $\gamma$ is the discount factor ($0 \leq \gamma < 1$)
+- $k$ is the iteration number
+
+3. **Iteration**: Repeat the update until the value function converges within a small tolerance level $\epsilon$:
+
+$$
+\max_{s \in S} |V_{k+1}(s) - V_k(s)| < \epsilon
+$$
+
+4. **Policy Extraction**: Once the value function is stable, derive the optimal policy by selecting the action that maximizes the expected return:
+
+$$
+\pi^*(s) = \arg\max_{a \in A} \sum_{s'} P(s'|s, a) [ R(s, a, s') + \gamma V^*(s') ]
+$$
+
+## 3. Important Concepts
+
+### Stochastic vs. Deterministic Policies
+
+- **Stochastic policies** assign probabilities to each action, allowing for exploration. The policy is defined as $\pi(a|s) = P(a|s).$
+- **Deterministic policies** provide a specific action for each state. The policy can be represented as $\pi(s) = a.$
+
+### Convergence
+
+The process of Value Iteration leverages the Bellman equation, which guarantees that, under certain conditions, the value function will converge to the optimal value function assuming that the state and action spaces are finite. The convergence rate is typically exponential in the discount factor $\gamma$.
+
+### Bellman Optimality Equation
+
+The Bellman optimality equation for the value function is:
+
+$$
+V^*(s) = \max_{a \in A} \sum_{s'} P(s'|s, a) [ R(s, a, s') + \gamma V^*(s') ]
+$$
+
+This equation expresses the value of a state as the maximum expected return that can be achieved from that state.
+
+### Q-function
+
+The action-value function, or Q-function, is defined as:
+
+$Q^*(s, a) = \sum_{s'} P(s'|s, a) [ R(s, a, s') + \gamma V^*(s') ]$
+
+The optimal policy can be derived from the Q-function:
+
+$\pi^*(s) = \arg\max_{a \in A} Q^*(s, a)$
+
+## 4. Advantages and Limitations
+
+### Advantages
+
+- Guaranteed to converge to the optimal value function and policy for finite MDPs
+- Simple to implement and understand
+- Provides a deterministic optimal policy
+
+### Limitations
+
+- Requires a complete model of the environment (transition probabilities and reward function)
+- Can be computationally expensive for large state spaces
+- May struggle with continuous state or action spaces
+
+## 5. Pseudocode
+
+```
+function ValueIteration(S, A, P, R, γ, ε):
+    Initialize V(s) = 0 for all s ∈ S
+    repeat:
+        Δ = 0
+        for each s ∈ S:
+            v = V(s)
+            V(s) = max_a ∑_s' P(s'|s,a) [R(s,a,s') + γV(s')]
+            Δ = max(Δ, |v - V(s)|)
+    until Δ < ε
+
+    return V
+```
+
+## 2. Value Function
+
+Imagine now that the robot starts at a state $s_0$ and at each time instant, it first samples an action from the policy $a_t \sim \pi(s_t)$ and takes this action to result in the next state $s_{t+1}$. The trajectory $\tau = (s_0, a_0, r_0, s_1, a_1, r_1, \ldots)$, can be different depending upon which particular action $a_t$ is sampled at intermediate instants. We define the average _return_ $R(\tau) = \sum_{t=0}^{\infty} \gamma^t r(s_t, a_t)$ of all such trajectories
+
+$$
+V^\pi(s_0) = \mathbb{E}_{a_t \sim \pi(s_t)}[R(\tau)] = \mathbb{E}_{a_t \sim \pi(s_t)}\left[\sum_{t=0}^{\infty} \gamma^t r(s_t, a_t)\right],
+$$
+
+where $s_{t+1} \sim P(s_{t+1}|s_t, a_t)$ is the next state of the robot and $r(s_t, a_t)$ is the instantaneous reward obtained by taking action $a_t$ in state $s_t$ at time $t$. This is called the "value function" for the policy $\pi$. In simple words, the value of a state $s_0$ for a policy $\pi$, denoted by $V^\pi(s_0)$, is the expected $\gamma$-discounted _return_ obtained by the robot if it begins at state $s_0$ and takes actions from the policy $\pi$ at each time instant.
+
+### Bellman Equation for Value Function
+
+We next break down the trajectory into two stages:
+
+1. The first stage which corresponds to $s_0 \rightarrow s_1$ upon taking the action $a_0$
+2. A second stage which is the trajectory $\tau' = (s_1, a_1, r_1, \ldots)$ thereafter
+
+The key idea behind all algorithms in reinforcement learning is that the value of state $s_0$ can be written as the average reward obtained in the first stage and the value function averaged over all possible next states $s_1$. This is quite intuitive and arises from our Markov assumption: the average return from the current state is the sum of the average return from the next state and the average reward of going to the next state. Mathematically, we write the two stages as
+
+$$
+V^\pi(s_0) = r(s_0, a_0) + \gamma \mathbb{E}_{a_0 \sim \pi(s_0)}[\mathbb{E}_{s_1 \sim P(s_1|s_0, a_0)}[V^\pi(s_1)]].
+$$
+
+This decomposition is very powerful: it is the foundation of the principle of dynamic programming upon which all reinforcement learning algorithms are based. Notice that the second stage gets two expectations, one over the choices of the action $a_0$ taken in the first stage using the stochastic policy and another over the possible states $s_1$ obtained from the chosen action. We can write this using the transition probabilities in the Markov decision process (MDP) as
+
+$$
+V^\pi(s) = \sum_{a \in A} \pi(a|s) \left[r(s,a) + \gamma \sum_{s' \in S} P(s'|s,a) V^\pi(s')\right]; \quad \text{for all } s \in S.
+$$
+
+An important thing to notice here is that the above identity holds for all states $s \in S$ because we can think of any trajectory that begins at that state and break down the trajectory into two stages.
+
+### Properties of the Value Function
+
+1. **Uniqueness**: For a given policy $\pi$, the value function $V^\pi$ is unique.
+
+2. **Monotonicity**: If we have two policies $\pi_1$ and $\pi_2$ such that $\pi_1(a|s) \geq \pi_2(a|s)$ for all states $s$ and actions $a$, then $V^{\pi_1}(s) \geq V^{\pi_2}(s)$ for all states $s$.
+
+3. **Contraction**: The Bellman operator is a contraction mapping, which guarantees the convergence of value iteration algorithms.
+
+### Relationship with Q-function
+
+The value function is closely related to the action-value function, also known as the Q-function. The Q-function is defined as:
+
+$$
+Q^\pi(s,a) = r(s,a) + \gamma \sum_{s' \in S} P(s'|s,a) V^\pi(s')
+$$
+
+The relationship between the value function and Q-function is:
+
+$$
+V^\pi(s) = \sum_{a \in A} \pi(a|s) Q^\pi(s,a)
+$$
+
+### Optimal Value Function
+
+The optimal value function $V^*(s)$ is defined as the maximum value function over all possible policies:
+
+$$
+V^*(s) = \max_\pi V^\pi(s)
+$$
+
+The optimal value function satisfies the Bellman optimality equation:
+
+$$
+V^*(s) = \max_{a \in A} \left[r(s,a) + \gamma \sum_{s' \in S} P(s'|s,a) V^*(s')\right]
+$$
+
+Understanding the value function and its properties is crucial for developing and implementing reinforcement learning algorithms, as it forms the basis for policy evaluation and improvement techniques.
+
+## 3. Action-Value Function
+
+In implementations, it is often useful to maintain a quantity called the "action value" function, which is closely related to the value function. This is defined to be the average _return_ of a trajectory that begins at $s_0$ but when the action of the first stage is fixed to be $a_0$:
+
+$$
+Q^\pi(s_0, a_0) = r(s_0, a_0) + \mathbb{E}_{a_t \sim \pi(s_t)}\left[\sum_{t=1}^{\infty} \gamma^t r(s_t, a_t)\right],
+$$
+
+Note that the summation inside the expectation is from $t=1,\ldots,\infty$ because the reward of the first stage is fixed in this case. We can again break down the trajectory into two parts and write:
+
+$$
+Q^\pi(s,a) = r(s,a) + \gamma \sum_{s' \in S} P(s'|s,a) \sum_{a' \in A} \pi(a'|s') Q^\pi(s', a'); \quad \text{for all } s \in S, a \in A.
+$$
+
+This version is the analog of the Bellman equation for the value function, but applied to the action-value function.
+
+### Properties of the Action-Value Function
+
+1. **State-Action Pairs**: Unlike the value function which is defined over states, the Q-function is defined over state-action pairs.
+
+2. **Policy Evaluation**: The Q-function allows for direct policy evaluation without needing to know the transition probabilities explicitly.
+
+3. **Relationship with Value Function**: The value function can be derived from the Q-function:
+
+$$
+V^\pi(s) = \sum_{a \in A} \pi(a|s) Q^\pi(s,a)
+$$
+
+4. **Optimal Q-function**: The optimal Q-function, denoted as $Q^*(s,a)$, satisfies the Bellman optimality equation:
+
+$$
+Q^*(s,a) = r(s,a) + \gamma \sum_{s' \in S} P(s'|s,a) \max_{a'} Q^*(s', a')
+$$
+
+### Advantages of Using Q-function
+
+1. **Model-Free Learning**: Q-learning, a popular reinforcement learning algorithm, can learn the optimal policy without knowing the transition probabilities.
+
+2. **Action Selection**: The Q-function provides a natural way to select actions, especially in epsilon-greedy strategies:
+
+$$
+a = \arg\max_a Q(s,a)
+$$
+
+3. **Off-Policy Learning**: The Q-function allows for off-policy learning, where the agent can learn about the optimal policy while following a different behavior policy.
+
+### Q-function in Deep Reinforcement Learning
+
+In deep reinforcement learning, the Q-function is often approximated using neural networks. This approach, known as Deep Q-Network (DQN), has been successfully applied to various complex tasks, including playing Atari games at human-level performance.
+
+The loss function for training a DQN is typically:
+
+$L(\theta) = \mathbb{E}_{(s,a,r,s') \sim D}\left[(r + \gamma \max_{a'} Q(s', a'; \theta^-) - Q(s, a; \theta))^2\right]$
+
+where $\theta$ are the parameters of the Q-network, $\theta^-$ are the parameters of a target network, and $D$ is a replay buffer of experiences.
+
+### Relationship between V-function and Q-function
+
+The relationship between the value function (V-function) and the action-value function (Q-function) can be expressed mathematically as:
+
+1. From Q to V:
+
+   $$
+   V^\pi(s) = \sum_{a \in A} \pi(a|s) Q^\pi(s,a)
+   $$
+
+2. From V to Q:
+
+$$
+Q^\pi(s,a) = r(s,a) + \gamma \sum_{s' \in S} P(s'|s,a) V^\pi(s')
+$$
+
+These relationships highlight the close connection between these two fundamental concepts in reinforcement learning and demonstrate how they can be used interchangeably in various algorithms.
+
+## 4. Optimal Stochastic Policy
+
+Both the value function and the action-value function depend upon the policy that the robot chooses. We will next think of the "optimal policy" that achieves the maximal average _return_:
+
+$$
+\pi^* = \arg\max_\pi V^\pi(s_0).
+$$
+
+Of all possible stochastic policies that the robot could have taken, the optimal policy $\pi^*$ achieves the largest average discounted _return_ for trajectories starting from state $s_0$. Let us denote the value function and the action-value function of the optimal policy as $V^* \equiv V^{\pi^*}$ and $Q^* \equiv Q^{\pi^*}$.
+
+### Deterministic Optimal Policy
+
+For a deterministic policy where there is only one action that is possible under the policy at any given state, we have:
+
+$$
+\pi^*(s) = \arg\max_{a \in A} \left[r(s,a) + \gamma \sum_{s' \in S} P(s'|s,a) V^*(s')\right].
+$$
+
+A good mnemonic to remember this is that the optimal action at state $s$ (for a deterministic policy) is the one that maximizes the sum of reward $r(s,a)$ from the first stage and the average _return_ of the trajectories starting from the next state $s'$, averaged over all possible next states $s'$ from the second stage.
+
+### Properties of the Optimal Policy
+
+1. **Existence**: For any finite MDP, there exists an optimal policy that is stationary and deterministic.
+
+2. **Uniqueness**: While the optimal value function $V^*$ is unique, there may be multiple optimal policies that achieve this value.
+
+3. **Bellman Optimality Equation**: The optimal value function satisfies the Bellman optimality equation:
+
+$$
+V^*(s) = \max_{a \in A} \left[r(s,a) + \gamma \sum_{s' \in S} P(s'|s,a) V^*(s')\right]
+$$
+
+4. **Optimal Q-function**: Similarly, the optimal Q-function satisfies:
+
+$$
+Q^*(s,a) = r(s,a) + \gamma \sum_{s' \in S} P(s'|s,a) \max_{a'} Q^*(s', a')
+$$
+
+### Stochastic vs Deterministic Optimal Policies
+
+While we often focus on deterministic optimal policies, in some cases, stochastic policies can be optimal:
+
+1. **Partial Observability**: In partially observable MDPs (POMDPs), the optimal policy may be stochastic.
+
+2. **Multi-agent Settings**: In game-theoretic scenarios, mixed (stochastic) strategies can be optimal.
+
+3. **Exploration-Exploitation Trade-off**: In practice, especially during learning, stochastic policies can help balance exploration and exploitation.
+
+### Methods for Finding the Optimal Policy
+
+Several methods exist for finding or approximating the optimal policy:
+
+1. **Value Iteration**: Iteratively compute the optimal value function, then derive the policy.
+
+2. **Policy Iteration**: Alternate between policy evaluation and policy improvement steps.
+
+3. **Q-learning**: Learn the optimal Q-function directly, from which the optimal policy can be derived.
+
+4. **Policy Gradient Methods**: Directly optimize the policy in a parameterized policy space.
+
+### Optimal Policy in Continuous Action Spaces
+
+In continuous action spaces, finding the exact $\arg\max$ can be challenging. Approaches include:
+
+1. **Function Approximation**: Use neural networks to approximate $Q^*(s,a)$ and optimize over $a$.
+
+2. **Actor-Critic Methods**: Learn both a value function (critic) and a policy (actor).
+
+3. **Deterministic Policy Gradient (DPG)**: Directly learn a deterministic policy $\mu(s)$.
+
+### Mathematical Relationship Between Optimal Value and Q-Functions
+
+The relationship between the optimal value function $V^*$ and the optimal action-value function $Q^*$ can be expressed as:
+
+$$
+V^*(s) = \max_{a \in A} Q^*(s,a)
+$$
+
+$$
+Q^*(s,a) = r(s,a) + \gamma \sum_{s' \in S} P(s'|s,a) V^*(s')
+$$
+
+These equations highlight the close connection between these optimal functions and form the basis for many reinforcement learning algorithms aimed at finding the optimal policy.
+
+## 5. Principle of Dynamic Programming
+
+Our development in the previous section can be turned into an algorithm to compute the optimal value function $V^*$ or the action-value function $Q^*$, respectively. Observe that:
+
+$$
+V^*(s) = \sum_{a \in A} \pi^*(a|s) \left[r(s,a) + \gamma \sum_{s' \in S} P(s'|s,a) V^*(s')\right]; \quad \text{for all } s \in S.
+$$
+
+For a deterministic optimal policy $\pi^*$, since there is only one action that can be taken at state $s$, we can also write:
+
+$$
+V^*(s) = \max_{a \in A} \left\{r(s,a) + \gamma \sum_{s' \in S} P(s'|s,a) V^*(s')\right\}
+$$
+
+for all states $s \in S$. This identity is called the "principle of dynamic programming" ([Bellman, 1952](https://www.pnas.org/doi/10.1073/pnas.38.8.716 'Bellman, R. (1952). On the theory of dynamic programming. Proceedings of the National Academy of Sciences, 38(8), 716–719.'), [Bellman, 1957](https://press.princeton.edu/books/paperback/9780691146683/dynamic-programming 'Bellman, R. (1957). Dynamic Programming. Princeton University Press.')). It was formulated by Richard Bellman in the 1950s, and we can remember it as "the remainder of an optimal trajectory is also optimal".
+
+### Key Concepts of Dynamic Programming
+
+1. **Optimal Substructure**: The optimal solution to a problem can be constructed from optimal solutions to its subproblems.
+
+2. **Overlapping Subproblems**: The same subproblems are encountered multiple times when solving the overall problem.
+
+3. **Memoization**: Storing solutions to subproblems to avoid redundant computations.
+
+### Bellman Optimality Equation
+
+The principle of dynamic programming is encapsulated in the Bellman optimality equation:
+
+$$
+V^*(s) = \max_{a \in A} \left\{r(s,a) + \gamma \sum_{s' \in S} P(s'|s,a) V^*(s')\right\}
+$$
+
+This equation expresses the value of a state under the optimal policy as the maximum expected return achievable from that state.
+
+### Dynamic Programming Algorithms
+
+1. **Value Iteration**: Iteratively update the value function:
+
+$$
+V_{k+1}(s) = \max_{a \in A} \left\{r(s,a) + \gamma \sum_{s' \in S} P(s'|s,a) V_k(s')\right\}
+$$
+
+2. **Policy Iteration**: Alternate between policy evaluation and policy improvement:
+
+- Policy Evaluation:
+
+  $$
+  V^{\pi_k}(s) = \sum_{a \in A} \pi_k(a|s) \left[r(s,a) + \gamma \sum_{s' \in S} P(s'|s,a) V^{\pi_k}(s')\right]
+  $$
+
+- Policy Improvement:
+  $$
+  \pi_{k+1}(s) = \arg\max_{a \in A} \left\{r(s,a) + \gamma \sum_{s' \in S} P(s'|s,a) V^{\pi_k}(s')\right\}
+  $$
+
+### Advantages of Dynamic Programming
+
+1. **Guaranteed Optimality**: For finite MDPs, dynamic programming methods converge to the optimal solution.
+2. **Efficiency**: By solving and storing solutions to subproblems, DP avoids redundant computations.
+3. **Versatility**: DP can be applied to a wide range of optimization problems beyond reinforcement learning.
+
+### Limitations of Dynamic Programming
+
+1. **Curse of Dimensionality**: The computational complexity grows exponentially with the size of the state space.
+2. **Model Dependency**: Requires complete knowledge of the environment (transition probabilities and reward function).
+3. **Memory Requirements**: Storing value functions for large state spaces can be memory-intensive.
+
+### Extensions and Variants
+
+1. **Asynchronous Dynamic Programming**: Update states in an arbitrary order, useful for large state spaces.
+2. **Prioritized Sweeping**: Prioritize updates to states that are likely to change the most.
+3. **Real-time Dynamic Programming**: Interleave planning with execution, focusing on relevant states.
+
+### Mathematical Insight: Contraction Mapping
+
+The Bellman operator $T$ defined as:
+
+$$
+(TV)(s) = \max_{a \in A} \left\{r(s,a) + \gamma \sum_{s' \in S} P(s'|s,a) V(s')\right\}
+$$
+
+is a contraction mapping in the supremum norm, with contraction factor $\gamma$. This property guarantees the convergence of value iteration to the unique fixed point $V^*$.
+
+Understanding the principle of dynamic programming is crucial for grasping the theoretical foundations of many reinforcement learning algorithms and their convergence properties.
+
+## 6. Value Iteration
+
+We can turn the principle of dynamic programming into an algorithm for finding the optimal value function called value iteration. The key idea behind value iteration is to think of this identity as a set of constraints that tie together $V^*(s)$ at different states $s \in S$. We initialize the value function to some arbitrary values $V_0(s)$ for all states $s \in S$. At the $k$-th iteration, the Value Iteration algorithm updates the value function as:
+
+$$
+V_{k+1}(s) = \max_{a \in A} \left\{r(s,a) + \gamma \sum_{s' \in S} P(s'|s,a) V_k(s')\right\}; \quad \text{for all } s \in S.
+$$
+
+It turns out that as $k \to \infty$ the value function estimated by the Value Iteration algorithm converges to the optimal value function irrespective of the initialization $V_0$:
+
+$$
+V^*(s) = \lim_{k \to \infty} V_k(s); \quad \text{for all states } s \in S.
+$$
+
+The same Value Iteration algorithm can be equivalently written using the action-value function as:
+
+$$
+Q_{k+1}(s,a) = r(s,a) + \gamma \max_{a' \in A} \sum_{s' \in S} P(s'|s,a) Q_k(s', a'); \quad \text{for all } s \in S, a \in A.
+$$
+
+In this case we initialize $Q_0(s,a)$ to some arbitrary values for all $s \in S$ and $a \in A$. Again we have $Q^*(s,a) = \lim_{k \to \infty} Q_k(s,a)$ for all $s \in S$ and $a \in A$.
+
+### Value Iteration Algorithm
+
+1. Initialize $V_0(s)$ arbitrarily for all states $s \in S$
+2. For $k = 0, 1, 2, \ldots$ until convergence:
+
+- For each state $s \in S$:
+
+$$
+V_{k+1}(s) = \max_{a \in A} \left\{r(s,a) + \gamma \sum_{s' \in S} P(s'|s,a) V_k(s')\right\}
+$$
+
+3. Output $V^* = V_k$ when convergence is reached
+
+### Convergence of Value Iteration
+
+Value Iteration converges to the optimal value function $V^*$ due to the following properties:
+
+1. **Contraction Mapping**: The Bellman optimality operator is a contraction mapping in the supremum norm.
+2. **Fixed Point**: The optimal value function $V^*$ is the unique fixed point of this contraction mapping.
+3. **Convergence Rate**: The convergence is linear, with a rate of $\gamma$ (the discount factor).
+
+### Stopping Criterion
+
+A common stopping criterion for Value Iteration is:
+
+$$
+\max_{s \in S} |V_{k+1}(s) - V_k(s)| < \epsilon
+$$
+
+where $\epsilon$ is a small positive number (e.g., $10^{-6}$).
+
+### Extracting the Optimal Policy
+
+Once Value Iteration converges, the optimal policy can be extracted as:
+
+$$
+\pi^*(s) = \arg\max_{a \in A} \left\{r(s,a) + \gamma \sum_{s' \in S} P(s'|s,a) V^*(s')\right\}
+$$
+
+### Advantages of Value Iteration
+
+1. **Guaranteed Convergence**: Always converges to the optimal value function.
+2. **No Policy Storage**: Does not need to explicitly store a policy during iterations.
+3. **Flexibility**: Can start with any initial value function.
+
+### Limitations of Value Iteration
+
+1. **Computational Complexity**: Each iteration requires $O(|S|^2|A|)$ computations.
+2. **Memory Requirements**: Needs to store the value function for all states.
+3. **Model-Based**: Requires knowledge of transition probabilities and reward function.
+
+### Variants and Extensions
+
+1. **Gauss-Seidel Value Iteration**: Updates values in-place, potentially speeding up convergence.
+2. **Asynchronous Value Iteration**: Updates states in an arbitrary order, useful for large state spaces.
+3. **Prioritized Sweeping**: Prioritizes updates to states that are likely to change the most.
+
+### Mathematical Insight: Error Bounds
+
+After $k$ iterations of Value Iteration, the error bound is:
+
+$$
+\|V_k - V^*\|_\infty \leq \frac{\gamma^k}{1-\gamma} \|V_1 - V_0\|_\infty
+$$
+
+This bound provides a theoretical guarantee on the quality of the approximation after a finite number of iterations.
+
+Understanding Value Iteration is crucial for reinforcement learning practitioners, as it forms the basis for many more advanced algorithms and provides insights into the fundamental properties of optimal decision-making in MDPs.
+
+## 7. Policy Evaluation
+
+Value Iteration enables us to compute the optimal value function, i.e., $V^{\pi^*}$ of the optimal deterministic policy $\pi^*$. We can also use similar iterative updates to compute the value function associated with any other, potentially stochastic, policy $\pi$. We again initialize $V_0^\pi(s)$ to some arbitrary values for all states $s \in S$ and at the $k$-th iteration, perform the updates:
+
+$$
+V_{k+1}^\pi(s) = \sum_{a \in A} \pi(a|s) \left[r(s,a) + \gamma \sum_{s' \in S} P(s'|s,a) V_k^\pi(s')\right]; \quad \text{for all } s \in S.
+$$
+
+This algorithm is known as policy evaluation and is useful to compute the value function given the policy. Again, it turns out that as $k \to \infty$ these updates converge to the correct value function irrespective of the initialization $V_0$:
+
+$$
+V^\pi(s) = \lim_{k \to \infty} V_k^\pi(s); \quad \text{for all states } s \in S.
+$$
+
+The algorithm for computing the action-value function $Q^\pi(s,a)$ of a policy $\pi$ is analogous.
+
+### Policy Evaluation Algorithm
+
+1. Initialize $V_0^\pi(s)$ arbitrarily for all states $s \in S$
+2. For $k = 0, 1, 2, \ldots$ until convergence:
+
+- For each state $s \in S$:
+  $$
+  V_{k+1}^\pi(s) = \sum_{a \in A} \pi(a|s) \left[r(s,a) + \gamma \sum_{s' \in S} P(s'|s,a) V_k^\pi(s')\right]
+  $$
+
+3. Output $V^\pi = V_k^\pi$ when convergence is reached
+
+### Convergence of Policy Evaluation
+
+Policy Evaluation converges to the true value function $V^\pi$ due to the following properties:
+
+1. **Contraction Mapping**: The Bellman expectation operator is a contraction mapping in the supremum norm.
+2. **Fixed Point**: The value function $V^\pi$ is the unique fixed point of this contraction mapping.
+3. **Convergence Rate**: The convergence is linear, with a rate of $\gamma$ (the discount factor).
+
+### Stopping Criterion
+
+A common stopping criterion for Policy Evaluation is:
+
+$$
+\max_{s \in S} |V_{k+1}^\pi(s) - V_k^\pi(s)| < \epsilon
+$$
+
+where $\epsilon$ is a small positive number (e.g., $10^{-6}$).
+
+### Action-Value Function Evaluation
+
+The action-value function $Q^\pi(s,a)$ can be evaluated using a similar iterative process:
+
+$$
+Q_{k+1}^\pi(s,a) = r(s,a) + \gamma \sum_{s' \in S} P(s'|s,a) \sum_{a' \in A} \pi(a'|s') Q_k^\pi(s', a')
+$$
+
+### Importance in Reinforcement Learning
+
+Policy Evaluation is a crucial component in many reinforcement learning algorithms:
+
+1. **Policy Iteration**: Alternates between policy evaluation and policy improvement.
+2. **Actor-Critic Methods**: The critic performs policy evaluation to estimate the value function.
+3. **Off-Policy Learning**: Used to evaluate target policies different from the behavior policy.
+
+### Advantages of Policy Evaluation
+
+1. **Flexibility**: Can evaluate any given policy, not just the optimal one.
+2. **Foundation for Policy Improvement**: Provides necessary information for improving policies.
+3. **Applicable to Stochastic Policies**: Works for both deterministic and stochastic policies.
+
+### Limitations of Policy Evaluation
+
+1. **Computational Cost**: May require many iterations to converge, especially for large state spaces.
+2. **Model Dependency**: Requires knowledge of transition probabilities and reward function.
+3. **Curse of Dimensionality**: Becomes intractable for very large state spaces.
+
+### Variants and Extensions
+
+1. **Truncated Policy Evaluation**: Performs a fixed number of iterations to approximate $V^\pi$.
+2. **Least-Squares Policy Evaluation**: Uses linear algebra techniques for faster convergence.
+3. **Temporal Difference Learning**: Model-free method for policy evaluation in online settings.
+
+### Comparison: Policy Evaluation vs. Value Iteration
+
+| Aspect      | Policy Evaluation                  | Value Iteration                          |
+| ----------- | ---------------------------------- | ---------------------------------------- |
+| Objective   | Compute $V^\pi$ for a given policy | Compute $V^*$ (optimal value function)   |
+| Update Rule | Expectation over actions           | Maximization over actions                |
+| Convergence | To the value of the given policy   | To the optimal value function            |
+| Use in RL   | Component of policy iteration      | Direct method for finding optimal policy |
+
+### Mathematical Insight: Error Bounds
+
+After $k$ iterations of Policy Evaluation, the error bound is:
+
+$$
+\|V_k^\pi - V^\pi\|_\infty \leq \frac{\gamma^k}{1-\gamma} \|V_1^\pi - V_0^\pi\|_\infty
+$$
+
+This bound provides a theoretical guarantee on the quality of the approximation after a finite number of iterations.
+
+Understanding Policy Evaluation is essential for reinforcement learning practitioners as it forms the basis for policy improvement techniques and is a key component in many advanced RL algorithms.
+
+## 8. Implementation of Value Iteration
+
+We now show how to implement Value Iteration for a navigation problem
+called FrozenLake from [Open AI Gym](https://gym.openai.com). We
+first need to setup the enviroment as shown in the following code.
+
+```
+%matplotlib inline
+import random
+import numpy as np
+from d2l import torch as d2l
+
+seed = 0  # Random number generator seed
+gamma = 0.95  # Discount factor
+num_iters = 10  # Number of iterations
+random.seed(seed)  # Set the random seed to ensure results can be reproduced
+np.random.seed(seed)
+
+# Now set up the environment
+env_info = d2l.make_env('FrozenLake-v1', seed=seed)
+
+```
+
+In the FrozenLake environment, the robot moves on a 4×4
+grid (these are the states) with actions that are “up”
+(↑), “down” (→), “left”
+(←), and “right” (→). The environment
+contains a number of holes (H) cells and frozen (F) cells as well as a
+goal cell (G), all of which are unknown to the robot. To keep the
+problem simple, we assume the robot has reliable actions,
+i.e. P(s′∣s,a)=1 for all
+s∈S,a∈A. If the robot reaches the
+goal, the trial ends and the robot receives a reward of 1
+irrespective of the action; the reward at any other state is 0
+for all actions. The objective of the robot is to learn a policy that
+reaches the goal location (G) from a given start location (S) (this is
+s0) to maximize the _return_.
+
+The following function implements Value Iteration, where `env_info`
+contains MDP and environment related information and `gamma` is the
+discount factor:
+
+```
+def value_iteration(env_info, gamma, num_iters):
+    env_desc = env_info['desc']  # 2D array shows what each item means
+    prob_idx = env_info['trans_prob_idx']
+    nextstate_idx = env_info['nextstate_idx']
+    reward_idx = env_info['reward_idx']
+    num_states = env_info['num_states']
+    num_actions = env_info['num_actions']
+    mdp = env_info['mdp']
+
+    V  = np.zeros((num_iters + 1, num_states))
+    Q  = np.zeros((num_iters + 1, num_states, num_actions))
+    pi = np.zeros((num_iters + 1, num_states))
+
+    for k in range(1, num_iters + 1):
+        for s in range(num_states):
+            for a in range(num_actions):
+                # Calculate \sum_{s'} p(s'\mid s,a) [r + \gamma v_k(s')]
+                for pxrds in mdp[(s,a)]:
+                    # mdp(s,a): [(p1,next1,r1,d1),(p2,next2,r2,d2),..]
+                    pr = pxrds[prob_idx]  # p(s'\mid s,a)
+                    nextstate = pxrds[nextstate_idx]  # Next state
+                    reward = pxrds[reward_idx]  # Reward
+                    Q[k,s,a] += pr * (reward + gamma * V[k - 1, nextstate])
+            # Record max value and max action
+            V[k,s] = np.max(Q[k,s,:])
+            pi[k,s] = np.argmax(Q[k,s,:])
+    d2l.show_value_function_progress(env_desc, V[:-1], pi[:-1])
+
+value_iteration(env_info=env_info, gamma=gamma, num_iters=num_iters)
+
+```
+
+![png](/static/courses/Introduction-to-Reinforcement-Learning/output_value-iter_b30603_3_0.png)
+
+The above pictures show the policy (the arrow indicates the action) and
+value function. (The change in color shows how the value function changes
+over time from the initial value shown by dark color to the optimal
+value shown by light colors.) As we see, Value Iteration finds the
+optimal value function after 10 iterations and the goal state (G) can be
+reached starting from any state as long as it is not an H cell. Another
+interesting aspect of the implementation is that in addition to finding
+the optimal value function, we also automatically found the optimal
+policy π∗ corresponding to this value function.
+
+## 9. Summary
+
+The main idea behind the Value Iteration algorithm is to use the
+principle of dynamic programming to find the optimal average return
+obtained from a given state. Note that implementing the Value Iteration
+algorithm requires that we know the Markov decision process (MDP), e.g.,
+the transition and reward functions, completely.

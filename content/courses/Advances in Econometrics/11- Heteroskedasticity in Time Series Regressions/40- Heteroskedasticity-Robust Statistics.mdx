@@ -1,0 +1,75 @@
+---
+title: Heteroskedasticity in Time Series Regressions
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+### Heteroskedasticity in Time Series Regressions
+
+#### Introduction
+
+Heteroskedasticity refers to the condition in which the variance of the error terms in a regression model is not constant across observations. In time series regressions, heteroskedasticity can lead to inefficient estimates and invalid inference if not properly addressed. This section explores the concept of heteroskedasticity in time series data and discusses methods for obtaining robust statistics that account for this issue.
+
+#### Understanding Heteroskedasticity
+
+In a typical linear regression model, the assumption of homoskedasticity implies that the variance of the error terms is constant:
+
+$$
+\text{Var}(u_t) = \sigma^2 \quad \text{for all } t
+$$
+
+However, when heteroskedasticity is present, this assumption is violated, and the variance of the error terms changes over time:
+
+$$
+\text{Var}(u_t) = \sigma_t^2
+$$
+
+This variability in error variance can arise due to several factors, such as structural changes in the data-generating process or economic events that affect volatility.
+
+#### Consequences of Heteroskedasticity
+
+1. **Inefficiency**: Ordinary Least Squares (OLS) estimators remain unbiased but become inefficient in the presence of heteroskedasticity. This inefficiency arises because OLS does not account for varying error variances.
+
+2. **Invalid Inference**: Standard errors computed under the assumption of homoskedasticity are biased when heteroskedasticity is present. This bias leads to incorrect hypothesis tests and confidence intervals.
+
+3. **Model Misinterpretation**: Ignoring heteroskedasticity can result in misinterpretation of the regression results, particularly when assessing the significance of coefficients.
+
+#### Heteroskedasticity-Robust Statistics
+
+To address heteroskedasticity in time series regressions, researchers can employ heteroskedasticity-robust standard errors, which provide valid inference even when error variances are not constant.
+
+###### Heteroskedasticity-Robust Standard Errors
+
+Heteroskedasticity-robust standard errors adjust the calculation of standard errors to account for heteroskedasticity. These robust standard errors are often referred to as White's standard errors, named after Halbert White, who developed them.
+
+- **Calculation**: Robust standard errors are calculated by modifying the usual OLS variance-covariance matrix:
+
+$$
+V_{\text{robust}} = (X'X)^{-1} \left( \sum_{t=1}^{n} X_t' u_t^2 X_t \right) (X'X)^{-1}
+$$
+
+where $$ X_t $$ is a vector of regressors at time $$ t $$ and $$ u_t $$ are the residuals from the OLS regression.
+
+- **Properties**: These robust standard errors provide consistent estimates of the true standard errors even when heteroskedasticity is present.
+
+###### Implementation in Practice
+
+Most statistical software packages offer options to compute heteroskedasticity-robust standard errors as part of their regression output. Researchers should specify this option when they suspect or detect heteroskedasticity in their data.
+
+#### Testing for Heteroskedasticity
+
+Before applying robust statistics, it is often useful to test for the presence of heteroskedasticity:
+
+1. **Breusch-Pagan Test**: This test detects heteroskedasticity by regressing squared residuals on the original regressors and checking for significance.
+
+2. **White Test**: A more general test that involves regressing squared residuals on all possible cross-products and powers of regressors to detect any form of heteroskedasticity.
+
+3. **Goldfeld-Quandt Test**: This test involves splitting the data into two groups and comparing variances between them to detect heteroskedasticity.
+
+#### Conclusion
+
+Heteroskedasticity in time series regressions can lead to inefficiencies and invalid inference if not properly addressed. By employing heteroskedasticity-robust standard errors and conducting appropriate tests, researchers can ensure reliable estimates and valid statistical inference despite varying error variances. Understanding and addressing heteroskedasticity is crucial for accurate econometric analysis and interpretation in time series data.

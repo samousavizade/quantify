@@ -1,0 +1,77 @@
+---
+title: Model Building
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+Here is a detailed markdown version of section 3.3 Model Building from pages 113-115, with mathematics in LaTeX format:
+
+## Model Building
+
+Building a volatility model for asset returns consists of four steps:
+
+1. Specify a mean equation by testing for serial dependence in the data and, if necessary, building an econometric model (e.g., an ARMA model) for the conditional mean.
+
+2. Use the residuals of the mean equation to test for ARCH effects.
+
+3. Specify a volatility model if ARCH effects are statistically significant.
+
+4. Check the fitted model carefully and refine it if necessary.
+
+### Step 1: Specify a Mean Equation
+
+Let $\{r_t\}$ be the return series of interest. We begin by testing for serial correlations in $r_t$. This can be done by examining the autocorrelation function (ACF) and the Ljung-Box statistics of $r_t$. If serial correlations are found to be statistically significant, then an appropriate time series model (e.g., an ARMA model) is built for the conditional mean of $r_t$. Denote the mean equation by
+
+$$
+r_t = \mu_t + a_t
+$$
+
+where $\mu_t = E(r_t | F_{t-1})$ is the conditional mean of $r_t$ given the information set $F_{t-1}$ available at time $t-1$, and $a_t$ is the shock or innovation at time $t$. For many high-frequency financial time series, $\mu_t$ is zero or a constant.
+
+### Step 2: Test for ARCH Effects
+
+After obtaining the mean equation, we calculate the residual series $\hat{a}_t = r_t - \hat{\mu}_t$, where $\hat{\mu}_t$ is the fitted value of the mean equation. The series $\hat{a}_t$ is then used to test for ARCH effects. There are several ways to test for ARCH effects, but we focus on two approaches here.
+
+#### Ljung-Box Test of Squared Residuals
+
+The first approach applies the Ljung-Box statistics to the squared residual series $\{\hat{a}_t^2\}$. Under the null hypothesis that $a_t$ is a sequence of independent and identically distributed (iid) normal random variables with mean zero, the squared series $\{a_t^2\}$ should not have serial correlations. Therefore, if the Ljung-Box statistics of $\{\hat{a}_t^2\}$ are significant, then there are ARCH effects in $a_t$.
+
+#### Lagrange Multiplier Test
+
+The second approach uses the Lagrange multiplier test of Engle (1982). This test is equivalent to the usual F statistic for testing $\alpha_i = 0$ $(i = 1, ..., m)$ in the linear regression
+
+$$
+\hat{a}_t^2 = \alpha_0 + \alpha_1 \hat{a}_{t-1}^2 + ... + \alpha_m \hat{a}_{t-m}^2 + e_t
+$$
+
+where $e_t$ denotes the error term and $m$ is a prespecified positive integer. Under the null hypothesis that there is no ARCH effect, we have $\alpha_i = 0$ for all $i > 0$. The test statistic is
+
+$$
+(T - m) R^2 \sim \chi^2(m)
+$$
+
+where $T$ is the sample size, $R^2$ is the coefficient of determination of the regression in Eq. (3.6), and $\chi^2(m)$ denotes the chi-squared distribution with $m$ degrees of freedom. In practice, $m = 5$ or $m = 10$ is often used.
+
+### Step 3: Specify a Volatility Model
+
+If ARCH effects are found to be statistically significant, then a volatility model is specified. The general form of a volatility model is
+
+$$
+a_t = \sigma_t \epsilon_t
+$$
+
+where $\sigma_t^2 = \text{Var}(a_t | F_{t-1})$ is the conditional variance of $a_t$ given $F_{t-1}$, and $\{\epsilon_t\}$ is a sequence of independent and identically distributed random variables with mean zero and variance 1. The functional form of $\sigma_t^2$ and the probability distribution of $\epsilon_t$ must be specified to complete the model.
+
+### Step 4: Check the Fitted Model
+
+After estimating the parameters of a volatility model, the fitted model is checked for possible misspecification. In particular, the standardized residuals
+
+$$
+\hat{\epsilon}_t = \frac{\hat{a}_t}{\hat{\sigma}_t}
+$$
+
+should behave like an iid sequence if the fitted model is adequate. Therefore, we can apply the Ljung-Box statistics to $\{\hat{\epsilon}_t\}$ and $\{\hat{\epsilon}_t^2\}$ to check the adequacy of the fitted mean and volatility equations. Other diagnostic tools such as the quantile plot of the standardized residuals can also be used to assess the adequacy of the specified probability distribution of $\epsilon_t$.

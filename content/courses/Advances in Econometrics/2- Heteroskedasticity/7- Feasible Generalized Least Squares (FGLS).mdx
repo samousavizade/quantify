@@ -1,0 +1,65 @@
+---
+title: Feasible Generalized Least Squares (FGLS)
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Feasible Generalized Least Squares (FGLS)
+
+### **The Heteroskedasticity Function Must Be Estimated: Feasible GLS**
+
+When the form of heteroskedasticity is not known but suspected, Feasible Generalized Least Squares (FGLS) provides a method to handle heteroskedasticity by estimating the heteroskedasticity function. This approach allows for more efficient estimation than OLS when heteroskedasticity is present.
+
+#### **Understanding Feasible GLS**
+
+Feasible GLS is used when the variance of the error term, $$\sigma_i^2$$, is not constant across observations and must be estimated. The FGLS method involves two main steps:
+
+1. **Estimate the Heteroskedasticity Function**:
+
+- Initially, an OLS regression is performed to obtain residuals.
+- These residuals are then used to estimate the form of heteroskedasticity. Common approaches include regressing the squared residuals on the independent variables or their functions to model how variance changes with these variables.
+
+2. **Transform the Model**:
+
+- Once the form of heteroskedasticity is estimated, weights are calculated based on this estimation.
+- The original model is transformed using these weights to stabilize the variance across observations.
+- The transformed model is then estimated using OLS, which now becomes efficient under the assumption that the estimated weights correctly model the heteroskedasticity.
+
+#### **Implementation Steps**
+
+1. **Initial OLS Estimation**:
+
+- Estimate the original regression model using OLS to obtain residuals $$\hat{u}_i$$.
+
+2. **Estimate Variance Function**:
+
+- Regress $$\hat{u}_i^2$$ on a set of variables (often including all independent variables and their squares or interactions) to estimate how variance changes with these variables.
+
+3. **Calculate Weights**:
+
+- Use the fitted values from the regression in step 2 to calculate weights for each observation. A common choice is $$w_i = 1/\sqrt{\hat{\sigma}_i^2}$$, where $$\hat{\sigma}_i^2$$ are the fitted values from step 2.
+
+4. **Transform and Re-estimate**:
+
+- Transform the original regression equation by multiplying each term by its corresponding weight $$w_i$$.
+- Perform OLS on this transformed model to obtain FGLS estimates.
+
+#### **Advantages and Considerations**
+
+- **Efficiency**: FGLS provides more efficient estimates than OLS in the presence of heteroskedasticity because it accounts for non-constant variance.
+- **Estimation Risk**: The efficiency gains from FGLS depend on correctly estimating the form of heteroskedasticity. If the assumed form is incorrect, FGLS might not perform better than OLS.
+- **Complexity**: Implementing FGLS involves additional steps compared to standard OLS, including estimating and applying weights based on an assumed model of heteroskedasticity.
+
+By using FGLS, econometricians can handle situations where heteroskedasticity is present but its exact form is unknown, allowing for more reliable statistical inference in regression analysis.
+
+[^1]: https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/30626316/2be59c8f-ac44-43e7-a595-38c5bea42df7/Jeffrey_M_Wooldridge_Introductory_Econometrics_A_Modern_Approach.pdf
+[^2]: https://www.aptech.com/blog/using-feasible-generalized-least-squares-to-improve-estimates/
+[^3]: https://www.fastercapital.com/content/Feasible-Generalized-Least-Squares--FGLS---Feasible-Solutions--Embracing-FGLS-for-Heteroskedasticity-Challenges.html
+[^4]: https://www.degruyter.com/document/doi/10.1515/jem-2023-0007/pdf
+[^5]: https://www.degruyter.com/document/doi/10.1515/jem-2023-0007/html
+[^6]: https://open.bu.edu/handle/2144/48974
+[^7]: https://en.wikipedia.org/wiki/Generalized_least_squares

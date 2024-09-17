@@ -1,0 +1,93 @@
+---
+title: Applications
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Applications
+
+To illustrate the application of nonlinearity tests, we consider two examples.
+
+### Example: U.S. GNP Growth Rate
+
+Consider again the quarterly growth rate of U.S. real GNP from the second quarter of 1947 to the first quarter of 1991. This series has 176 observations and was studied in Example 2.1. We apply some nonlinearity tests to the data.
+
+First, we fit an AR(3) model to the data and obtain:
+
+$$
+r_t = 0.0047 + 0.3480r_{t-1} + 0.1793r_{t-2} - 0.1423r_{t-3} + a_t, \quad \hat{\sigma}_a = 0.00974
+$$
+
+where $r_t$ denotes the growth rate. The Ljung-Box statistics of the residuals give $Q(12) = 8.9$ with $p$-value 0.54, indicating that the AR(3) model is adequate in modeling the linear dependence of the data.
+
+Next, we apply some nonlinearity tests to the AR(3) residuals. The results are:
+
+1. Keenan's test: The test statistic is 5.39 with $p$-value 0.02.
+
+2. Tsay's test: The test statistic is 3.11 with $p$-value 0.01.
+
+3. ARCH-LM test: The test statistic is 20.5 with $p$-value 0.00.
+
+All three tests reject the null hypothesis of linearity at the 5% significance level. The results suggest that there exist nonlinear dependencies in the U.S. GNP growth rate series.
+
+To further investigate the nonlinearity, we apply the neural network test of Lee, White, and Granger (1993) to the data. Using 10 hidden units and the logistic activation function, we obtain a test statistic of 30.2 with $p$-value 0.003. This result confirms the nonlinearity in the data.
+
+### Daily Returns of Microsoft Stock
+
+As another illustration, we consider the daily returns of Microsoft stock from February 27, 1990, to May 31, 2002. There are 3100 observations. Let $r_t$ be the log return in percentages. We first build a linear model for the data. The sample mean of $r_t$ is 0.181, and the sample standard deviation is 2.695. The Ljung-Box statistics of $r_t$ give $Q(10) = 18.2$ and $Q(20) = 32.5$ with $p$-values 0.05 and 0.04, respectively. These statistics show some serial correlations in the return series. Using AIC, we select an AR(5) model for the data. The fitted model is:
+
+$$
+\begin{aligned}
+r_t = & 0.1814 + 0.0448r_{t-1} - 0.0228r_{t-2} - 0.0008r_{t-3} \\
+& - 0.0077r_{t-4} - 0.0469r_{t-5} + a_t, \quad \hat{\sigma}_a = 2.687
+\end{aligned}
+$$
+
+where the standard errors of the coefficients are 0.048, 0.018, 0.018, 0.018, 0.018, and 0.018, respectively. The Ljung-Box statistics of the residuals are $Q(10) = 4.8$ and $Q(20) = 18.9$ with $p$-values 0.78 and 0.40, respectively. Therefore, the AR(5) model is adequate in modeling the linear dependence in $r_t$.
+
+We then apply various nonlinearity tests to the AR(5) residuals. The results are:
+
+1. Keenan's test: The test statistic is 0.25 with $p$-value 0.62.
+
+2. Tsay's test: The test statistic is 1.43 with $p$-value 0.20.
+
+3. ARCH-LM test: The test statistic is 308.7 with $p$-value 0.00.
+
+4. Bilinear test: The test statistic is 35.8 with $p$-value 0.47.
+
+5. Neural network test: Using 10 hidden units and the logistic activation function, we obtain a test statistic of 103.5 with $p$-value 0.00.
+
+The test results are mixed. Keenan's test and Tsay's test fail to reject the null hypothesis of linearity at the 5% significance level. The bilinear test also fails to detect any nonlinearity. However, both the ARCH-LM test and the neural network test strongly reject the linearity hypothesis. These results suggest that the nonlinearity in daily returns of Microsoft stock is mainly in the second moment. This is a typical phenomenon for asset returns.
+
+To further illustrate the point, we compute the autocorrelation function of the squared AR(5) residuals. The first 10 lags of the ACF are 0.145, 0.115, 0.118, 0.093, 0.140, 0.093, 0.080, 0.095, 0.101, and 0.076. The Ljung-Box statistics of the squared residuals are $Q(10) = 314.5$ and $Q(20) = 563.1$. These statistics confirm strong nonlinear dependencies in the volatility of the returns.
+
+### Discussion
+
+The applications demonstrate several important points in nonlinearity testing:
+
+1. Different tests may lead to different conclusions. This is because various tests are designed to detect different types of nonlinearity.
+
+2. For financial time series, nonlinearity often manifests in the second moment (volatility) rather than in the conditional mean.
+
+3. It is important to apply multiple tests to get a comprehensive understanding of the potential nonlinear structures in the data.
+
+4. The choice of test should be guided by the specific features of interest in the data and the potential nonlinear models one might consider.
+
+5. Rejection of linearity does not automatically suggest a particular nonlinear model. Further analysis is needed to identify an appropriate nonlinear specification.
+
+6. Even when linearity is not rejected, it may still be worthwhile to consider nonlinear models, especially if there are theoretical reasons to expect nonlinearity in the data-generating process.
+
+In practice, nonlinearity testing should be seen as an exploratory step in the model-building process. The results of these tests can guide the modeler in choosing appropriate nonlinear specifications or in deciding whether to pursue more complex nonlinear modeling techniques.
+
+It's also worth noting that the power of nonlinearity tests can be affected by various factors, including:
+
+- Sample size: Larger samples generally provide more power to detect nonlinearity.
+- Strength of the nonlinear effect: Subtle nonlinearities may be harder to detect.
+- Nature of the nonlinearity: Some tests are more powerful against certain types of nonlinear alternatives.
+- Presence of outliers or structural breaks: These can sometimes lead to spurious rejections of linearity.
+
+Therefore, it's often advisable to combine formal statistical tests with graphical analysis and domain knowledge when investigating potential nonlinearities in time series data.

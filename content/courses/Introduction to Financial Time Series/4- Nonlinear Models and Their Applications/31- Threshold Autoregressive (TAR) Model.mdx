@@ -1,0 +1,135 @@
+---
+title: Threshold Autoregressive (TAR) Model
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Threshold Autoregressive (TAR) Model
+
+Threshold autoregressive (TAR) models are simple nonlinear time series models that can capture asymmetric cycles. The basic idea is to describe a complex stochastic system by a set of simpler subsystems. The specific subsystem used at each time point is determined by the position of a conditioning variable relative to a threshold value.
+
+### Model Definition
+
+A $k$-regime TAR model for a time series $\{r_t\}$ can be written as:
+
+$$
+r_t = \begin{cases}
+\phi_0^{(1)} + \phi_1^{(1)}r_{t-1} + \cdots + \phi_{p_1}^{(1)}r_{t-p_1} + a_t^{(1)} & \text{if } z_t \leq c_1 \\
+\phi_0^{(2)} + \phi_1^{(2)}r_{t-1} + \cdots + \phi_{p_2}^{(2)}r_{t-p_2} + a_t^{(2)} & \text{if } c_1 < z_t \leq c_2 \\
+\vdots \\
+\phi_0^{(k)} + \phi_1^{(k)}r_{t-1} + \cdots + \phi_{p_k}^{(k)}r_{t-p_k} + a_t^{(k)} & \text{if } z_t > c_{k-1}
+\end{cases}
+$$
+
+where $z_t$ is a threshold variable, $c_1 < c_2 < \cdots < c_{k-1}$ are threshold values, $p_i$ is the AR order of regime $i$, and $\{a_t^{(i)}\}$ is a sequence of independent and identically distributed random variables with mean zero and variance $\sigma_i^2$ for the $i$th regime. The threshold variable $z_t$ can be an exogenous variable or a function of the past values of $r_t$. A common choice is $z_t = r_{t-d}$ for some positive integer $d$, which is called the delay parameter.
+
+### Properties
+
+1. **Piecewise Linearity**: Within each regime, the model is linear. The nonlinearity arises from the switching between regimes.
+
+2. **Asymmetry**: TAR models can capture asymmetric behavior in different regimes, making them suitable for modeling phenomena like business cycles.
+
+3. **Stationarity**: The stationarity of a TAR model depends on the properties of the individual regimes and the transition mechanism. In general, if all regimes are stationary AR processes and the process visits all regimes with positive probability, the overall process is stationary.
+
+4. **Ergodicity**: Under mild conditions, TAR models are ergodic, which is important for statistical inference.
+
+### Estimation
+
+Estimation of TAR models involves several steps:
+
+1. **Specification**: Determine the number of regimes $k$, the delay parameter $d$, and the AR orders $p_1, \ldots, p_k$.
+
+2. **Threshold Estimation**: Estimate the threshold values $c_1, \ldots, c_{k-1}$.
+
+3. **Parameter Estimation**: Estimate the AR coefficients $\phi_j^{(i)}$ and the error variances $\sigma_i^2$ for each regime.
+
+The most common approach is to use conditional least squares estimation. For a given set of threshold values and delay parameter, the model becomes piecewise linear, and the AR coefficients can be estimated by ordinary least squares within each regime.
+
+To estimate the threshold values and delay parameter, one can use a grid search method:
+
+1. For each possible value of $d$, consider a grid of potential threshold values.
+2. For each combination of $d$ and threshold values, estimate the AR coefficients and compute the sum of squared residuals (SSR).
+3. Choose the combination that minimizes the SSR.
+
+Formally, the estimators are:
+
+$$
+(\hat{c}_1, \ldots, \hat{c}_{k-1}, \hat{d}) = \arg\min_{c_1, \ldots, c_{k-1}, d} \sum_{t=1}^T (r_t - \hat{r}_t)^2
+$$
+
+where $\hat{r}_t$ is the fitted value based on the estimated AR coefficients for the given thresholds and delay.
+
+### Testing for Threshold Nonlinearity
+
+To test whether a TAR model is necessary (i.e., whether there is significant threshold nonlinearity), one can use a sup-LM test:
+
+1. Compute the LM statistic for each possible threshold value in a certain range.
+2. Take the supremum of these LM statistics.
+3. Compare this supremum to critical values obtained by simulation or bootstrap methods.
+
+The test statistic is:
+
+$$
+\sup LM = \sup_{c \in [c_L, c_U]} LM(c)
+$$
+
+where $[c_L, c_U]$ is a pre-specified range for the threshold, and $LM(c)$ is the LM statistic for testing the null hypothesis of no threshold effect at the threshold value $c$.
+
+### Example: TAR Model for GNP Growth Rate
+
+Consider the quarterly growth rate of U.S. real GNP from 1947 Q2 to 1991 Q1. We can fit a two-regime TAR model with $z_t = r_{t-2}$:
+
+$$
+r_t = \begin{cases}
+0.0071 + 0.2286r_{t-1} + 0.0782r_{t-2} - 0.1658r_{t-3} + a_t^{(1)}, & \text{if } r_{t-2} \leq 0.0131 \\
+0.0091 + 0.5270r_{t-1} + 0.1814r_{t-2} - 0.0921r_{t-3} + a_t^{(2)}, & \text{if } r_{t-2} > 0.0131
+\end{cases}
+$$
+
+where $\hat{\sigma}_1 = 0.00806$ and $\hat{\sigma}_2 = 0.00744$.
+
+This model suggests that:
+
+1. The GNP growth rate behaves differently depending on whether the growth rate two quarters ago was above or below 1.31%.
+
+2. When the lagged growth rate is low (≤ 1.31%), the current growth rate is less persistent (smaller AR(1) coefficient) and more negatively affected by the growth rate three quarters ago.
+
+3. When the lagged growth rate is high (> 1.31%), the current growth rate is more persistent and less affected by the growth rate three quarters ago.
+
+### Smooth Transition Between Regimes
+
+A limitation of the basic TAR model is the abrupt change between regimes. This can be addressed by introducing smooth transition between regimes, leading to the Smooth Transition Autoregressive (STAR) model.
+
+In a two-regime STAR model, the transition between regimes is governed by a smooth function $G(z_t; \gamma, c)$:
+
+$$
+r_t = (\phi_0^{(1)} + \phi_1^{(1)}r_{t-1} + \cdots + \phi_p^{(1)}r_{t-p})(1 - G(z_t; \gamma, c)) + (\phi_0^{(2)} + \phi_1^{(2)}r_{t-1} + \cdots + \phi_p^{(2)}r_{t-p})G(z_t; \gamma, c) + a_t
+$$
+
+A common choice for $G$ is the logistic function:
+
+$$
+G(z_t; \gamma, c) = \frac{1}{1 + \exp(-\gamma(z_t - c))}
+$$
+
+where $\gamma > 0$ controls the smoothness of the transition and $c$ is the threshold.
+
+### Advantages and Limitations of TAR Models
+
+Advantages:
+
+1. Can capture asymmetric behavior in different regimes
+2. Interpretable model structure
+3. Can model complex dynamics with a relatively simple framework
+
+Limitations:
+
+1. Requires specification of number of regimes and threshold variable
+2. Estimation can be computationally intensive
+3. Abrupt transitions between regimes may not always be realistic (addressed by STAR models)
+
+In conclusion, TAR models provide a flexible framework for modeling nonlinear time series, particularly those exhibiting regime-switching behavior. They have found applications in various fields, including economics, finance, and climate science, where asymmetric cycles and regime-dependent behavior are common.

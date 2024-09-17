@@ -1,0 +1,96 @@
+---
+title: Econometrics and Causality
+draft: false
+summary: Backtest statistics are essential for evaluating the efficacy of investment strategies.
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+# 5 Causality in Econometrics
+
+Chen and Pearl (2013) reviewed six of the most popular textbooks in econometrics, concluding that they "deviate significantly from modern standards of causal analysis." Chen and Pearl find that most textbooks deny the causal content of econometric equations, and confuse causation with association. This section discusses several ways in which the econometrics literature often misunderstands causality.
+
+## 5.1 Authors often Mistake Causality for Association
+
+First, consider the joint distribution of $ (X, Y) $, and the standard econometric model, $ Y_t = \beta_0 + \beta_1 X_t + \epsilon_t $. Second, consider an alternative model with specification, $ X_t = \gamma_0 + \gamma_1 Y_t + \zeta_t $. If regression parameters are characteristics of the joint distribution of $ (X, Y) $, it should be possible to recover one set of estimates from the other, namely $ \hat{\gamma}\_0 = -\hat{\beta}\_0/\hat{\beta}\_1 $, $ \hat{\gamma}\_1 = 1/\hat{\beta}\_1 $, and $ \hat{\zeta} = -\hat{\epsilon}/\hat{\beta}\_1 $, because associational relations are nondirectional. However, least-squares estimators do not have this property. The parameter estimates from one specification are inconsistent with the parameter estimates from the alternative specification, hence a least-squares model cannot be “just” a statement on the joint distribution $ (X, Y) $.
+
+If a least-squares model does not model association, what does it model? The answer comes from the definition of the error term, which implies a directed flow of information. In the first specification, $ \epsilon $ represents the portion of the outcome $ Y $ that cannot be attributed to $ X $. This unexplained outcome is different from $ \zeta $, which is the portion of the outcome $ X $ that cannot be attributed to $ Y $. A researcher that chooses the first specification has in mind a controlled experiment where $ X $ causes $ Y $, and he estimates the effect coefficient $ \beta_1 $ under the least-squares assumption that $ E[\epsilon_t | X_t] = 0 $, rather than $ E[\epsilon_t | Y_t] = 0 $. A researcher that chooses the second specification has in mind a controlled experiment where $ Y $ causes $ X $, and he estimates the effect coefficient $ \gamma_1 $ under the assumption that $ E[\zeta_t | Y_t] = 0 $, rather than $ E[\zeta_t | X_t] = 0 $.
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![Figure 5](/static/courses/Causal-Factor-Investing/Figure-5.png)
+</div>
+> Figure 5 Three regression lines on the same dataset
+
+The vast majority of econometric models rely on least-squares estimators, hence implying causal relationships, not associational relationships [1]. By choosing a particular model specification and estimating its parameters through least-squares, econometricians inject extra-statistical information consistent with some causal graph. Alternatively, econometricians could have used a Deming (or orthogonal) regression, a type of errors-in-variables model that attributes errors to both $ X $ and $ Y $. Figure 5 illustrates the regression lines of: (1) a least-squares model where $ X $ causes $ Y $; (2) a least-squares model where $ Y $ causes $ X $; and (3) a Deming regression. Only result (3) characterizes the joint distribution $ (X, Y) $, without injecting extra-statistical information.
+
+The realization that econometric equations model causal relationships may come as a surprise to many economics students and professionals. This surprise is understandable, because econometrics textbooks rarely mention causality, causal discovery, causal graphs, causal mechanisms, or causal inference. Economists are not trained in the estimation of Bayesian networks, design of experiments, or applications of do-calculus[^23]. They are not taught that the causal graph determines the model’s specification, not the other way around, hence the identification of a causal graph should always precede any choice of model specification. Instead, they have been taught debunked specification-searching procedures, such as the stepwise algorithm (an instance of selection bias under multiple testing, see Romano and Wolf 2005), the general-to-simple algorithm (see Greene 2012, pp. 178–182), or model selection through trial and error, see Chatfield (1995). Section 6.4.2.3 expands on this point, in the context of factor investing.
+
+## 5.2 Authors often Misunderstand the Meaning of $\beta$
+
+The least-squares method estimates $\beta$ in the equation $Y = X\beta + \epsilon$ as[^24]
+
+$$\hat{\beta} = (X'X)^{-1}X'Y = (X'X)^{-1}X'(X\beta + \epsilon) = \beta + (X'X)^{-1}X'\epsilon.$$
+
+For the estimate to be unbiased ($E[\hat{\beta}|X] = \beta$), it must occur that $E[\epsilon|X] = 0$. This is known as the exogeneity condition. There are two approaches for achieving exogeneity.
+
+The first approach, called implicit exogeneity, is to define the error term as $\epsilon \equiv Y - E[Y|X]$, thus $E[\epsilon|X] = E[Y - E[Y|X]|X] = E[Y|X] - E[Y|X] = 0$. Under this approach, $E[Y|X] = Y - \epsilon = X\beta$, and $\beta$ has merely a distributional (associational) interpretation, as the slope of a regression line. This is the approach adopted by most econometrics textbooks, see for example Greene (2012), Hill et al. (2011), Kennedy (2008), Ruud (2000), and Wooldridge (2009). A first flaw of this approach is that it cannot answer interventional questions, hence it is rarely useful for building theories. A second flaw is that it is inconsistent with the causal meaning of the least-squares model specification (Section 5.1).
+
+The second approach, called explicit exogeneity, is to assume that ε represents all causes of Y that are uncorrelated to X. In this case, exogeneity is supported by a causal argument, not by an associational definition. When X has been randomly assigned, as in an RCT or a natural experiment, exogeneity is a consequence of experimental design. However, in purely observational studies, the validity of this assumption is contingent on the model being correctly specified. Under this second approach, $E[Y|do(X)] = X\beta$, and $\beta$ has a causal interpretation, as the expected value of Y given an intervention that sets the value of X. More formally,
+
+$$\beta = \frac{\partial E[Y|do(X)]}{\partial X}.$$
+
+Defending the assumption of correct model specification requires the identification of a causal graph consistent with the observed sample. Absent this information, $\beta$ loses its causal meaning, and reverts to the simpler associational interpretation that is inadequate for building theories and inconsistent with least-squares' causal meaning.
+
+The ceteris paribus assumption, so popular among economists, is consistent with the causal interpretation of the estimated $\beta$, whereby the model simulates a controlled experiment. Haavelmo (1944) was among the first to argue that most economists imply a causal meaning when they use their estimated $\beta$. Almost 80 years later, most econometrics textbooks continue to teach an associational meaning of the estimated $\beta$ that contradicts economists' interpretation and use. Accordingly, economists are taught to estimate $\beta$ as if it were an associational concept, without regard for causal discovery or do-calculus, while at the same time they interpret and use the estimated $\beta$ as if it were a causal concept, leading to spurious claims.
+
+## 5.3 Authors Often Mistake Association for Causality
+
+Section 5.1 explained how economists often mean causation when they write about association. Oddly, economists also often mean association when they write about causation. A case in point is the so-called Granger causality. Consider two stationary random variables $X_t$ and $Y_t$. Granger (1969, 1980) proposed an econometric test for (linear) causality, based on the equation:
+
+$$ Y*t = \beta_0 + \sum*{i=1}^{I} \beta*i X*{t-i} + \sum*{j=1}^{J} \gamma_j Y*{t-j} + \epsilon_t. $$
+
+According to Granger, $X$ causes $Y$ if and only if at least one of the estimated coefficients in $\beta_i$ for $i \in \{1, \ldots, I\}$ is statistically significant. This approach was later expanded to multivariate systems, in the form of a vector autoregression specification, see Hamilton (1994, section 11.2).
+
+The term Granger causality is an unfortunate misnomer. The confusion stems from Granger’s attempt to define causality in terms of sequential association (a characteristic of the joint distribution of probability), see Diebold (2007, pp. 230–231). However, sequentiality is a necessary, non-sufficient condition for causality (Section 2). Sequential association cannot establish causality, as the latter requires an interventional or natural experiment (Sections 4.1 and 4.2), and in the absence of these, a simulated intervention justified by a discovered or hypothesized causal graph (Section 4.3).
+
+For example, a Granger causality test will conclude that a rooster’s crow ($X_{t-1}$) causes the sun to dawn ($Y_t$), because $\beta_1$ is statistically significant after controlling for lags of $Y$. And yet, it is trivial to falsify the claim that a rooster’s crow is a cause of dawn, by silencing the rooster before dawn, or by forcing it to crow at midnight (an intervention).
+
+A second problem with Granger causality is that, if both $X$ and $Y$ are caused by $Z$ (a confounder), Granger’s test will still falsely conclude that $X$ causes $Y$ (see Figure 1). Granger causality is misleading in a causally insufficient multivariate time series (Peters et al. 2017, pp. 205–208).
+
+A third problem is that the test itself is susceptible to selection bias, because the selection of lagged variables involves multiple testing across a large number of potential specifications that are not informed by a causal graph, for example through stepwise specification-searching algorithms. A fourth problem is that it assumes that the causal relation must be linear. Granger (1969) remains one of the most-cited articles in the econometrics literature, with over 33,000 citations, and it has become Granger’s second most-cited article. As Figure 6 illustrates, that publication receives thousands of new citations each year, and that number keeps rising, with 2,294 publications referencing it in the year 2021 alone.
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![Figure 6](/static/courses/Causal-Factor-Investing/Figure-6.png)
+</div>
+> Figure 6 Google Scholar, 2023
+
+This confusion of association for causality has led to numerous misinformed claims in the factor investing literature (see Schuller et al. 2021 for a survey of claims based on Granger causality). While Granger causality may be used as a simple tool to help decide the direction of causal flow between two unconfounded variables (rather than the existence of causal flow), the field of causal discovery has developed more sophisticated methods to that purpose (see Peters et al. 2017, chapter 4).
+
+Granger (1969) remains one of the most-cited articles in the econometrics literature, with over 33,000 citations, and it has become Granger’s second most-cited article. As Figure 6 illustrates, that publication receives thousands of new citations each year, and that number keeps rising. This confusion of association for causality has led to numerous misinformed claims in the factor investing literature (see Schuller et al. 2021 for a survey of claims based on Granger causality). While Granger causality may be used as a simple tool to help decide the direction of causal flow between two unconfounded variables (rather than the existence of causal flow), the field of causal discovery has developed more sophisticated methods to that purpose (see Peters et al. 2017, chapter 4).
+
+I cannot end this section without recognizing a few remarkable economists who, defying the resistance from their peers, have fought to bring the rigor of causal inference into their field of study. Section 4.3.2.4 already discussed the method of instrumental variables, first proposed in 1928 by economist P. G. Wright. Section 5.2 mentioned Haavelmo’s 1944 paper on the meaning of $\beta$, whose insights continue to be ignored today to a large extent (Pearl 2015). The original idea of the DID approach first appeared in labor economics, see Ashenfelter and Card (1986). In the year 2021, Joshua Angrist and Guido Imbens received (in conjunction with David Card) the Nobel Memorial Prize in Economics in recognition “for their methodological contributions to the analysis of causal relationships” in the context of natural experiments (see Section 4.2). Several authors have recently applied the RDD approach to corporate finance, such as Bronzoni and Iachini (2014), Flammer (2015), and Malenko and Shen (2016). Angrist and Pischke (2010) have called for a “credibility revolution,” urging fellow economists to improve the reliability of their empirical work through the design of interventional studies and natural experiments. These academics offer a rare but inspiring example that ought to be emulated throughout the entire field of economics. On the other hand, asset pricing remains to this day staunchly oblivious to rigorous causal reasoning. Paraphrasing Leamer (1983), factor researchers have not yet taken the “con” out of econometrics, with the dire consequences described in the next section.
+
+[^23]: Economists are often taught the method of instrumental variables, however econometrics textbooks motivate this method as a solution to the correlation between X and ε, once again comingling association with causation (see Chen and Pearl 2013, section 3.4). While instrumental variables can be helpful in some cases, they are a limited tool compared to the wide range of problems tackled by do-calculus.
+[^24]: Throughout the Element, when a regression equation does not include an intercept, variable Y is assumed to have been centered.

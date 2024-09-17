@@ -1,0 +1,62 @@
+---
+title: Comparing OLS and FGLS
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Comparing OLS and FGLS
+
+### Introduction
+
+When dealing with time series data, serial correlation in the error terms of a regression model can lead to inefficiencies in Ordinary Least Squares (OLS) estimation. This inefficiency arises because OLS does not account for the correlation structure in the errors, resulting in biased standard errors and unreliable inference. Feasible Generalized Least Squares (FGLS) offers an alternative by transforming the model to account for serial correlation, potentially providing more efficient estimates. This section compares OLS and FGLS in terms of their properties and applicability.
+
+### Ordinary Least Squares (OLS)
+
+OLS is a widely used method for estimating the parameters of a linear regression model. It minimizes the sum of squared residuals to find the best-fitting line through the data points. Despite its popularity, OLS has limitations when errors are serially correlated:
+
+- **Unbiasedness**: OLS estimators remain unbiased under the Gauss-Markov assumptions, even with serial correlation.
+- **Consistency**: OLS estimators are consistent if the model is correctly specified.
+- **Efficiency**: In the presence of serial correlation, OLS estimators are inefficient because they do not exploit the information contained in the error structure.
+- **Inference**: Serial correlation leads to biased standard errors, which affects hypothesis testing and confidence intervals.
+
+### Feasible Generalized Least Squares (FGLS)
+
+FGLS is designed to address inefficiencies in OLS by accounting for serial correlation in the error terms. It involves transforming the model based on an estimated error structure and then applying OLS to this transformed model.
+
+#### Properties of FGLS
+
+- **Efficiency**: FGLS provides efficient estimates by incorporating information about the error correlation structure, leading to smaller standard errors compared to OLS.
+- **Consistency**: FGLS estimators are consistent if the model is correctly specified and if the estimated error structure is accurate.
+- **Unbiasedness**: While FGLS estimators are generally unbiased, their unbiasedness depends on correctly specifying and estimating the error structure.
+
+#### Steps for FGLS Estimation
+
+1. **Estimate OLS Model**: Begin with an OLS estimation to obtain residuals.
+2. **Estimate Error Structure**: Use these residuals to estimate parameters of the error structure (e.g., autocorrelation coefficient $$ \rho $$ for AR(1) errors).
+3. **Transform Model**: Transform the original regression model using estimated parameters to "whiten" errors.
+4. **Apply OLS to Transformed Model**: Estimate parameters using OLS on this transformed model.
+
+### Comparison of OLS and FGLS
+
+#### Efficiency
+
+- **OLS**: Inefficient in the presence of serial correlation because it ignores error correlations.
+- **FGLS**: More efficient as it accounts for error correlations, leading to more precise estimates.
+
+#### Applicability
+
+- **OLS**: Simple to implement and interpret; suitable when errors are not serially correlated or when robust standard errors can be used.
+- **FGLS**: More complex; requires estimating error structures, making it suitable when serial correlation is present and accurately modeled.
+
+#### Robustness
+
+- **OLS**: Robust to misspecification of error structure if robust standard errors are used.
+- **FGLS**: Sensitive to misspecification of error structure; incorrect estimation can lead to biased results.
+
+### Conclusion
+
+While both OLS and FGLS have their merits, choosing between them depends on the nature of the data and model assumptions. In cases where serial correlation is present and can be accurately modeled, FGLS offers efficiency gains over OLS. However, if there is uncertainty about the error structure or if computational simplicity is desired, OLS with robust standard errors may be preferable. Understanding these trade-offs is crucial for making informed decisions in econometric analysis.

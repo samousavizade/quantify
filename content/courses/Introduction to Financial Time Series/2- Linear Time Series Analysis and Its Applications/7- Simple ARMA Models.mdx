@@ -1,0 +1,133 @@
+---
+title: Simple ARMA Models
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Simple ARMA Models
+
+In some applications, AR or MA models become cumbersome because one may need a high-order model with many parameters to adequately describe the dynamic structure of the data. To overcome this difficulty, autoregressive moving-average (ARMA) models are introduced. ARMA models combine the ideas of AR and MA models into a compact form so that the number of parameters used is kept small, achieving parsimony in parameterization. Although the chance of using ARMA models for return series in finance is low, the concept is highly relevant in volatility modeling.
+
+### Properties of ARMA(1,1) Models
+
+A time series $\{r_t\}$ follows an ARMA(1,1) model if it satisfies:
+
+$$
+r_t - \phi_1 r_{t-1} = \phi_0 + a_t - \theta_1 a_{t-1}
+$$
+
+where $\{a_t\}$ is a white noise series. The left-hand side of the equation is the AR component, and the right-hand side gives the MA component. For this model to be meaningful, we need $\phi_1 \neq \theta_1$; otherwise, there is a cancellation in the equation, reducing it to a white noise series.
+
+#### Stationarity Condition
+
+Taking expectation, we have:
+
+$$
+E(r_t) - \phi_1 E(r_{t-1}) = \phi_0
+$$
+
+The mean of $r_t$ is:
+
+$$
+E(r_t) = \mu = \frac{\phi_0}{1 - \phi_1}
+$$
+
+provided that the series is weakly stationary.
+
+#### Variance and Autocovariance Function
+
+Assuming $\phi_0 = 0$, multiply the model by $a_t$ and take expectation:
+
+$$
+E(r_t a_t) = E(a_t^2) - \theta_1 E(a_t a_{t-1}) = \sigma_a^2
+$$
+
+Rewriting the model as $r_t = \phi_1 r_{t-1} + a_t - \theta_1 a_{t-1}$ and taking variance:
+
+$$
+Var(r_t) = \phi_1^2 Var(r_{t-1}) + (1 + \theta_1^2)\sigma_a^2 - 2\phi_1\theta_1 E(r_{t-1}a_{t-1})
+$$
+
+For weak stationarity:
+
+$$
+Var(r_t) = \frac{(1 + \theta_1^2 - 2\phi_1\theta_1)\sigma_a^2}{(1 - \phi_1^2)}
+$$
+
+The stationarity condition is $|\phi_1| < 1$.
+
+#### Autocorrelation Function (ACF)
+
+For $\ell = 1$, taking expectation:
+
+$$
+\gamma_1 - \phi_1\gamma_0 = -\theta_1\sigma_a^2
+$$
+
+For $\ell > 1$:
+
+$$
+\gamma_\ell - \phi_1\gamma_{\ell-1} = 0
+$$
+
+In terms of ACF:
+
+$$
+\rho_\ell =
+\begin{cases}
+\frac{\phi_1 - \theta_1}{(1 + \theta_1^2 - 2\phi_1\theta_1)} & \text{if } \ell = 0 \\
+\frac{\gamma_\ell}{\gamma_0} & \text{if } \ell > 0
+\end{cases}
+$$
+
+The ACF of an ARMA(1,1) model behaves like that of an AR(1) model except that exponential decay starts at lag 2.
+
+### General ARMA Models
+
+A general ARMA(p,q) model is given by:
+
+$$
+r_t = \phi_0 + \sum_{i=1}^{p} \phi_i r_{t-i} + a_t - \sum_{i=1}^{q} \theta_i a_{t-i}
+$$
+
+where $\{a_t\}$ is a white noise series. Using the back-shift operator $B$, it can be written as:
+
+$$
+(1 - \sum_{i=1}^{p} \phi_i B^i) r_t = \phi_0 + (1 - \sum_{i=1}^{q} \theta_i B^i) a_t
+$$
+
+The polynomial $P(B) = 1 - \sum_{i=1}^{p} \phi_i B^i$ introduces the characteristic equation of an ARMA model. If all solutions are less than one in absolute value, then the ARMA model is weakly stationary.
+
+### Identifying ARMA Models
+
+The ACF and PACF are not informative for determining the order of an ARMA model. Tsay and Tiao (1984) propose using the extended autocorrelation function (EACF). The EACF table helps identify the order by showing a triangle of zeros with its upper left vertex at position $(p,q)$ for an ARMA(p,q) model.
+
+#### Example: Monthly Log Stock Returns of 3M Company
+
+Consider monthly log stock returns from February 1946 to December 2008 with 755 observations. The sample ACF indicates no significant serial correlations at the 5% level. The sample EACF table helps identify potential orders for an ARMA model.
+
+### Forecasting Using an ARMA Model
+
+Forecasting with an ARMA model involves computing future values based on past observations using recursive equations derived from the model.
+
+#### One-Step-Ahead Forecast
+
+For an ARMA(1, 1):
+
+$$
+r_{h+1} = E(r_{h+1}|F_h) = \phi_0 + \phi_1 r_h - \theta_1 a_h
+$$
+
+The forecast error variance is $\sigma_a^2$.
+
+#### Multi-Step-Ahead Forecasts
+
+For multi-step-ahead forecasts ($\ell > 2$), use recursive equations to compute forecasts based on previous forecasts.
+
+### Summary
+
+ARMA models offer a compact representation for capturing both autoregressive and moving-average dynamics in time series data. They are particularly useful when dealing with complex data structures that require parsimonious modeling approaches.

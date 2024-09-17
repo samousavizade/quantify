@@ -1,0 +1,710 @@
+---
+title: Another Look at the Kalman Filter
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+# Fresh Perspective on the Kalman Filter
+
+In a previous quantecon lecture on the Kalman filter, we applied it to track rocket positions.
+
+Now, we'll use the Kalman filter to estimate an employee's skills and their effort in skill development, both of which are not directly observable by the employer.
+
+The company learns about these factors only by monitoring the employee's output history and understanding how it relates to the employee's skills and skill development.
+
+We'll propose a formula that determines the employee's compensation each period based on the company's available information.
+
+In addition to Anaconda, this lecture requires the following libraries:
+
+```python
+!pip install quantecon
+```
+
+For our simulations, we import these modules, as in the previous Kalman filter lecture.
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from quantecon import Kalman, LinearStateSpace
+from collections import namedtuple
+from scipy.stats import multivariate_normal
+import matplotlib as mpl
+mpl.rcParams['text.usetex'] = True
+mpl.rcParams['text.latex.preamble'] = r'\usepackage{{amsmath}}'
+```
+
+    OMP: Info #276: omp_set_nested routine deprecated, please use omp_set_max_active_levels instead.
+
+## Employee Productivity
+
+A typical employee has permanent employment at a company.
+
+The employee's output follows this dynamic process:
+
+$$
+\begin{aligned}
+h_{t+1} &= \alpha h_t + \beta u_t + c w_{t+1}, \quad c_{t+1} \sim {\mathcal N}(0,1) \\
+u_{t+1} & = u_t \\
+y_t & = g h_t + v_t , \quad v_t \sim {\mathcal N} (0, R)
+\end{aligned} \tag{26.1}
+$$
+
+Where:
+
+- $ h_t $ represents the log of skills at time $ t $
+- $ u_t $ is the log of the employee's skill development effort at $ t $
+- $ y_t $ denotes the log of the employee's output at time $ t $
+- $ h*0 \sim {\mathcal N}(\hat h_0, \sigma*{h,0}) $
+- $ u*0 \sim {\mathcal N}(\hat u_0, \sigma*{u,0}) $
+
+Model parameters are $ \alpha, \beta, c, R, g, \hat h_0, \hat u_0, \sigma_h, \sigma_u $.
+
+At time $ 0 $, a company hires the employee.
+
+The employee remains with the company indefinitely, working at all times $ t =0, 1, 2, \ldots $.
+
+Initially, the company can't observe the employee's innate skills $ h_0 $ or their inherent effort level $ u_0 $.
+
+The company believes that $ u*0 $ for a specific employee is drawn from a Gaussian distribution, described by $ u_0 \sim {\mathcal N}(\hat u_0, \sigma*{u,0}) $.
+
+The $ h_t $ aspect of an employee's "profile" changes over time, but the effort component remains constant at $ u_t = u_0 $.
+
+This means the company views the employee's effort as an unknown fixed "parameter".
+
+At time $ t\geq 1 $, for a particular employee, the company has observed $ y^{t-1} = [y_{t-1}, y_{t-2}, \ldots, y_0] $.
+
+The company can't directly observe the employee's "profile" $ (h_0, u_0) $.
+
+However, the company does observe the employee's current output $ y_t $ and recalls past outputs $ y^{t-1} $.
+
+## Company's Compensation Strategy
+
+Based on its knowledge about the employee at time $ t \geq 1 $, the company pays a log wage of
+
+$$
+w_t = g E [ h_t | y^{t-1} ], \quad t \geq 1
+$$
+
+and at time $ 0 $ pays a log wage equal to the expected value of $ y_0 $:
+
+$$
+w_0 = g \hat h_0
+$$
+
+This payment strategy accounts for the fact that today's log output is partly influenced by the random factor $ v_t $, which is purely luck-based and assumed to be independent of $ h_t $ and $ u_t $.
+
+## State-Space Model
+
+Rewrite system [(26.1)](#equation-worker-model) in state-space form
+
+$$
+\begin{aligned}
+\begin{bmatrix} h_{t+1} \cr u_{t+1} \end{bmatrix} &= \begin{bmatrix} \alpha & \beta \cr 0 & 1 \end{bmatrix}\begin{bmatrix} h_{t} \cr u_{t} \end{bmatrix} + \begin{bmatrix} c \cr 0 \end{bmatrix} w_{t+1} \cr
+y_t & = \begin{bmatrix} g & 0 \end{bmatrix} \begin{bmatrix} h_{t} \cr u_{t} \end{bmatrix} + v_t
+\end{aligned}
+$$
+
+which is equivalent to
+
+$$
+\begin{aligned}
+x_{t+1} & = A x_t + C w_{t+1} \cr
+y_t & = G x_t + v_t \cr
+x_0 & \sim {\mathcal N}(\hat x_0, \Sigma_0)
+\end{aligned} \tag{26.2}
+$$
+
+where
+
+$$
+x_t = \begin{bmatrix} h_{t} \cr u_{t} \end{bmatrix} , \quad
+\hat x_0 = \begin{bmatrix} \hat h_0 \cr \hat u_0 \end{bmatrix} , \quad
+\Sigma_0 = \begin{bmatrix} \sigma_{h,0} & 0 \cr
+0 & \sigma_{u,0} \end{bmatrix}
+$$
+
+To compute the company's wage-setting policy, we first create a `namedtuple` to store the model parameters
+
+```python
+WorkerModel = namedtuple("WorkerModel",
+                ('A', 'C', 'G', 'R', 'xhat_0', 'Σ_0'))
+
+def create_worker(α=.8, β=.2, c=.2,
+                  R=.5, g=1.0, hhat_0=4, uhat_0=4,
+                  σ_h=4, σ_u=4):
+
+    A = np.array([[α, β],
+                  [0, 1]])
+    C = np.array([[c],
+                  [0]])
+    G = np.array([g, 1])
+
+    # Define initial state and covariance matrix
+    xhat_0 = np.array([[hhat_0],
+                       [uhat_0]])
+
+    Σ_0 = np.array([[σ_h, 0],
+                    [0, σ_u]])
+
+    return WorkerModel(A=A, C=C, G=G, R=R, xhat_0=xhat_0, Σ_0=Σ_0)
+```
+
+Note how the `WorkerModel` namedtuple generates all the necessary components for the associated
+state-space representation [(26.2)](#equation-ssrepresent).
+
+This is useful because to simulate an employee's history $ \{y_t, h_t\} $, we'll want to create a
+state space system using the [`LinearStateSpace`](https://quanteconpy.readthedocs.io/en/latest/tools/lss.html) class.
+
+```python
+# Define A, C, G, R, xhat_0, Σ_0
+worker = create_worker()
+A, C, G, R = worker.A, worker.C, worker.G, worker.R
+xhat_0, Σ_0 = worker.xhat_0, worker.Σ_0
+
+# Create a LinearStateSpace object
+ss = LinearStateSpace(A, C, G, np.sqrt(R),
+        mu_0=xhat_0, Sigma_0=np.zeros((2,2)))
+
+T = 100
+x, y = ss.simulate(T)
+y = y.flatten()
+
+h_0, u_0 = x[0, 0], x[1, 0]
+```
+
+Next, to determine the company's log wage-setting policy based on its employee information,
+we use the Kalman filter described in the previous quantecon lecture.
+
+Specifically, we want to compute all components of an "innovation representation".
+
+## Innovations Framework
+
+We have all the necessary elements to form an innovations representation for the output
+process $ \{y*t\}*{t=0}^T $ of an employee.
+
+Let's code that now.
+
+$$
+\begin{aligned}
+\hat x_{t+1} & = A \hat x_t + K_t a_t \cr
+y_{t} & = G \hat x_t + a_t
+\end{aligned}
+$$
+
+where $ K_t $ is the Kalman gain matrix at time $ t $.
+
+We accomplish this with the following code using the [`Kalman`](https://quanteconpy.readthedocs.io/en/latest/tools/kalman.html) class.
+
+```python
+kalman = Kalman(ss, xhat_0, Σ_0)
+Σ_t = np.zeros((*Σ_0.shape, T-1))
+y_hat_t = np.zeros(T-1)
+x_hat_t = np.zeros((2, T-1))
+
+for t in range(1, T):
+    kalman.update(y[t])
+    x_hat, Σ = kalman.x_hat, kalman.Sigma
+    Σ_t[:, :, t-1] = Σ
+    x_hat_t[:, t-1] = x_hat.reshape(-1)
+    y_hat_t[t-1] = worker.G @ x_hat
+
+x_hat_t = np.concatenate((x[:, 1][:, np.newaxis],
+                    x_hat_t), axis=1)
+Σ_t = np.concatenate((worker.Σ_0[:, :, np.newaxis],
+                    Σ_t), axis=2)
+u_hat_t = x_hat_t[1, :]
+```
+
+    /var/folders/zj/sz5g50055l9gj8nhh_6md1cw0000gn/T/ipykernel_31204/2927621375.py:11: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      y_hat_t[t-1] = worker.G @ x_hat
+
+For a sample of $ h_0, u_0 $, we graph $ E y_t = G \hat x_t $ where $ \hat x_t = E [x_t | y^{t-1}] $.
+
+We also graph $ E [u_0 | y^{t-1}] $, which represents the company's estimate of an employee's innate "work ethic" $ u_0 $, based on information $ y^{t-1} $ available at the start of period $ t $.
+
+We can observe how the company's estimate $ E [u_0 | y^{t-1}] $ of the employee's work ethic approaches the hidden $ u_0 $, which the company cannot directly observe.
+
+```python
+fig, ax = plt.subplots(1, 2)
+
+ax[0].plot(y_hat_t, label=r'$E[y_t| y^{t-1}]$')
+ax[0].set_xlabel('Time')
+ax[0].set_ylabel(r'$E[y_t]$')
+ax[0].set_title(r'$E[y_t]$ over time')
+ax[0].legend()
+
+ax[1].plot(u_hat_t, label=r'$E[u_t|y^{t-1}]$')
+ax[1].axhline(y=u_0, color='grey',
+            linestyle='dashed', label=fr'$u_0={u_0:.2f}$')
+ax[1].set_xlabel('Time')
+ax[1].set_ylabel(r'$E[u_t|y^{t-1}]$')
+ax[1].set_title('Inferred work ethic over time')
+ax[1].legend()
+
+fig.tight_layout()
+plt.show()
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/26.%20Another%20Look%20at%20the%20Kalman%20Filter_files/26.%20Another%20Look%20at%20the%20Kalman%20Filter_17_0.png)
+</div>
+
+## Numerical Simulations
+
+Let's examine $ \Sigma_0 $ and $ \Sigma_T $ to see how much the company learns about the hidden state during our set timeframe.
+
+```python
+print(Σ_t[:, :, 0])
+```
+
+    [[4. 0.]
+     [0. 4.]]
+
+```python
+print(Σ_t[:, :, -1])
+```
+
+    [[0.08805027 0.00100377]
+     [0.00100377 0.00398351]]
+
+Clearly, elements in the conditional covariance matrix decrease over time.
+
+It's informative to show how conditional covariance matrices $ \Sigma_t $ evolve by plotting confidence ellipsoids around $ E [x_t |y^{t-1}] $ at various $ t $'s.
+
+```python
+# Create a grid of points for contour plotting
+h_range = np.linspace(x_hat_t[0, :].min()-0.5*Σ_t[0, 0, 1],
+                      x_hat_t[0, :].max()+0.5*Σ_t[0, 0, 1], 100)
+u_range = np.linspace(x_hat_t[1, :].min()-0.5*Σ_t[1, 1, 1],
+                      x_hat_t[1, :].max()+0.5*Σ_t[1, 1, 1], 100)
+h, u = np.meshgrid(h_range, u_range)
+
+# Create a figure with subplots for each time step
+fig, axs = plt.subplots(1, 3, figsize=(12, 7))
+
+# Iterate through each time step
+for i, t in enumerate(np.linspace(0, T-1, 3, dtype=int)):
+    # Create a multivariate normal distribution with x_hat and Σ at time step t
+    mu = x_hat_t[:, t]
+    cov = Σ_t[:, :, t]
+    mvn = multivariate_normal(mean=mu, cov=cov)
+
+    # Evaluate the multivariate normal PDF on the grid
+    pdf_values = mvn.pdf(np.dstack((h, u)))
+
+    # Create a contour plot for the PDF
+    con = axs[i].contour(h, u, pdf_values, cmap='viridis')
+    axs[i].clabel(con, inline=1, fontsize=10)
+    axs[i].set_title(f'Time Step {t+1}')
+    axs[i].set_xlabel(r'$h_{{{}}}$'.format(str(t+1)))
+    axs[i].set_ylabel(r'$u_{{{}}}$'.format(str(t+1)))
+
+    cov_latex = r'$\Sigma_{{{}}}= \begin{{bmatrix}} {:.2f} & {:.2f} \\ {:.2f} & {:.2f} \end{{bmatrix}}$'.format(
+        t+1, cov[0, 0], cov[0, 1], cov[1, 0], cov[1, 1]
+    )
+    axs[i].text(0.33, -0.15, cov_latex, transform=axs[i].transAxes)
+
+
+plt.tight_layout()
+plt.show()
+```
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/26.%20Another%20Look%20at%20the%20Kalman%20Filter_files/26.%20Another%20Look%20at%20the%20Kalman%20Filter_22_0.png)
+</div>
+
+Observe how the accumulation of evidence $ y^t $ influences the shape of the confidence ellipsoid as the sample size $ t $ increases.
+
+Now let's use our code to set the hidden state $ x_0 $ to a specific vector to observe how
+a company learns starting from an $ x_0 $ of interest.
+
+For instance, let's set $ h_0 = 0 $ and $ u_0 = 4 $.
+
+Here's one method to do this.
+
+```python
+# For example, we might want h_0 = 0 and u_0 = 4
+mu_0 = np.array([0.0, 4.0])
+
+# Create a LinearStateSpace object with Sigma_0 as a matrix of zeros
+ss_example = LinearStateSpace(A, C, G, np.sqrt(R), mu_0=mu_0,
+                              # This line forces exact h_0=0 and u_0=4
+                              Sigma_0=np.zeros((2, 2))
+                             )
+
+T = 100
+x, y = ss_example.simulate(T)
+y = y.flatten()
+
+# Now h_0=0 and u_0=4
+h_0, u_0 = x[0, 0], x[1, 0]
+print('h_0 =', h_0)
+print('u_0 =', u_0)
+```
+
+    h_0 = 0.0
+    u_0 = 4.0
+
+An alternative approach to achieve the same goal is to use the following code.
+
+```python
+# If we want to set the initial
+# h_0 = hhat_0 = 0 and u_0 = uhhat_0 = 4.0:
+worker = create_worker(hhat_0=0.0, uhat_0=4.0)
+
+ss_example = LinearStateSpace(A, C, G, np.sqrt(R),
+                              # This line takes h_0=hhat_0 and u_0=uhhat_0
+                              mu_0=worker.xhat_0,
+                              # This line forces exact h_0=hhat_0 and u_0=uhhat_0
+                              Sigma_0=np.zeros((2, 2))
+                             )
+
+T = 100
+x, y = ss_example.simulate(T)
+y = y.flatten()
+
+# Now h_0 and u_0 will be exactly hhat_0
+h_0, u_0 = x[0, 0], x[1, 0]
+print('h_0 =', h_0)
+print('u_0 =', u_0)
+```
+
+    h_0 = 0.0
+    u_0 = 4.0
+
+For this employee, let's create a graph similar to the one above.
+
+```python
+# First we compute the Kalman filter with initial xhat_0 and Σ_0
+kalman = Kalman(ss, xhat_0, Σ_0)
+Σ_t = []
+y_hat_t = np.zeros(T-1)
+u_hat_t = np.zeros(T-1)
+
+# Then we iteratively update the Kalman filter class using
+# observation y based on the linear state model above:
+for t in range(1, T):
+    kalman.update(y[t])
+    x_hat, Σ = kalman.x_hat, kalman.Sigma
+    Σ_t.append(Σ)
+    y_hat_t[t-1] = worker.G @ x_hat
+    u_hat_t[t-1] = x_hat[1]
+
+
+# Generate plots for y_hat_t and u_hat_t
+fig, ax = plt.subplots(1, 2)
+
+ax[0].plot(y_hat_t, label=r'$E[y_t| y^{t-1}]$')
+ax[0].set_xlabel('Time')
+ax[0].set_ylabel(r'$E[y_t]$')
+ax[0].set_title(r'$E[y_t]$ over time')
+ax[0].legend()
+
+ax[1].plot(u_hat_t, label=r'$E[u_t|y^{t-1}]$')
+ax[1].axhline(y=u_0, color='grey',
+            linestyle='dashed', label=fr'$u_0={u_0:.2f}$')
+ax[1].set_xlabel('Time')
+ax[1].set_ylabel(r'$E[u_t|y^{t-1}]$')
+ax[1].set_title('Inferred work ethic over time')
+ax[1].legend()
+
+fig.tight_layout()
+plt.show()
+```
+
+    /var/folders/zj/sz5g50055l9gj8nhh_6md1cw0000gn/T/ipykernel_31204/1462412779.py:13: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      y_hat_t[t-1] = worker.G @ x_hat
+    /var/folders/zj/sz5g50055l9gj8nhh_6md1cw0000gn/T/ipykernel_31204/1462412779.py:14: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      u_hat_t[t-1] = x_hat[1]
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/26.%20Another%20Look%20at%20the%20Kalman%20Filter_files/26.%20Another%20Look%20at%20the%20Kalman%20Filter_28_1.png)
+</div>
+
+More broadly, we can modify some or all of the parameters defining an employee in our `create_worker`
+namedtuple.
+
+Here's an example.
+
+```python
+# We can set these parameters when creating a worker -- just like classes!
+hard_working_worker =  create_worker(α=.4, β=.8,
+                        hhat_0=7.0, uhat_0=100, σ_h=2.5, σ_u=3.2)
+
+print(hard_working_worker)
+```
+
+    WorkerModel(A=array([[0.4, 0.8],
+           [0. , 1. ]]), C=array([[0.2],
+           [0. ]]), G=array([1., 1.]), R=0.5, xhat_0=array([[  7.],
+           [100.]]), Σ_0=array([[2.5, 0. ],
+           [0. , 3.2]]))
+
+We can also simulate the system for $ T = 50 $ periods for different employees.
+
+The gap between the inferred work ethics and actual work ethics diminishes over time.
+
+This demonstrates that the filter gradually informs both the employee and company about the employee's effort.
+
+```python
+def simulate_workers(worker, T, ax, mu_0=None, Sigma_0=None,
+                    diff=True, name=None, title=None):
+    A, C, G, R = worker.A, worker.C, worker.G, worker.R
+    xhat_0, Σ_0 = worker.xhat_0, worker.Σ_0
+
+    if isinstance(mu_0, type(None)):
+        mu_0 = xhat_0
+    if isinstance(Sigma_0, type(None)):
+        Sigma_0 = worker.Σ_0
+
+    ss = LinearStateSpace(A, C, G, np.sqrt(R),
+                        mu_0=mu_0, Sigma_0=Sigma_0)
+
+    x, y = ss.simulate(T)
+    y = y.flatten()
+
+    u_0 = x[1, 0]
+
+    # Compute Kalman filter
+    kalman = Kalman(ss, xhat_0, Σ_0)
+    Σ_t = []
+
+    y_hat_t = np.zeros(T)
+    u_hat_t = np.zeros(T)
+
+    for i in range(T):
+        kalman.update(y[i])
+        x_hat, Σ = kalman.x_hat, kalman.Sigma
+        Σ_t.append(Σ)
+        y_hat_t[i] = worker.G @ x_hat
+        u_hat_t[i] = x_hat[1]
+
+    if diff == True:
+        title = ('Difference between inferred and true work ethic over time'
+                 if title == None else title)
+
+        ax.plot(u_hat_t - u_0, alpha=.5)
+        ax.axhline(y=0, color='grey', linestyle='dashed')
+        ax.set_xlabel('Time')
+        ax.set_ylabel(r'$E[u_t|y^{t-1}] - u_0$')
+        ax.set_title(title)
+
+    else:
+        label_line = (r'$E[u_t|y^{t-1}]$' if name == None
+                      else name)
+        title = ('Inferred work ethic over time'
+                if title == None else title)
+
+        u_hat_plot = ax.plot(u_hat_t, label=label_line)
+        ax.axhline(y=u_0, color=u_hat_plot[0].get_color(),
+                    linestyle='dashed', alpha=0.5)
+        ax.set_xlabel('Time')
+        ax.set_ylabel(r'$E[u_t|y^{t-1}]$')
+        ax.set_title(title)
+```
+
+```python
+num_workers = 3
+T = 50
+fig, ax = plt.subplots(figsize=(7, 7))
+
+for i in range(num_workers):
+    worker = create_worker(uhat_0=4+2*i)
+    simulate_workers(worker, T, ax)
+ax.set_ylim(ymin=-2, ymax=2)
+plt.show()
+```
+
+    /var/folders/zj/sz5g50055l9gj8nhh_6md1cw0000gn/T/ipykernel_31204/2747793518.py:30: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      y_hat_t[i] = worker.G @ x_hat
+    /var/folders/zj/sz5g50055l9gj8nhh_6md1cw0000gn/T/ipykernel_31204/2747793518.py:31: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      u_hat_t[i] = x_hat[1]
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/26.%20Another%20Look%20at%20the%20Kalman%20Filter_files/26.%20Another%20Look%20at%20the%20Kalman%20Filter_33_1.png)
+</div>
+
+```python
+# We can also generate plots of u_t:
+
+T = 50
+fig, ax = plt.subplots(figsize=(7, 7))
+
+uhat_0s = [2, -2, 1]
+αs = [0.2, 0.3, 0.5]
+βs = [0.1, 0.9, 0.3]
+
+for i, (uhat_0, α, β) in enumerate(zip(uhat_0s, αs, βs)):
+    worker = create_worker(uhat_0=uhat_0, α=α, β=β)
+    simulate_workers(worker, T, ax,
+                    # By setting diff=False, it will give u_t
+                    diff=False, name=r'$u_{{{}, t}}$'.format(i))
+
+ax.axhline(y=u_0, xmin=0, xmax=0, color='grey',
+           linestyle='dashed', label=r'$u_{i, 0}$')
+ax.legend(bbox_to_anchor=(1, 0.5))
+plt.show()
+```
+
+    /var/folders/zj/sz5g50055l9gj8nhh_6md1cw0000gn/T/ipykernel_31204/2747793518.py:30: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      y_hat_t[i] = worker.G @ x_hat
+    /var/folders/zj/sz5g50055l9gj8nhh_6md1cw0000gn/T/ipykernel_31204/2747793518.py:31: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      u_hat_t[i] = x_hat[1]
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/26.%20Another%20Look%20at%20the%20Kalman%20Filter_files/26.%20Another%20Look%20at%20the%20Kalman%20Filter_34_1.png)
+</div>
+
+```python
+# We can also use exact u_0=1 and h_0=2 for all workers
+
+T = 50
+fig, ax = plt.subplots(figsize=(7, 7))
+
+# These two lines set u_0=1 and h_0=2 for all workers
+mu_0 = np.array([[1],
+                 [2]])
+Sigma_0 = np.zeros((2,2))
+
+uhat_0s = [2, -2, 1]
+αs = [0.2, 0.3, 0.5]
+βs = [0.1, 0.9, 0.3]
+
+for i, (uhat_0, α, β) in enumerate(zip(uhat_0s, αs, βs)):
+    worker = create_worker(uhat_0=uhat_0, α=α, β=β)
+    simulate_workers(worker, T, ax, mu_0=mu_0, Sigma_0=Sigma_0,
+                     diff=False, name=r'$u_{{{}, t}}$'.format(i))
+
+# This controls the boundary of plots
+ax.set_ylim(ymin=-3, ymax=3)
+ax.axhline(y=u_0, xmin=0, xmax=0, color='grey',
+           linestyle='dashed', label=r'$u_{i, 0}$')
+ax.legend(bbox_to_anchor=(1, 0.5))
+plt.show()
+```
+
+    /var/folders/zj/sz5g50055l9gj8nhh_6md1cw0000gn/T/ipykernel_31204/2747793518.py:30: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      y_hat_t[i] = worker.G @ x_hat
+    /var/folders/zj/sz5g50055l9gj8nhh_6md1cw0000gn/T/ipykernel_31204/2747793518.py:31: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      u_hat_t[i] = x_hat[1]
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/26.%20Another%20Look%20at%20the%20Kalman%20Filter_files/26.%20Another%20Look%20at%20the%20Kalman%20Filter_35_1.png)
+</div>
+
+```python
+# We can generate a plot for only one of the workers:
+
+T = 50
+fig, ax = plt.subplots(figsize=(7, 7))
+
+mu_0_1 = np.array([[1],
+                 [100]])
+mu_0_2 = np.array([[1],
+                 [30]])
+Sigma_0 = np.zeros((2,2))
+
+uhat_0s = 100
+αs = 0.5
+βs = 0.3
+
+worker = create_worker(uhat_0=uhat_0, α=α, β=β)
+simulate_workers(worker, T, ax, mu_0=mu_0_1, Sigma_0=Sigma_0,
+                 diff=False, name=r'Hard-working worker')
+simulate_workers(worker, T, ax, mu_0=mu_0_2, Sigma_0=Sigma_0,
+                 diff=False,
+                 title='A hard-working worker and a less hard-working worker',
+                 name=r'Normal worker')
+ax.axhline(y=u_0, xmin=0, xmax=0, color='grey',
+           linestyle='dashed', label=r'$u_{i, 0}$')
+ax.legend(bbox_to_anchor=(1, 0.5))
+plt.show()
+```
+
+    /var/folders/zj/sz5g50055l9gj8nhh_6md1cw0000gn/T/ipykernel_31204/2747793518.py:30: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      y_hat_t[i] = worker.G @ x_hat
+    /var/folders/zj/sz5g50055l9gj8nhh_6md1cw0000gn/T/ipykernel_31204/2747793518.py:31: DeprecationWarning: Conversion of an array with ndim > 0 to a scalar is deprecated, and will error in future. Ensure you extract a single element from your array before performing this operation. (Deprecated NumPy 1.25.)
+      u_hat_t[i] = x_hat[1]
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![png](/static/courses/Advances%20in%20Quantitative%20Economics/26.%20Another%20Look%20at%20the%20Kalman%20Filter_files/26.%20Another%20Look%20at%20the%20Kalman%20Filter_36_1.png)
+</div>
+
+## Potential Developments
+
+We can conduct many insightful experiments by creating new types of employees and allowing the company
+to learn about their hidden (to the company) states by observing only their output histories.

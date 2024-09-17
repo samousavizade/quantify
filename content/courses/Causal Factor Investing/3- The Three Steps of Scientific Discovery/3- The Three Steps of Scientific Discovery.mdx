@@ -1,0 +1,176 @@
+---
+title: Best Practice of Scientific Discovery
+draft: false
+summary: Backtest statistics are essential for evaluating the efficacy of investment strategies.
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+# 3 The Three Steps of Scientific Discovery
+
+Knowing the causes of effects has long been a human aspiration. In 29 BC, ancient Roman poet Virgil wrote "happy the
+man, who, studying Nature's laws, / thro' known effects can trace the secret cause" (Dryden 1697, p. 71). It was not
+until around the year 1011 that Arab mathematician Hasan Ibn al-Haytham proposed a scientific method for deducing the
+causes of effects (Thiele 2005; Sabra 1989). Science has been defined as the systematic organization of knowledge in the
+form of testable explanations of natural observations (Heilbron 2003). Mature scientific knowledge aims at identifying
+causal relations, and the mechanisms behind them, because causal relations are responsible for the regularities in
+observed data (Glymour et al. 2019).
+
+## 3.1 The Phenomenological Step
+
+In the phenomenological step, researchers observe associated events, without exploring the reason for that association.
+At this step, it suffices to discover that $P[X=x, Y=y] \neq P[X=x] P[Y=y]$. Further, a researcher may model the joint
+distribution $P[X=x, Y=y]$, derive conditional probabilities $P[Y=y \mid X=x]$, and make associational statements of
+the type $E[Y \mid X=x]=y$ (an associational prediction) with the help of machine learning tools. Exceptionally, a
+researcher may go as far as to produce empirical evidence of a causal effect, such as the result from an interventional
+study (e.g., Ohm's law of current, Newton's law of universal gravitation, or Coulomb's law of electrical forces), but
+without providing an explanation for the relationship. The main goal of the phenomenological step is to state "a problem
+situation," in the sense of describing the observed anomaly for which no scientific explanation exists (Popper 1994b,
+pp. 2-3). At this step, inference occurs by logical induction, because the problem situation rests on the conclusion
+that, for some unknown reason, the phenomenon will reoccur[^7].
+
+For example, consider the observation that bid-ask spreads widen in the presence of imbalanced orderflow (i.e., when the
+amount of shares exchanged in trades initiated by buyers does not equal the amount of shares exchanged in trades
+initiated by sellers over a period of time), and that the widening of bid-ask spreads often precedes a rise in intraday
+volatility. This is a surprising phenomenon because under the efficient market hypothesis asset prices are expected to
+reflect all available information at all times, making predictions futile (Fama 1970). The existence of orderflow
+imbalance, the sequential nature of these events, and their predictability point to market inefficiencies, of unclear
+source. Such associational observations do not constitute a theory, and they do not explain why the phenomenon occurs.
+
+## 3.2 The Theoretical Step
+
+In the theoretical step, researchers advance a possible explanation for the observed associated events. This is an
+exercise in logical abduction (sometimes also called retroduction): Given the observed phenomenon, the most likely
+explanation is inferred by elimination among competing alternatives. Observations cannot be explained by a hypothesis
+more extraordinary than the observations themselves, and of various hypotheses the least extraordinary must be
+preferred (Wieten et al. 2020). At this step, a researcher states that $X$ and $Y$ are associated because $X$ causes
+$Y$, in the sense that $P[Y=y \mid do[X=x]]>P[Y=y]$. For the explanation to be scientific, it must propose a causal
+mechanism that is falsifiable, that is, propose the system of structural equations along the causal path from $X$ to
+$Y$, where the validity of each causal link and causal path can be tested empirically.
+
+For example, in the year 1900, Paul Drude was the first to offer a falsifiable explanation to Ohm’s law of 1827; in the
+year 1915, Albert Einstein offered a falsifiable explanation for Newton’s law of gravitation of 1687, and so on[^8]. The
+Probability of Informed Trading (PIN) theory explains liquidity provision as the result of a sequential strategic game
+between market makers and informed traders (Easley et al. 1996). In the absence of informed traders, the orderflow is
+balanced, because uninformed traders initiate buys and sells in roughly equal amounts, hence market impact is mute and
+the mid-price barely changes. When market makers provide liquidity to uninformed traders, they profit from the bid-ask
+spread (they buy at the bid price and sell at the ask price). However, the presence of informed traders imbalances the
+orderflow, creating market impact that changes the mid-price. When market makers provide liquidity to an informed
+trader, the mid-price changes before market makers are able to profit from the bid-ask spread, and they are eventually
+forced to realize a loss. As a protection against losses, market makers react to orderflow imbalance by charging a
+greater premium for selling the option to be adversely selected (that premium is the bid-ask spread). In the presence of
+persistent orderflow imbalance, realized losses accumulate, and market makers are forced to reduce their provision of
+liquidity, which results in greater volatility.
+
+## 3.3 The Falsification Step
+
+In the falsification step, researchers not involved in the formulation of the theory independently: (i) deduce key
+implications from the theory, such that it is impossible for the theory to be true and the implications to be false;
+and (ii) design and execute experiments with the purpose of proving that the implications are false. Step (i) is an
+exercise in logical deduction because given some theorized premises, a falsifiable conclusion is reached reductively (
+Gensler 2010, pp. 104–110). When properly done, performing step (i) demands substantial creativity and domain expertise,
+as it must balance the strength of the deduced implication with its testability (cost, measurement errors,
+reproducibility, etc.).
+
+Each experiment in step (ii) focuses on falsifying one particular link in the chain of events involved in the causal
+mechanism, applying the tools of mediation analysis. The conclusion that the theory is false follows the structure of a
+modus tollens syllogism (proof by contradiction): using standard sequent notation, if $A \Rightarrow B$, however $\neg
+B$ is observed, then $\neg A$, where $A$ stands for “the theory is true” and $B$ stands for a falsifiable key
+implication of the theory. One strategy of falsification is to show that $P[Y=y \mid do[X=x]] = P[Y=y]$, in which case
+either the association is noncausal, or there is no association (i.e., the phenomenon originally observed in step (i)
+was a statistical fluke). A second strategy of falsification is to deduce a causal prediction from the proposed
+mechanism, and to show that $E[Y \mid do[X=x]] \neq y$. When that is the case, there may be a causal mechanism,
+however, it does not work as theorized (e.g., when the actual causal graph is more complex than the one proposed).
+
+For example, a researcher may split a list of stocks randomly into two groups, send buy orders that set the level of
+orderflow imbalance for the first group, and measure the difference in bid-ask spread, liquidity, and volatility between
+the two groups (an interventional study, see Section 4.1)[^9]. In response to random spikes in orderflow imbalance, a
+researcher may find evidence of quote cancellation, quote size reduction, and resending quotes further away from the
+mid-price (a natural experiment, see Section 4.2)[^10].
+
+## 3.4 Demarcation and Falsificationism in Statistics
+
+Science is essential to human understanding in that it replaces unreliable inductive reasoning (such as “$Y$ will
+follow $X$ because that is the association observed in the past”) with more reliable deductive reasoning (such as “$Y$
+will follow $X$ because $X$ causes $Y$ through a tested mechanism $M$”). Parsimonious theories are preferable,
+because they are easier to falsify, as they involve controlling for fewer variables (Occam’s razor). The most
+parsimonious surviving theory is not truer, however, it is better “fit” (in an evolutionary sense) to tackle more
+difficult problems posed by that theory. The most parsimonious surviving theory poses new problem situations, hence
+re-starting a new iteration of the three-step process, which will result in a better theory yet.
+
+To appreciate the unique characteristics of the scientific method, it helps to contrast it with a dialectical
+predecessor. For centuries prior to the scientific revolution of the seventeenth century, academics used the Socratic
+method to eliminate logically inconsistent hypotheses. Like the scientific method, the Socratic method relies on three
+steps: (1) problem statement; (2) hypothesis formulation; and (3) elenchus (refutation), see Vlastos (1983, pp. 27–58).
+However, both methods differ in three important aspects. First, a Socratic problem statement is a definiendum (“what is
+$X$?”), not an observed empirical phenomenon (“$X$ and $Y$ are associated”). Second, a Socratic hypothesis is a
+definiens (“$X$ is...”), not a falsifiable theory (“$X$ causes $Y$ through mechanism $M$”). Third, a Socratic
+refutation presents a counterexample that exposes implicit assumptions, where those assumptions contradict the original
+definition. In contrast, scientific falsification does not involve searching for contradictive implicit assumptions,
+since all assumptions were made explicit and coherent by a plausible causal mechanism. Instead, scientific falsification
+designs and executes an experiment aimed at debunking the theorized causal effect (“$X$ does not cause $Y$”), or
+showing that the experiment’s results contradict the hypothesized mechanism (“experimental results contradict
+$M$”)[^12].
+
+The above explanation elucidates an important fact that is often ignored or misunderstood: not all academic debate is
+scientific, even in empirical or mathematical subjects. A claim does not become scientific by virtue of its use of
+complex mathematics, its reliance on measurements, or its submission to peer review[^13]. Philosophers of science call
+the challenge of separating scientific claims from pseudoscientific claims the “demarcation problem.” Popper, Kuhn,
+Lakatos, Musgrave, Thagard, Laudan, Lutz, and many other authors have proposed different demarcation principles. While
+there is no consensus on what constitutes a definitive demarcation principle across all disciplines, modern philosophers
+of science generally agree that, for a theory to be scientific, it must be falsifiable in some wide or narrow
+sense[^14].
+
+The principle of falsification is deeply ingrained in statistics and econometrics (Dickson and Baird 2011). Frequentist statisticians routinely use Fisher’s p-values and Neyman–Pearson’s framework for falsifying a proposed hypothesis ($H0$), following a hypothetical deductive argument of the form (using standard sequent notation):
+
+$$
+H_0 \rightarrow Prob(data | H_0) \geq \alpha; \quad Prob(data | H_0) \rightarrow \neq H_0
+$$
+
+where _data_ denotes the observation made and α denotes the targeted false positive rate (Perezgonzalez 2017). The above proposition is analogous to a _modus tollens_ syllogism, with the caveat that $H_0$ is not rejected with certainty, as it would be the case in a mathematical proof. For this reason, this proposition is categorized as a stochastic proof by contradiction, where certainty is replaced by a preset confidence level (Imai 2013; Balsubramani and Ramdas 2016). Failure to reject $H_0$ does not validate $H_0$, but rather attests that there is not sufficient empirical evidence to cast significant doubt on the truth of $H_0$ (Reeves and Brewer 1980).[^15] Accordingly, the logical structure of statistical hypothesis testing enforces a _Popperian_ view of science in quantitative disciplines, whereby a hypothesis can never be accepted, but it can be rejected (i.e., falsified), see Wilkinson (2013). Popper’s influence is also palpable in Bayesian statistics, see Gelman and Rohilla-Shalizi (2013).
+
+Statistical falsification can be applied to different types of claims. For the purpose of this Element, it is helpful to differentiate between the statistical falsification of: (a) associational claims; and (b) causal claims. The statistical falsification of associational claims occurs during the phenomenological step of the scientific method (e.g., when a researcher finds that “$X$ is correlated with $Y$ ”), and it can be done on the sole basis of observational evidence. The statistical falsification of causal claims may also occur at the phenomenological step of the scientific method (e.g., when a laboratory finds that “$X$ causes $Y$” in the absence of any theory to explain why), or at the falsification step of the scientific method (involving a theory, of the form “$X$ causes $Y$ through a mechanism $M$”), but either way the statistical falsification of a causal claim always requires an experiment.[^16] Most statisticians and econometricians are trained in the statistical falsification of
+associational claims and have a limited understanding of the statistical falsification of causal claims in general, and the statistical falsification of causal theories in particular. The statistical falsification of causal claims requires the careful design of experiments, and the statistical falsification of causal theories requires testing the hypothesized causal mechanism, which in turn requires testing independent effects along the causal path. The next section delves into this important topic.
+
+[^7]:
+    Reasoning by induction occurs when, given some premises, a probable conclusion is inferred non-reductively, by
+    generalizing or extrapolating from specific cases to a general rule. The evidence to support this extrapolation may come
+    from a large number of cases (enumerative induction) or a wide range of cases (variative induction). See Gensler (2010,
+    pp. 80-117).
+
+[^8]:
+    Following on the earlier examples, in the year 1900, Paul Drude was the first to offer a falsifiable explanation
+    to Ohm’s law of 1827; in the year 1915, Albert Einstein offered a falsifiable explanation for Newton’s law of
+    gravitation of 1687, and so on.
+
+[^9]:
+    Sophisticated large asset managers routinely conduct so-called algo-wheel experiments to assess broker
+    performance, however the results from these controlled experiments are rarely made public, and are generally unknown to
+    the academic community (López de Prado 2017). See Webster and Westray (2022) for an example of a theoretical framework
+    that covers this kind of execution experiments.
+
+[^10]:
+    Random spikes in orderflow imbalance allow researchers to observe the reaction of market makers while removing
+    the influence of potential confounders. For the purpose of this experiment, a researcher is interested in orderflow
+    imbalance fluctuations that market makers cannot rule out as random at their onset, however the researcher can determine
+    to have been random (likely ex-post).
+
+[^12]:
+    The reader should not conclude from these statements that the Socratic method has no place in science. The
+    Socratic method can be helpful at certain steps of the scientific method, such as sharpening definitions (
+    phenomenological step) and making all assumptions explicit (theoretical step).
+
+[^13]:
+    Some of the greatest scientists in history had limited mathematical training. The mathematical knowledge of
+    Michael Faraday (1791–1867) did not reach beyond the simplest of algebra. What made Faraday one of the most influential
+    scientists of all time was his ability to design experiments that elucidated causal mechanisms (Rao 2000, p. 281).
+
+[^14]:
+    This statement is hardly an endorsement of strict falsificationism a la Popper (1994b, pp. 82–86). It is merely
+    an acknowledgement that scientists never cease to design experiments in an attempt to falsify a theory, if not with
+    absolute certainty, at least with a sufficient degree of confidence.
+
+[^15]: In the words of Fisher (1971): “In relation to any experiment we may speak of this hypothesis as the null hypothesis, and it should be noted that the null hypothesis is never proved or established, but is possibly disproved, in the course of experimentation. Every experiment may be said to exist only in order to give the facts a chance of disproving the null hypothesis.”
+[^16]: As explained in Section 4.3, under certain assumptions the experiment used to falsify a causal claim may be simulated.

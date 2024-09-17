@@ -1,0 +1,61 @@
+---
+title: Testing for Heteroskedasticity
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Testing for Heteroskedasticity
+
+### **Heteroskedasticity Testing**
+
+Heteroskedasticity occurs when the variance of the error terms in a regression model is not constant across observations. Detecting heteroskedasticity is crucial because it can lead to inefficient estimates and biased inference when using ordinary least squares (OLS). Several tests are available to detect heteroskedasticity, with the White test being one of the most widely used.
+
+### **The White Test for Heteroskedasticity**
+
+The White test is a general test for heteroskedasticity that does not rely on any specific form of heteroskedasticity. It is robust and can detect a wide range of heteroskedastic patterns, making it a popular choice among econometricians.
+
+#### **Steps to Perform the White Test**
+
+1. **Estimate the Original Model**: Begin by estimating your regression model using OLS and obtain the residuals ($$\hat{u}_i$$).
+
+2. **Auxiliary Regression**: Regress the squared residuals ($$\hat{u}_i^2$$) on the original independent variables, their squares, and their cross-products. This auxiliary regression is used to capture potential non-linear relationships that might indicate heteroskedasticity.
+
+Mathematically, if your original model is:
+
+$$
+y_i = \beta_0 + \beta_1 x_{1i} + \beta_2 x_{2i} + u_i
+$$
+
+The auxiliary regression for the White test would be:
+
+$$
+\hat{u}_i^2 = \alpha_0 + \alpha_1 x_{1i} + \alpha_2 x_{2i} + \alpha_3 x_{1i}^2 + \alpha_4 x_{2i}^2 + \alpha_5 x_{1i}x_{2i} + v_i
+$$
+
+3. **Compute the Test Statistic**: The test statistic for the White test is calculated as:
+
+   $$
+   nR^2_{\text{aux}}
+   $$
+
+   where $$n$$ is the sample size, and $$R^2_{\text{aux}}$$ is the R-squared from the auxiliary regression.
+
+4. **Inference**: The test statistic follows a chi-square distribution with degrees of freedom equal to the number of independent variables in the auxiliary regression minus one. If the test statistic exceeds the critical value from the chi-square distribution, reject the null hypothesis of homoskedasticity.
+
+#### **Interpretation**
+
+- A significant result from the White test suggests that heteroskedasticity is present, indicating that standard OLS inference might be invalid.
+- If heteroskedasticity is detected, consider using heteroskedasticity-robust standard errors or alternative estimation techniques like weighted least squares (WLS) or generalized least squares (GLS) to obtain valid inference.
+
+The White test provides a flexible approach to detecting heteroskedasticity without assuming a specific form of variance change, making it suitable for various econometric applications.
+
+[^1]: https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/30626316/2be59c8f-ac44-43e7-a595-38c5bea42df7/Jeffrey_M_Wooldridge_Introductory_Econometrics_A_Modern_Approach.pdf
+[^2]: https://economics.mit.edu/sites/default/files/2022-09/Heteroskedasticity-Robust%20Inference%20In%20Finite%20Samples.pdf
+[^3]: http://www2.kobe-u.ac.jp/~kawabat/ch08.pdf
+[^4]: https://en.wikipedia.org/wiki/White_test
+[^5]: https://www.dummies.com/article/business-careers-money/business/economics/test-for-heteroskedasticity-with-the-white-test-154899/
+[^6]: https://spureconomics.com/white-test-for-heteroscedasticity/

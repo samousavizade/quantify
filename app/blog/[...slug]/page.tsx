@@ -7,14 +7,10 @@ import { coreContent, formatBlogLink, sortedBlogPost } from '@/lib/utils/content
 import { allAuthors, allBlogs } from 'contentlayer/generated';
 import { Metadata } from 'next';
 
-// import AuthorLayout from "@/layouts/MDX/AuthorLayout";
-
 export async function generateMetadata({
   params,
 }: {
-  params: {
-    slug: string[];
-  };
+  params: { slug: string[] };
 }): Promise<Metadata> {
   const slug = decodeURI(params.slug.join('/'));
   const post = allBlogs.find((p) => p.slug === slug);
@@ -54,7 +50,10 @@ export default function BlogPost({
 
   return (
     <>
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" />
+      <link
+        rel={'stylesheet'}
+        href={'https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css'}
+      />
       <ScrollProgressBar />
       <MainLayout>
         {post && 'draft' in post && post.draft !== true ? (

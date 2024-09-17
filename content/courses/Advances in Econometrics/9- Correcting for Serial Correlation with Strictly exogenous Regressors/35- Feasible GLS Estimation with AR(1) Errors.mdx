@@ -1,0 +1,65 @@
+---
+title: Feasible GLS Estimation with AR(1) Errors
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+### Feasible GLS Estimation with AR(1) Errors
+
+#### Introduction
+
+When dealing with time series data, serial correlation in the error terms can lead to inefficient Ordinary Least Squares (OLS) estimators and invalid inference. In particular, when errors follow an AR(1) process, it is essential to correct for this serial correlation to obtain efficient estimates. Feasible Generalized Least Squares (FGLS) is a method used to address this issue, providing a way to obtain efficient parameter estimates in the presence of AR(1) serial correlation.
+
+#### The AR(1) Error Model
+
+Consider a linear regression model with AR(1) errors:
+
+$$
+y_t = \beta_0 + \beta_1 x_t + u_t
+$$
+
+where:
+
+$$
+u_t = \rho u_{t-1} + \epsilon_t
+$$
+
+Here, $$ \epsilon_t $$ is a white noise error term with mean zero and constant variance, and $$ |\rho| < 1 $$ ensures stationarity of the error process.
+
+#### Feasible Generalized Least Squares (FGLS)
+
+FGLS is a two-step procedure that first estimates the degree of serial correlation and then transforms the data to eliminate it. This method provides efficient estimates of the coefficients by accounting for the correlation structure in the error terms.
+
+###### Steps for FGLS Estimation
+
+1. **Estimate the OLS Model**: Begin by estimating your regression model using OLS to obtain residuals $$ \hat{u}\_t $$.
+
+2. **Estimate $$ \rho $$**: Regress the residuals $$ \hat{u}_t $$ on their lagged values $$ \hat{u}_{t-1} $$ to estimate the autocorrelation parameter $$ \rho $$. The estimated coefficient from this regression is denoted as $$ \hat{\rho} $$.
+
+3. **Transform the Model**: Use the estimated autocorrelation parameter $$ \hat{\rho} $$ to transform the original regression model. The transformation aims to "whiten" the errors by eliminating serial correlation:
+
+$$
+y_t - \hat{\rho} y_{t-1} = (\beta_0 (1-\hat{\rho})) + \beta_1 (x_t - \hat{\rho} x_{t-1}) + v_t
+$$
+
+where $$ v*t = \epsilon_t - \hat{\rho} \epsilon*{t-1} $$ is a transformed error term that is not serially correlated.
+
+4. **Estimate Transformed Model**: Apply OLS to the transformed model to obtain efficient estimates of the parameters.
+
+###### Properties of FGLS Estimators
+
+- **Efficiency**: FGLS estimators are more efficient than OLS estimators when serial correlation is present, as they account for the correlation structure in the errors.
+- **Consistency**: FGLS estimators are consistent under standard assumptions.
+- **Unbiasedness**: FGLS estimators are unbiased if all assumptions hold.
+
+#### Comparing OLS and FGLS
+
+While OLS estimators remain unbiased in the presence of AR(1) serial correlation, they are inefficient because they do not account for the correlation structure in the errors. In contrast, FGLS provides efficient estimates by transforming the model to eliminate serial correlation. However, FGLS requires an accurate estimate of $$ \rho $$. If this estimate is poor, FGLS may not perform better than OLS.
+
+#### Conclusion
+
+Feasible Generalized Least Squares (FGLS) provides a robust method for correcting AR(1) serial correlation in time series regression models with strictly exogenous regressors. By transforming the model and accounting for the correlation structure in the errors, FGLS ensures efficient estimation and reliable inference. This method is particularly useful in time series analysis where serial correlation is a common issue.

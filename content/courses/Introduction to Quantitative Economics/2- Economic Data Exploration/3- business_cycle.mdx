@@ -1,0 +1,632 @@
+---
+title: Business Cycles
+draft: false
+summary: Backtest statistics are essential for evaluating the efficacy of investment strategies.
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+# Business Cycles
+
+export const Video = ({ src, title }) => {
+  return (
+    <div
+      style={{
+        position: 'relative',
+        paddingBottom: '56.25%',
+        height: 0,
+        overflow: 'hidden',
+        maxWidth: '100%',
+        background: '#000',
+      }}
+    >
+      <iframe
+        src={src}
+        title={title}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          border: 'none',
+        }}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+      />
+    </div>
+  );
+};
+
+[//] # (<Video src="https://www.aparat.com/video/video/embed/videohash/husa9i9/vt/frame" title="My Video"/>)
+
+## Overview
+
+In this lecture, we explore key empirical aspects of business cycles, which refer to the periodic fluctuations in economic activity over time. These cycles include periods of expansion (booms) and contraction (recessions). For our analysis, we will utilize economic indicators from both the [World Bank](https://documents.worldbank.org/en/publication/documents-reports/api) and [FRED](https://fred.stlouisfed.org/). Besides the packages that come pre-installed with Anaconda, this lecture also requires a few additional packages.
+
+```python
+!pip install wbgapi
+!pip install pandas-datareader
+```
+
+We use the following imports
+
+```python
+import matplotlib.pyplot as plt
+import pandas as pd
+import datetime
+import wbgapi as wb
+import pandas_datareader.data as web
+```
+
+Below is a small code snippet that can assist with managing colors in our plots.
+
+```python
+# Set graphical parameters
+cycler = plt.cycler(linestyle=['-', '-.', '--', ':'],
+        color=['#377eb8', '#ff7f00', '#4daf4a', '#ff334f'])
+plt.rc('axes', prop_cycle=cycler)
+```
+
+## Data acquisition
+
+We will use the World Bank's data API `wbgapi` along with `pandas_datareader` to fetch the required data. To explore the available data from the [World Bank](https://www.worldbank.org/en/home), we can utilize the `wb.series.info` function with the `q` argument. For instance, we can retrieve the GDP growth data ID to query GDP growth information.
+
+```python
+wb.series.info(q='GDP growth')
+```
+
+| **id**                | **value**             |
+| --------------------- | --------------------- |
+| **NY.GDP.MKTP.KD.ZG** | GDP growth (annual %) |
+| \*\*\*\*              | 1 elements            |
+
+Next, we use the retrieved series ID to obtain the GDP growth data.
+
+```python
+gdp_growth = wb.data.DataFrame('NY.GDP.MKTP.KD.ZG',
+            ['USA', 'ARG', 'GBR', 'GRC', 'JPN'],
+            labels=True)
+gdp_growth
+```
+
+| \*\*\*\*    | **Country**    | **YR1960** | **YR1961** | **YR1962** | **YR1963** | **YR1964** | **YR1965** | **YR1966** | **YR1967** | **YR1968** | **...** | **YR2014** | **YR2015** | **YR2016** | **YR2017** | **YR2018** | **YR2019** | **YR2020** | **YR2021** | **YR2022** | **YR2023** |
+| ----------- | -------------- | ---------- | ---------- | ---------- | ---------- | ---------- | ---------- | ---------- | ---------- | ---------- | ------- | ---------- | ---------- | ---------- | ---------- | ---------- | ---------- | ---------- | ---------- | ---------- | ---------- |
+| **economy** |                |            |            |            |            |            |            |            |            |            |         |            |            |            |            |            |            |            |            |            |            |
+| **JPN**     | Japan          | NaN        | 12.043536  | 8.908973   | 8.473642   | 11.676708  | 5.819708   | 10.638562  | 11.082142  | 12.882468  | ...     | 0.296206   | 1.560627   | 0.753827   | 1.675332   | 0.643391   | -0.402169  | -4.147119  | 2.559320   | 0.954737   | 1.923056   |
+| **GRC**     | Greece         | NaN        | 13.203841  | 0.364811   | 11.844867  | 9.409678   | 10.768010  | 6.494501   | 5.669486   | 7.203719   | ...     | 0.475696   | -0.196088  | -0.487173  | 1.092149   | 1.668429   | 1.879490   | -9.316436  | 8.379944   | 5.557287   | 2.011521   |
+| **GBR**     | United Kingdom | NaN        | 2.701314   | 1.098696   | 4.859545   | 5.594811   | 2.130333   | 1.567450   | 2.775738   | 5.472693   | ...     | 3.195782   | 2.220258   | 1.921063   | 2.655070   | 1.403792   | 1.641611   | -10.359901 | 8.674904   | 4.345229   | 0.104018   |
+| **ARG**     | Argentina      | NaN        | 5.427843   | -0.852022  | -5.308197  | 10.130298  | 10.569433  | -0.659726  | 3.191997   | 4.822501   | ...     | -2.512615  | 2.731160   | -2.080328  | 2.818503   | -2.617396  | -2.000861  | -9.900485  | 10.718010  | 4.956370   | -1.550502  |
+| **USA**     | United States  | NaN        | 2.300000   | 6.100000   | 4.400000   | 5.800000   | 6.400000   | 6.500000   | 2.500000   | 4.800000   | ...     | 2.523820   | 2.945550   | 1.819451   | 2.457622   | 2.966505   | 2.467038   | -2.213469  | 5.800206   | 1.935496   | 2.542700   |
+
+We can examine the series' metadata to gain further insights about the data (click to expand).
+
+```python
+wb.series.metadata.get('NY.GDP.MKTP.KD.ZG')
+```
+
+| **Field**                            | **Value**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Aggregationmethod**                | Weighted average                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| **Developmentrelevance**             | An economy&#x27;s growth is measured by the change in the volume of its output or in the real incomes of its residents. The 2008 United Nations System of National Accounts (2008 SNA) offers three plausible indicators for calculating growth: the volume of gross domestic product (GDP), real gross domestic income, and real gross national income. The volume of GDP is the sum of value added, measured at constant prices, by households, government, and industries operating in the economy. GDP accounts for all domestic production, regardless of whether the income accrues to domestic or foreign institutions.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **IndicatorName**                    | GDP growth (annual %)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **License_Type**                     | CC BY-4.0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **License_URL**                      | https://datacatalog.worldbank.org/public-licenses#cc-by                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| **Limitationsandexceptions**         | Each industry&#x27;s contribution to growth in the economy&#x27;s output is measured by growth in the industry&#x27;s value added. In principle, value added in constant prices can be estimated by measuring the quantity of goods and services produced in a period, valuing them at an agreed set of base year prices, and subtracting the cost of intermediate inputs, also in constant prices. This double-deflation method requires detailed information on the structure of prices of inputs and outputs. In many industries, however, value added is extrapolated from the base year using single volume indexes of outputs or, less commonly, inputs. Particularly in the services industries, including most of government, value added in constant prices is often imputed from labor inputs, such as real wages or number of employees. In the absence of well defined measures of output, measuring the growth of services remains difficult. Moreover, technical progress can lead to improvements in production processes and in the quality of goods and services that, if not properly accounted for, can distort measures of value added and thus of growth. When inputs are used to estimate output, as for nonmarket services, unmeasured technical progress leads to underestimates of the volume of output. Similarly, unmeasured improvements in quality lead to underestimates of the value of output and value added. The result can be underestimates of growth and productivity improvement and overestimates of inflation. Informal economic activities pose a particular measurement problem, especially in developing countries, where much economic activity is unrecorded. A complete picture of the economy requires estimating household outputs produced for home use, sales in informal markets, barter exchanges, and illicit or deliberately unreported activities. The consistency and completeness of such estimates depend on the skill and methods of the compiling statisticians. Rebasing of national accounts can alter the measured growth rate of an economy and lead to breaks in series that affect the consistency of data over time. When countries rebase their national accounts, they update the weights assigned to various components to better reflect current patterns of production or uses of output. The new base year should represent normal operation of the economy - it should be a year without major shocks or distortions. Some developing countries have not rebased their national accounts for many years. Using an old base year can be misleading because implicit price and volume weights become progressively less relevant and useful. To obtain comparable series of constant price data for computing aggregates, the World Bank rescales GDP and value added by industrial origin to a common reference year. Because rescaling changes the implicit weights used in forming regional and income group aggregates, aggregate growth rates are not comparable with those from earlier editions with different base years. Rescaling may result in a discrepancy between the rescaled GDP and the sum of the rescaled components. To avoid distortions in the growth rates, the discrepancy is left unallocated. As a result, the weighted average of the growth rates of the components generally does not equal the GDP growth rate. |
+| **Longdefinition**                   | Annual percentage growth rate of GDP at market prices based on constant local currency. Aggregates are based on constant 2015 prices, expressed in U.S. dollars. GDP is the sum of gross value added by all resident producers in the economy plus any product taxes and minus any subsidies not included in the value of the products. It is calculated without making deductions for depreciation of fabricated assets or for depletion and degradation of natural resources.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| **Periodicity**                      | Annual                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| **Source**                           | World Bank national accounts data, and OECD National Accounts data files.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **Statisticalconceptandmethodology** | Gross domestic product (GDP) represents the sum of value added by all its producers. Value added is the value of the gross output of producers less the value of intermediate goods and services consumed in production, before accounting for consumption of fixed capital in production. The United Nations System of National Accounts calls for value added to be valued at either basic prices (excluding net taxes on products) or producer prices (including net taxes on products paid by producers but excluding sales or value added taxes). Both valuations exclude transport charges that are invoiced separately by producers. Total GDP is measured at purchaser prices. Value added by industry is normally measured at basic prices. When value added is measured at producer prices. Growth rates of GDP and its components are calculated using the least squares method and constant price data in the local currency. Constant price in U.S. dollar series are used to calculate regional and income group growth rates. Local currency series are converted to constant U.S. dollars using an exchange rate in the common reference year.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **Topic**                            | Economic Policy &amp; Debt: National accounts: Growth rates                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+
+## GDP growth rate
+
+We’ll start by examining GDP growth. Let’s retrieve the data from the World Bank and clean it for analysis.
+
+```python
+# Use the series ID retrieved before
+gdp_growth = wb.data.DataFrame('NY.GDP.MKTP.KD.ZG',
+            ['USA', 'ARG', 'GBR', 'GRC', 'JPN'],
+            labels=True)
+gdp_growth = gdp_growth.set_index('Country')
+gdp_growth.columns = gdp_growth.columns.str.replace('YR', '').astype(int)
+gdp_growth
+```
+
+| \*\*\*\*           | **1960** | **1961**  | **1962**  | **1963**  | **1964**  | **1965**  | **1966**  | **1967**  | **1968**  | **1969**  | **...** | **2014**  | **2015**  | **2016**  | **2017** | **2018**  | **2019**  | **2020**   | **2021**  | **2022** | **2023**  |
+| ------------------ | -------- | --------- | --------- | --------- | --------- | --------- | --------- | --------- | --------- | --------- | ------- | --------- | --------- | --------- | -------- | --------- | --------- | ---------- | --------- | -------- | --------- |
+| **Country**        |          |           |           |           |           |           |           |           |           |           |         |           |           |           |          |           |           |            |           |          |           |
+| **Japan**          | NaN      | 12.043536 | 8.908973  | 8.473642  | 11.676708 | 5.819708  | 10.638562 | 11.082142 | 12.882468 | 12.477895 | ...     | 0.296206  | 1.560627  | 0.753827  | 1.675332 | 0.643391  | -0.402169 | -4.147119  | 2.559320  | 0.954737 | 1.923056  |
+| **Greece**         | NaN      | 13.203841 | 0.364811  | 11.844867 | 9.409678  | 10.768010 | 6.494501  | 5.669486  | 7.203719  | 11.563668 | ...     | 0.475696  | -0.196088 | -0.487173 | 1.092149 | 1.668429  | 1.879490  | -9.316436  | 8.379944  | 5.557287 | 2.011521  |
+| **United Kingdom** | NaN      | 2.701314  | 1.098696  | 4.859545  | 5.594811  | 2.130333  | 1.567450  | 2.775738  | 5.472693  | 1.939138  | ...     | 3.195782  | 2.220258  | 1.921063  | 2.655070 | 1.403792  | 1.641611  | -10.359901 | 8.674904  | 4.345229 | 0.104018  |
+| **Argentina**      | NaN      | 5.427843  | -0.852022 | -5.308197 | 10.130298 | 10.569433 | -0.659726 | 3.191997  | 4.822501  | 9.679526  | ...     | -2.512615 | 2.731160  | -2.080328 | 2.818503 | -2.617396 | -2.000861 | -9.900485  | 10.718010 | 4.956370 | -1.550502 |
+| **United States**  | NaN      | 2.300000  | 6.100000  | 4.400000  | 5.800000  | 6.400000  | 6.500000  | 2.500000  | 4.800000  | 3.100000  | ...     | 2.523820  | 2.945550  | 1.819451  | 2.457622 | 2.966505  | 2.467038  | -2.213469  | 5.800206  | 1.935496 | 2.542700  |
+
+Next, we write a function to generate plots for individual countries, factoring in the periods of recessions.
+
+```python
+def plot_series(data, country, ylabel,
+                txt_pos, ax, g_params,
+                b_params, t_params, ylim=15, baseline=0):
+    """
+    Plots a time series with recessions highlighted.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Data to plot
+    country : str
+        Name of the country to plot
+    ylabel : str
+        Label of the y-axis
+    txt_pos : float
+        Position of the recession labels
+    y_lim : float
+        Limit of the y-axis
+    ax : matplotlib.axes._subplots.AxesSubplot
+        Axes to plot on
+    g_params : dict
+        Parameters for the line
+    b_params : dict
+        Parameters for the recession highlights
+    t_params : dict
+        Parameters for the recession labels
+    baseline : float, optional
+        Dashed baseline on the plot, by default 0
+
+    Returns
+    -------
+    ax : matplotlib.axes.Axes
+        Axes with the plot.
+    """
+
+    ax.plot(data.loc[country], label=country, **g_params)
+
+    # Highlight recessions
+    ax.axvspan(1973, 1975, **b_params)
+    ax.axvspan(1990, 1992, **b_params)
+    ax.axvspan(2007, 2009, **b_params)
+    ax.axvspan(2019, 2021, **b_params)
+    if ylim != None:
+        ax.set_ylim([-ylim, ylim])
+    else:
+        ylim = ax.get_ylim()[1]
+    ax.text(1974, ylim + ylim*txt_pos,
+            'Oil Crisis\n(1974)', **t_params)
+    ax.text(1991, ylim + ylim*txt_pos,
+            '1990s recession\n(1991)', **t_params)
+    ax.text(2008, ylim + ylim*txt_pos,
+            'GFC\n(2008)', **t_params)
+    ax.text(2020, ylim + ylim*txt_pos,
+            'Covid-19\n(2020)', **t_params)
+
+    # Add a baseline for reference
+    if baseline != None:
+        ax.axhline(y=baseline,
+                   color='black',
+                   linestyle='--')
+    ax.set_ylabel(ylabel)
+    ax.legend()
+    return ax
+
+# Define graphical parameters
+g_params = {'alpha': 0.7}
+b_params = {'color':'grey', 'alpha': 0.2}
+t_params = {'color':'grey', 'fontsize': 9,
+            'va':'center', 'ha':'center'}
+```
+
+Let’s begin by focusing on the United States.
+
+```python
+fig, ax = plt.subplots()
+
+country = 'United States'
+ylabel = 'GDP growth rate (%)'
+plot_series(gdp_growth, country,
+            ylabel, 0.1, ax,
+            g_params, b_params, t_params)
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/business_cycle_files/business_cycle_21_0.png)
+
+GDP growth tends to be positive on average and shows a slight downward trend over time. We also observe notable fluctuations in GDP growth, with some being quite significant. To establish a basis for comparison, let’s examine a few more countries. The United Kingdom (UK) exhibits a similar pattern to the US, with a gradual decline in the growth rate and substantial fluctuations. Notably, there is a very large dip corresponding to the Covid-19 pandemic.
+
+```python
+fig, ax = plt.subplots()
+
+country = 'United Kingdom'
+plot_series(gdp_growth, country,
+            ylabel, 0.1, ax,
+            g_params, b_params, t_params)
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/business_cycle_files/business_cycle_23_0.png)
+
+Next, let’s examine Japan, which saw rapid economic growth during the 1960s and 1970s but has experienced slowed expansion in the past two decades. Significant declines in the growth rate align with the Oil Crisis of the 1970s, the Global Financial Crisis (GFC), and the Covid-19 pandemic.
+
+```python
+fig, ax = plt.subplots()
+
+country = 'Japan'
+plot_series(gdp_growth, country,
+            ylabel, 0.1, ax,
+            g_params, b_params, t_params)
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/business_cycle_files/business_cycle_25_0.png)
+
+Next, let’s examine Greece.
+
+```python
+fig, ax = plt.subplots()
+
+country = 'Greece'
+plot_series(gdp_growth, country,
+            ylabel, 0.1, ax,
+            g_params, b_params, t_params)
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/business_cycle_files/business_cycle_27_0.png)
+
+Greece experienced a significant decline in GDP growth around 2010-2011, coinciding with the peak of the Greek debt crisis. Now, let’s turn our attention to Argentina.
+
+```python
+fig, ax = plt.subplots()
+
+country = 'Argentina'
+plot_series(gdp_growth, country,
+            ylabel, 0.1, ax,
+            g_params, b_params, t_params)
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/business_cycle_files/business_cycle_29_0.png)
+
+Observe that Argentina has experienced much more volatile economic cycles compared to the previously examined economies. Additionally, Argentina's growth rate did not decline during the recessions that affected developed economies in the 1970s and 1990s.
+
+## Unemployment
+
+Another key aspect of business cycles is the unemployment rate. We analyze unemployment data using figures from FRED, covering the period from [1929-1942](https://fred.stlouisfed.org/series/M0892AUSM156SNBR) to [1948-2022](https://fred.stlouisfed.org/series/UNRATE), along with combined unemployment rate data for the years 1942-1948, which is estimated by the [Census Bureau](https://www.census.gov/library/publications/1975/compendia/hist_stats_colonial-1970.html).
+
+```python
+start_date = datetime.datetime(1929, 1, 1)
+end_date = datetime.datetime(1942, 6, 1)
+
+unrate_history = web.DataReader('M0892AUSM156SNBR',
+                    'fred', start_date,end_date)
+unrate_history.rename(columns={'M0892AUSM156SNBR': 'UNRATE'},
+                inplace=True)
+
+start_date = datetime.datetime(1948, 1, 1)
+end_date = datetime.datetime(2022, 12, 31)
+
+unrate = web.DataReader('UNRATE', 'fred',
+                    start_date, end_date)
+```
+
+Let’s create a plot of the unemployment rate in the US from 1929 to 2022, incorporating recession periods as defined by the NBER.
+
+```python
+# We use the census bureau's estimate for the unemployment rate
+# between 1942 and 1948
+years = [datetime.datetime(year, 6, 1) for year in range(1942, 1948)]
+unrate_census = [4.7, 1.9, 1.2, 1.9, 3.9, 3.9]
+
+unrate_census = {'DATE': years, 'UNRATE': unrate_census}
+unrate_census = pd.DataFrame(unrate_census)
+unrate_census.set_index('DATE', inplace=True)
+
+# Obtain the NBER-defined recession periods
+start_date = datetime.datetime(1929, 1, 1)
+end_date = datetime.datetime(2022, 12, 31)
+
+nber = web.DataReader('USREC', 'fred', start_date, end_date)
+
+fig, ax = plt.subplots()
+
+ax.plot(unrate_history, **g_params,
+        color='#377eb8',
+        linestyle='-', linewidth=2)
+ax.plot(unrate_census, **g_params,
+        color='black', linestyle='--',
+        label='Census estimates', linewidth=2)
+ax.plot(unrate, **g_params, color='#377eb8',
+        linestyle='-', linewidth=2)
+
+# Draw gray boxes according to NBER recession indicators
+ax.fill_between(nber.index, 0, 1,
+                where=nber['USREC']==1,
+                color='grey', edgecolor='none',
+                alpha=0.3,
+                transform=ax.get_xaxis_transform(),
+                label='NBER recession indicators')
+ax.set_ylim([0, ax.get_ylim()[1]])
+ax.legend(loc='upper center',
+          bbox_to_anchor=(0.5, 1.1),
+          ncol=3, fancybox=True, shadow=True)
+ax.set_ylabel('unemployment rate (%)')
+
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/business_cycle_files/business_cycle_34_0.png)
+
+The plot reveals that:
+
+- Expansions and contractions in the labor market are closely aligned with recessions.
+- Economic cycles are generally asymmetric, characterized by sharp increases in unemployment followed by slow recoveries.
+
+Additionally, the plot highlights the exceptional nature of labor market conditions in the US during the post-pandemic recovery. The labor market rebounded at an unprecedented pace following the shock of 2020-2021.
+
+## Synchronization
+
+In our [previous discussion](#gdp-growth), we observed that developed economies have generally experienced synchronized periods of recession. However, this synchronization was not evident in Argentina until the 2000s. Let’s explore this trend in more detail. By making minor adjustments, we can use our earlier function to create a plot that includes multiple countries.
+
+```python
+
+def plot_comparison(data, countries,
+                        ylabel, txt_pos, y_lim, ax,
+                        g_params, b_params, t_params,
+                        baseline=0):
+    """
+    Plot multiple series on the same graph
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Data to plot
+    countries : list
+        List of countries to plot
+    ylabel : str
+        Label of the y-axis
+    txt_pos : float
+        Position of the recession labels
+    y_lim : float
+        Limit of the y-axis
+    ax : matplotlib.axes._subplots.AxesSubplot
+        Axes to plot on
+    g_params : dict
+        Parameters for the lines
+    b_params : dict
+        Parameters for the recession highlights
+    t_params : dict
+        Parameters for the recession labels
+    baseline : float, optional
+        Dashed baseline on the plot, by default 0
+
+    Returns
+    -------
+    ax : matplotlib.axes.Axes
+        Axes with the plot.
+    """
+
+    # Allow the function to go through more than one series
+    for country in countries:
+        ax.plot(data.loc[country], label=country, **g_params)
+
+    # Highlight recessions
+    ax.axvspan(1973, 1975, **b_params)
+    ax.axvspan(1990, 1992, **b_params)
+    ax.axvspan(2007, 2009, **b_params)
+    ax.axvspan(2019, 2021, **b_params)
+    if y_lim != None:
+        ax.set_ylim([-y_lim, y_lim])
+    ylim = ax.get_ylim()[1]
+    ax.text(1974, ylim + ylim*txt_pos,
+            'Oil Crisis\n(1974)', **t_params)
+    ax.text(1991, ylim + ylim*txt_pos,
+            '1990s recession\n(1991)', **t_params)
+    ax.text(2008, ylim + ylim*txt_pos,
+            'GFC\n(2008)', **t_params)
+    ax.text(2020, ylim + ylim*txt_pos,
+            'Covid-19\n(2020)', **t_params)
+    if baseline != None:
+        ax.hlines(y=baseline, xmin=ax.get_xlim()[0],
+                  xmax=ax.get_xlim()[1], color='black',
+                  linestyle='--')
+    ax.set_ylabel(ylabel)
+    ax.legend()
+    return ax
+
+# Define graphical parameters
+g_params = {'alpha': 0.7}
+b_params = {'color':'grey', 'alpha': 0.2}
+t_params = {'color':'grey', 'fontsize': 9,
+            'va':'center', 'ha':'center'}
+```
+
+Here, we compare the GDP growth rates of developed economies with those of developing economies.
+
+```python
+# Obtain GDP growth rate for a list of countries
+gdp_growth = wb.data.DataFrame('NY.GDP.MKTP.KD.ZG',
+            ['CHN', 'USA', 'DEU', 'BRA', 'ARG', 'GBR', 'JPN', 'MEX'],
+            labels=True)
+gdp_growth = gdp_growth.set_index('Country')
+gdp_growth.columns = gdp_growth.columns.str.replace('YR', '').astype(int)
+```
+
+We use the United Kingdom, United States, Germany, and Japan as examples of developed economies.
+
+```python
+fig, ax = plt.subplots()
+countries = ['United Kingdom', 'United States', 'Germany', 'Japan']
+ylabel = 'GDP growth rate (%)'
+plot_comparison(gdp_growth.loc[countries, 1962:],
+                countries, ylabel,
+                0.1, 20, ax,
+                g_params, b_params, t_params)
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/business_cycle_files/business_cycle_41_0.png)
+
+We select Brazil, China, Argentina, and Mexico as representative examples of developing economies.
+
+```python
+fig, ax = plt.subplots()
+countries = ['Brazil', 'China', 'Argentina', 'Mexico']
+plot_comparison(gdp_growth.loc[countries, 1962:],
+                countries, ylabel,
+                0.1, 20, ax,
+                g_params, b_params, t_params)
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/business_cycle_files/business_cycle_43_0.png)
+
+The comparison of GDP growth rates indicates that business cycles are becoming more synchronized in 21st-century recessions. However, emerging and less developed economies tend to experience more volatile fluctuations throughout economic cycles.
+
+Despite this synchronization in GDP growth, individual countries often have different experiences during recessions. To illustrate this, we use the unemployment rate and the recovery of labor market conditions as another example. Here, we compare the unemployment rates of the United States, the United Kingdom, Japan, and France.
+
+```python
+unempl_rate = wb.data.DataFrame('SL.UEM.TOTL.NE.ZS',
+    ['USA', 'FRA', 'GBR', 'JPN'], labels=True)
+unempl_rate = unempl_rate.set_index('Country')
+unempl_rate.columns = unempl_rate.columns.str.replace('YR', '').astype(int)
+
+fig, ax = plt.subplots()
+
+countries = ['United Kingdom', 'United States', 'Japan', 'France']
+ylabel = 'unemployment rate (national estimate) (%)'
+plot_comparison(unempl_rate, countries,
+                ylabel, 0.05, None, ax, g_params,
+                b_params, t_params, baseline=None)
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/business_cycle_files/business_cycle_45_0.png)
+
+We observe that France, due to its strong labor unions, generally experiences relatively slow recoveries in the labor market following negative shocks. Additionally, Japan is noted for its historically low and stable unemployment rates.
+
+## Leading Indicators and Correlated Factors
+
+Analyzing leading indicators and correlated factors helps policymakers understand the causes and effects of business cycles. We will explore potential leading indicators and correlated factors from three perspectives: consumption, production, and credit levels.
+
+### Consumption
+
+Consumption is influenced by consumers' confidence in their income and the overall future performance of the economy. A widely recognized measure of consumer confidence is the [Consumer Sentiment Index](https://fred.stlouisfed.org/series/UMCSENT) published by the University of Michigan.
+
+Here, we plot the University of Michigan Consumer Sentiment Index alongside the year-on-year change in the [core Consumer Price Index (CPI)](https://fred.stlouisfed.org/series/CPILFESL) from 1978 to 2022 in the US.
+
+```python
+start_date = datetime.datetime(1978, 1, 1)
+end_date = datetime.datetime(2022, 12, 31)
+
+# Limit the plot to a specific range
+start_date_graph = datetime.datetime(1977, 1, 1)
+end_date_graph = datetime.datetime(2023, 12, 31)
+
+nber = web.DataReader('USREC', 'fred', start_date, end_date)
+consumer_confidence = web.DataReader('UMCSENT', 'fred',
+                                start_date, end_date)
+
+fig, ax = plt.subplots()
+ax.plot(consumer_confidence, **g_params,
+        color='#377eb8', linestyle='-',
+        linewidth=2)
+ax.fill_between(nber.index, 0, 1,
+            where=nber['USREC']==1,
+            color='grey', edgecolor='none',
+            alpha=0.3,
+            transform=ax.get_xaxis_transform(),
+            label='NBER recession indicators')
+ax.set_ylim([0, ax.get_ylim()[1]])
+ax.set_ylabel('consumer sentiment index')
+
+# Plot CPI on another y-axis
+ax_t = ax.twinx()
+inflation = web.DataReader('CPILFESL', 'fred',
+                start_date, end_date).pct_change(12)*100
+
+# Add CPI on the legend without drawing the line again
+ax_t.plot(2020, 0, **g_params, linestyle='-',
+          linewidth=2, label='consumer sentiment index')
+ax_t.plot(inflation, **g_params,
+          color='#ff7f00', linestyle='--',
+          linewidth=2, label='CPI YoY change (%)')
+
+ax_t.fill_between(nber.index, 0, 1,
+                  where=nber['USREC']==1,
+                  color='grey', edgecolor='none',
+                  alpha=0.3,
+                  transform=ax.get_xaxis_transform(),
+                  label='NBER recession indicators')
+ax_t.set_ylim([0, ax_t.get_ylim()[1]])
+ax_t.set_xlim([start_date_graph, end_date_graph])
+ax_t.legend(loc='upper center',
+            bbox_to_anchor=(0.5, 1.1),
+            ncol=3, fontsize=9)
+ax_t.set_ylabel('CPI YoY change (%)')
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/business_cycle_files/business_cycle_49_0.png)
+
+We observe that:
+
+- Consumer sentiment typically remains high during periods of economic expansion but declines before recessions.
+- There is a clear negative correlation between consumer sentiment and the Consumer Price Index (CPI). As the price of consumer goods increases, consumer confidence tends to decrease, with this effect being more pronounced during periods of [stagflation](https://en.wikipedia.org/wiki/Stagflation).
+
+### Production
+
+Real industrial output is strongly correlated with economic recessions. However, it is not considered a leading indicator, as the peak of production contraction usually lags behind changes in consumer confidence and inflation. To illustrate this trend, we plot the year-over-year change in real industrial output from 1919 to 2022 in the US.
+
+```python
+start_date = datetime.datetime(1919, 1, 1)
+end_date = datetime.datetime(2022, 12, 31)
+
+nber = web.DataReader('USREC', 'fred',
+                    start_date, end_date)
+industrial_output = web.DataReader('INDPRO', 'fred',
+                    start_date, end_date).pct_change(12)*100
+
+fig, ax = plt.subplots()
+ax.plot(industrial_output, **g_params,
+        color='#377eb8', linestyle='-',
+        linewidth=2, label='Industrial production index')
+ax.fill_between(nber.index, 0, 1,
+                where=nber['USREC']==1,
+                color='grey', edgecolor='none',
+                alpha=0.3,
+                transform=ax.get_xaxis_transform(),
+                label='NBER recession indicators')
+ax.set_ylim([ax.get_ylim()[0], ax.get_ylim()[1]])
+ax.set_ylabel('YoY real output change (%)')
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/business_cycle_files/business_cycle_52_0.png)
+
+We notice a delayed contraction in the plot across different recessions.
+
+### Credit Level
+
+Credit contractions frequently occur during recessions as lenders become more cautious and borrowers are reluctant to take on additional debt. This cautious behavior is driven by factors such as a decline in overall economic activity and pessimistic future expectations. An example of this is domestic credit extended to the private sector by banks in the UK. The following graph illustrates domestic credit to the private sector as a percentage of GDP by banks from 1970 to 2022 in the UK.
+
+```python
+private_credit = wb.data.DataFrame('FS.AST.PRVT.GD.ZS',
+                ['GBR'], labels=True)
+private_credit = private_credit.set_index('Country')
+private_credit.columns = private_credit.columns.str.replace('YR', '').astype(int)
+
+fig, ax = plt.subplots()
+
+countries = 'United Kingdom'
+ylabel = 'credit level (% of GDP)'
+ax = plot_series(private_credit, countries,
+                 ylabel, 0.05, ax, g_params, b_params,
+                 t_params, ylim=None, baseline=None)
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/business_cycle_files/business_cycle_55_0.png)
+
+Note that credit levels increase during economic expansions and either stagnate or contract following recessions.

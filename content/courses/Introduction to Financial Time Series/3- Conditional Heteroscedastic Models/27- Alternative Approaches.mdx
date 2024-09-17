@@ -1,0 +1,182 @@
+---
+title: Alternative Approaches
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Alternative Approaches
+
+In this section, we discuss two alternative approaches to volatility modeling that have gained popularity in recent years:
+
+1. Use of high-frequency data
+2. Use of daily open, high, low, and close prices
+
+These approaches aim to provide more accurate volatility estimates by utilizing additional information beyond just daily closing prices.
+
+### Use of High-Frequency Data
+
+With the availability of intraday transaction data, researchers have proposed using high-frequency returns to estimate volatility. The basic idea is to use intraday returns to construct an ex-post measure of daily volatility, which can then be used to model and forecast future volatility.
+
+#### Realized Volatility
+
+Let $r_{t,i}$ denote the $i$th intraday return on day $t$, where $i = 1, \ldots, m$. The realized volatility (RV) for day $t$ is defined as:
+
+$$
+RV_t = \sum_{i=1}^m r_{t,i}^2
+$$
+
+Under certain conditions, as $m \to \infty$, $RV_t$ converges to the integrated volatility of day $t$, which is a measure of the true latent volatility process.
+
+The realized volatility approach has several advantages:
+
+1. It provides a model-free estimate of volatility.
+2. It can capture intraday patterns in volatility.
+3. It can potentially provide more accurate volatility forecasts than models based on daily data.
+
+However, there are also some challenges:
+
+1. Microstructure noise: At very high frequencies, market microstructure effects (e.g., bid-ask bounce) can contaminate the volatility estimate.
+2. Non-synchronous trading: Different stocks may trade at different times, making it difficult to compute correlations.
+
+To address these issues, various modifications to the basic realized volatility measure have been proposed.
+
+#### Realized Kernel
+
+Barndorff-Nielsen et al. (2008) proposed the realized kernel estimator to deal with microstructure noise:
+
+$$
+RK_t = \sum_{h=-H}^H k\left(\frac{h}{H+1}\right) \gamma_h
+$$
+
+where $k(\cdot)$ is a kernel function, $H$ is the bandwidth, and $\gamma_h$ is the $h$th realized autocovariance:
+
+$$
+\gamma_h = \sum_{i=|h|+1}^m r_{t,i} r_{t,i-|h|}
+$$
+
+The realized kernel provides a consistent estimator of integrated volatility in the presence of microstructure noise.
+
+#### Two-Scale Realized Volatility
+
+Zhang et al. (2005) proposed the two-scale realized volatility (TSRV) estimator:
+
+$$
+TSRV_t = \frac{1}{K} \sum_{k=1}^K RV_t^{(k)} - \frac{n}{n_K} RV_t^{(all)}
+$$
+
+where $RV_t^{(k)}$ is the realized volatility computed on the $k$th subgrid of observations, $RV_t^{(all)}$ is the realized volatility computed using all observations, $n$ is the total number of observations, and $n_K$ is the average number of observations in each subgrid.
+
+The TSRV estimator combines information from different time scales to reduce the impact of microstructure noise.
+
+#### Modeling and Forecasting Realized Volatility
+
+Once we have obtained realized volatility estimates, we can model and forecast them using various time series models. Some popular approaches include:
+
+1. Heterogeneous Autoregressive (HAR) model (Corsi, 2009):
+
+$$
+RV_t = \beta_0 + \beta_d RV_{t-1} + \beta_w RV_{t-5:t-1} + \beta_m RV_{t-22:t-1} + \epsilon_t
+$$
+
+where $RV_{t-5:t-1}$ and $RV_{t-22:t-1}$ are the average realized volatilities over the past week and month, respectively.
+
+2. ARFIMA models:
+
+$$
+(1 - L)^d \phi(L) \log RV_t = \theta(L) \epsilon_t
+$$
+
+where $L$ is the lag operator, $d$ is the fractional differencing parameter, and $\phi(L)$ and $\theta(L)$ are polynomials in $L$.
+
+3. Realized GARCH models (Hansen et al., 2012):
+
+$$
+\begin{aligned}
+r_t &= \sigma_t \epsilon_t \\
+\log \sigma_t^2 &= \omega + \beta \log \sigma_{t-1}^2 + \gamma \log RV_{t-1} \\
+\log RV_t &= \xi + \phi \log \sigma_t^2 + \tau(\epsilon_t) + u_t
+\end{aligned}
+$$
+
+where $\tau(\epsilon_t)$ captures the leverage effect.
+
+These models can potentially provide more accurate volatility forecasts than traditional GARCH models based on daily returns.
+
+### Use of Daily Open, High, Low, and Close Prices
+
+Another approach to improving volatility estimation is to use information from daily open, high, low, and close prices, rather than just closing prices. This approach can capture intraday price movements without requiring high-frequency data.
+
+#### Range-Based Volatility Estimators
+
+Let $O_t$, $H_t$, $L_t$, and $C_t$ denote the open, high, low, and close prices on day $t$, respectively. Some popular range-based volatility estimators include:
+
+1. Parkinson (1980) estimator:
+
+$$
+\hat{\sigma}_t^2 = \frac{1}{4 \log 2} (\log H_t - \log L_t)^2
+$$
+
+2. Garman-Klass (1980) estimator:
+
+$$
+\hat{\sigma}_t^2 = 0.511 (\log H_t - \log L_t)^2 - 0.019 [\log C_t (\log H_t + \log L_t) - 2 \log H_t \log L_t] - 0.383 (\log C_t - \log O_t)^2
+$$
+
+3. Rogers-Satchell (1991) estimator:
+
+$$
+\hat{\sigma}_t^2 = \log H_t (\log H_t - \log O_t) + \log L_t (\log L_t - \log O_t)
+$$
+
+4. Yang-Zhang (2000) estimator:
+
+$$
+\hat{\sigma}_t^2 = \hat{\sigma}_o^2 + k \hat{\sigma}_c^2 + (1-k) \hat{\sigma}_{rs}^2
+$$
+
+where $\hat{\sigma}_o^2$ is the overnight volatility, $\hat{\sigma}_c^2$ is the close-to-close volatility, $\hat{\sigma}_{rs}^2$ is the Rogers-Satchell estimator, and $k$ is a weighting parameter.
+
+These estimators can provide more efficient volatility estimates than the simple squared return, especially for assets with significant intraday price movements.
+
+#### Modeling and Forecasting Range-Based Volatility
+
+Range-based volatility estimates can be used in various volatility models:
+
+1. Range-GARCH (Brandt and Jones, 2006):
+
+$$
+\begin{aligned}
+\log R_t &= \mu + \sigma_t \epsilon_t \\
+\log \sigma_t^2 &= \omega + \alpha \log R_{t-1} + \beta \log \sigma_{t-1}^2
+\end{aligned}
+$$
+
+where $R_t = \log H_t - \log L_t$ is the log range.
+
+2. Conditional Autoregressive Range (CARR) model (Chou, 2005):
+
+$$
+R_t = \psi_t \epsilon_t, \quad \psi_t = \omega + \alpha R_{t-1} + \beta \psi_{t-1}
+$$
+
+where $R_t$ is the range and $\psi_t$ is the conditional mean of the range.
+
+3. Range-based HAR model:
+
+$$
+R_t = \beta_0 + \beta_d R_{t-1} + \beta_w R_{t-5:t-1} + \beta_m R_{t-22:t-1} + \epsilon_t
+$$
+
+where $R_t$ is the range or a range-based volatility estimate.
+
+These models can potentially provide more accurate volatility forecasts than traditional GARCH models, especially for assets with significant intraday price movements.
+
+### Summary
+
+The use of high-frequency data and range-based volatility estimators offers promising alternatives to traditional GARCH models based on daily closing prices. These approaches can capture intraday price movements and potentially provide more accurate volatility estimates and forecasts.
+
+However, they also come with challenges, such as dealing with microstructure noise in high-frequency data and choosing the appropriate range-based estimator for a given application. Researchers and practitioners should carefully consider the trade-offs between these different approaches when modeling and forecasting volatility.

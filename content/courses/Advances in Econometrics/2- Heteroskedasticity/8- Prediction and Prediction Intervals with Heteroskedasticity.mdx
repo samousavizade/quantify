@@ -1,0 +1,132 @@
+---
+title: Prediction and Prediction Intervals with Heteroskedasticity
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Prediction and Prediction Intervals with Heteroskedasticity
+
+### Prediction and Prediction Intervals with Heteroskedasticity\*\*
+
+When heteroskedasticity is present in a regression model, it affects not only the estimation of coefficients but also the accuracy of predictions and prediction intervals. In econometrics, making predictions about the dependent variable and constructing prediction intervals are essential tasks, especially when using the model for forecasting or policy analysis.
+
+#### **Prediction in the Presence of Heteroskedasticity**
+
+1. **Point Predictions**:
+
+- A point prediction for a new observation is obtained by substituting the values of the independent variables into the estimated regression equation.
+- In the presence of heteroskedasticity, the point prediction itself remains unbiased. However, the accuracy of this prediction, as measured by its variance, can be affected.
+
+2. **Prediction Variance**:
+
+- The variance of a prediction in a heteroskedastic context is not constant across observations. It depends on both the variance of the error term and the specific values of the independent variables for which the prediction is made.
+- The formula for the prediction variance under heteroskedasticity is more complex than under homoskedasticity, as it must account for varying error variances.
+
+3. **Prediction Intervals**:
+
+- A prediction interval provides a range within which we expect a new observation to fall with a certain probability (e.g., 95%).
+- Constructing accurate prediction intervals in the presence of heteroskedasticity requires using heteroskedasticity-robust standard errors to ensure that the interval accounts for varying error variances.
+
+#### **Constructing Prediction Intervals**
+
+To construct a prediction interval in a heteroskedastic context:
+
+1. **Estimate Model Parameters**: Use OLS to estimate model parameters and obtain residuals.
+
+2. **Calculate Robust Standard Errors**: Compute heteroskedasticity-robust standard errors to adjust for non-constant variance in errors.
+
+3. **Compute Prediction Interval**:
+
+- For a given set of independent variable values $$x_0$$, compute the predicted value $$\hat{y}_0 = \hat{\beta}_0 + \hat{\beta}_1 x_0$$.
+- Calculate the standard error of this prediction using robust methods.
+- Construct the interval as $$\hat{y}_0 \pm t_{\alpha/2} \cdot \text{SE}(\hat{y}_0)$$, where $$t_{\alpha/2}$$ is the critical value from the t-distribution.
+
+#### **Implications and Considerations**
+
+- **Accuracy**: Prediction intervals that do not account for heteroskedasticity may be too narrow or too wide, leading to incorrect assessments of uncertainty.
+- **Model Assumptions**: Ensuring that model assumptions are met and using robust techniques are crucial for reliable predictions.
+- **Software Implementation**: Many statistical software packages provide options to compute heteroskedasticity-robust standard errors and prediction intervals, facilitating their application in practice.
+
+By addressing heteroskedasticity in predictions and intervals, econometricians can ensure that their forecasts are both accurate and reliable, reflecting true variability in data.
+
+## Example: Prediction and Prediction Intervals with Heteroskedasticity
+
+### **Scenario**
+
+Suppose we are analyzing the relationship between household income and expenditure on luxury goods. We have data from a sample of households, and we suspect that the variability in expenditure increases with income, indicating the presence of heteroskedasticity.
+
+### **Step 1: Model Specification**
+
+The regression model is specified as:
+
+$$
+\text{Expenditure}_i = \beta_0 + \beta_1 \text{Income}_i + u_i
+$$
+
+where:
+
+- $$ \text{Expenditure}\_i $$ is the expenditure on luxury goods for household $$ i $$,
+- $$ \text{Income}\_i $$ is the income of household $$ i $$,
+- $$ u_i $$ is the error term, which is heteroskedastic.
+
+### **Step 2: Detecting Heteroskedasticity**
+
+First, we perform a test for heteroskedasticity, such as the White test. Suppose the test indicates significant heteroskedasticity, confirming our suspicion that variability in expenditure increases with income.
+
+### **Step 3: Estimation Using Robust Methods**
+
+To address heteroskedasticity, we use heteroskedasticity-robust standard errors in our OLS estimation. This adjustment ensures that our inference about the coefficients remains valid despite the presence of heteroskedasticity.
+
+### **Step 4: Making Predictions**
+
+For a new household with an income of $100,000, we want to predict their expenditure on luxury goods. Using the estimated regression model:
+
+$$
+\hat{\text{Expenditure}} = \hat{\beta}_0 + \hat{\beta}_1 \times 100,000
+$$
+
+This gives us a point prediction for expenditure.
+
+### **Step 5: Constructing Prediction Intervals**
+
+To construct a prediction interval for this new observation:
+
+1. **Calculate Prediction Variance**:
+
+- The variance of the prediction includes both the variance of the estimated coefficients and the variance of the error term at this level of income. With heteroskedasticity, this variance is not constant and must be estimated using robust methods.
+
+2. **Compute Prediction Interval**:
+
+- The prediction interval is given by:
+
+$$
+\hat{\text{Expenditure}} \pm t_{\alpha/2} \cdot \sqrt{\text{Var}(\hat{\text{Expenditure}})}
+$$
+
+where $$ t\_{\alpha/2} $$ is the critical value from the t-distribution for the desired confidence level (e.g., 95%).
+
+### **Interpretation**
+
+- The point prediction provides an estimate of expenditure for a household with $100,000 income.
+- The prediction interval gives a range within which we expect the actual expenditure to fall with a certain probability (e.g., 95%), accounting for both estimation uncertainty and heteroskedasticity.
+
+By using heteroskedasticity-robust methods for both estimation and prediction intervals, we ensure that our predictions are reliable even when error variances are not constant across observations. This approach allows us to make informed decisions based on our econometric analysis.
+
+[^1]: https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/30626316/2be59c8f-ac44-43e7-a595-38c5bea42df7/Jeffrey_M_Wooldridge_Introductory_Econometrics_A_Modern_Approach.pdf
+[^2]: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11125562/
+[^3]: http://www2.kobe-u.ac.jp/~kawabat/ch08.pdf
+[^4]: https://economics.mit.edu/sites/default/files/2022-09/Heteroskedasticity-Robust%20Inference%20In%20Finite%20Samples.pdf
+[^5]: https://www.degruyter.com/document/doi/10.1515/jem-2023-0007/pdf
+[^6]: https://iris.uniupo.it/retrieve/e163b88f-abfc-c12c-e053-d805fe0a7f21/2018_Prediction%20intervals_postprintcopy.pdf
+[^7]: https://mapie.readthedocs.io/en/latest/examples_regression/1-quickstart/plot_heteroscedastic_1d_data.html
+[^8]: https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/30626316/2be59c8f-ac44-43e7-a595-38c5bea42df7/Jeffrey_M_Wooldridge_Introductory_Econometrics_A_Modern_Approach.pdf
+[^9]: http://www2.kobe-u.ac.jp/~kawabat/ch08.pdf
+[^10]: https://www.aimodels.fyi/papers/arxiv/conditional-validity-heteroskedastic-conformal-regression
+[^11]: https://economics.mit.edu/sites/default/files/2022-09/Heteroskedasticity-Robust%20Inference%20In%20Finite%20Samples.pdf
+[^12]: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11125562/
+[^13]: https://www.econometrics-with-r.org/5.4-hah.html
+[^14]: https://www3.wabash.edu/econometrics/EconometricsBook/chap19.htm

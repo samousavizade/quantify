@@ -1,0 +1,550 @@
+---
+title: Geometric Series for Elementary Economics
+draft: false
+summary: Backtest statistics are essential for evaluating the efficacy of investment strategies.
+---
+
+# Geometric Series for Elementary Economics
+
+## Overview
+
+This lecture covers key economic concepts that utilize the mathematics of geometric series, including:
+
+- The Keynesian **multiplier**
+- The money **multiplier** in fractional reserve banking systems
+- Interest rates and the present value of asset payout streams
+
+(As we will explore, the term **multiplier** essentially refers to the **sum of a convergent geometric series**.)
+
+These concepts illustrate the adage:
+
+> “In economics, a little knowledge of geometric series goes a long way.”
+
+We'll begin by using the following imports:
+
+```python
+import matplotlib.pyplot as plt
+plt.rcParams["figure.figsize"] = (11, 5)  #set default figure size
+import numpy as np
+import sympy as sym
+from sympy import init_printing
+from matplotlib import cm
+```
+
+## Key Formulas
+
+Consider a real number $ c $ strictly between $ -1 $ and $ 1 $.
+
+- We denote this as $ c \in (-1,1) $.
+- The interval $ (-1,1) $ represents all real numbers greater than $ -1 $ and less than $ 1 $.
+- The symbol $ \in $ signifies "belongs to" or "is a member of" the set following it.
+
+We are interested in evaluating two types of geometric series: infinite and finite.
+
+### Infinite Geometric Series
+
+The infinite geometric series of interest is:
+
+$$
+1 + c + c^2 + c^3 + \cdots
+$$
+
+where $ \cdots $ indicates that the series extends indefinitely.
+
+The key formula for this series is:
+
+$$
+1 + c + c^2 + c^3 + \cdots = \frac{1}{1 -c } \tag{10.1}
+$$
+
+To verify formula [(10.1)](#equation-infinite), multiply both sides by $ (1-c) $ and confirm that if $ c \in (-1,1) $, the result simplifies to $ 1 = 1 $.
+
+### Finite Geometric Series
+
+The finite geometric series we consider is:
+
+$$
+1 + c + c^2 + c^3 + \cdots + c^T
+$$
+
+where $ T $ is a positive integer.
+
+The formula for this series is:
+
+$$
+1 + c + c^2 + c^3 + \cdots + c^T  = \frac{1 - c^{T+1}}{1-c}
+$$
+
+**Remark:** This formula applies to any scalar value of $ c $, not restricted to $ (-1,1) $.
+
+Next, we explore famous economic applications of geometric series.
+
+## Example: The Money Multiplier in Fractional Reserve Banking
+
+In fractional reserve banking, banks keep a fraction $ r \in (0,1) $ of cash for each deposit receipt they issue:
+
+- Historically, cash was either paper money or metallic coins.
+- A _deposit_ is an amount in a checking or savings account that can be redeemed on demand.
+- The reserve ratio $ r $ is set by the government or chosen by banks for precautionary reasons.
+
+Economists define the **supply of money** as the total of **cash** plus **deposits**.
+
+In a fractional reserve system (where $ 0 < r < 1 $), banks create money by issuing deposits backed by fractional reserves and loans.
+
+The geometric series formula [(10.1)](#equation-infinite) underpins the classic money creation model, leading to the **money multiplier**.
+
+### A Simple Model
+
+Banks are indexed as $ i = 0, 1, 2, \ldots $.
+
+Each bank $ i $’s loans $ L_i $, deposits $ D_i $, and reserves $ R_i $ satisfy:
+
+$$
+L_i + R_i = D_i \tag{10.2}
+$$
+
+Each bank sets its reserves to meet:
+
+$$
+R_i = r D_i \tag{10.3}
+$$
+
+where $ r \in (0,1) $ is the **reserve-deposit ratio**.
+
+Bank $ i+1 $’s deposits depend on the loans from bank $ i $:
+
+$$
+D_{i+1} = L_i \tag{10.4}
+$$
+
+The initial deposit in bank $ 0 $ is given as:
+
+$$
+D_0 \ \text{is exogenously given}
+$$
+
+Combining equations [(10.2)](#equation-balance) and [(10.3)](#equation-reserves):
+
+$$
+L_i = (1-r) D_i \tag{10.5}
+$$
+
+From this, we find:
+
+$$
+D_{i+1} = (1-r) D_i  \ \text{for } i \geq 0
+$$
+
+This leads to:
+
+$$
+D_i = (1 - r)^i D_0  \ \text{for } i \geq 0 \tag{10.6}
+$$
+
+The total deposits in the banking system are:
+
+$$
+\sum_{i=0}^\infty (1-r)^i D_0 =  \frac{D_0}{1 - (1-r)} = \frac{D_0}{r} \tag{10.7}
+$$
+
+### Money Multiplier
+
+The **money multiplier** is the factor by which an initial cash deposit into bank $ 0 $ increases total deposits in the banking system.
+
+According to equation [(10.7)](#equation-sumdeposits), the money multiplier is $ \frac{1}{r} $.
+
+- An initial deposit $ D_0 $ in bank $ 0 $ results in total deposits of $ \frac{D_0}{r} $ across the system.
+
+## Example: The Keynesian Multiplier
+
+John Maynard Keynes developed a model to determine national income $ y $ in scenarios where:
+
+- There is excess supply of labor and capital.
+- Prices and interest rates do not adjust to balance supply and demand.
+- National income is solely determined by aggregate demand.
+
+### Static Version
+
+The Keynesian model consists of:
+
+1. A national income identity: $ c + i = y $, where $ c $ is consumption and $ i $ is investment.
+2. A consumption function: $ c = b y $, with $ b \in (0,1) $ as the **marginal propensity to consume**.
+3. Investment is constant: $ i $.
+
+Substituting the consumption function into the identity gives:
+
+$$
+(1-b) y = i
+$$
+
+Solving for $ y $:
+
+$$
+y = \frac{1}{1-b} i
+$$
+
+The multiplier is:
+
+$$
+\frac{1}{1-b} = \sum_{t=0}^\infty b^t
+$$
+
+### Dynamic Version
+
+To include a time component, we assume:
+
+- Consumption at time $ t $ depends on income from the previous period.
+- Investment $ i_t $ is constant over time.
+
+Thus:
+
+$$
+y_t = b y_{t-1} + i = (1+ b + b^2 + \cdots + b^t) i
+$$
+
+or:
+
+$$
+y_t = \frac{1-b^{t+1}}{1 -b } i
+$$
+
+As $ t \rightarrow \infty $:
+
+$$
+y_t \rightarrow \frac{1}{1-b} i
+$$
+
+**Remark 1:** An increase in investment $ \Delta i $ at time $ 0 $ initiates a process of increasing national income.
+
+**Remark 2:** If $ g_t $ represents government expenditures, the **government expenditures multiplier** is also $ \frac{1}{1-b} $.
+
+## Example: Interest Rates and Present Values
+
+Geometric series help us understand how interest rates impact the value of future dollar payments.
+
+Consider:
+
+- A one-period **net nominal interest rate** $ r \in (0,1) $.
+- The **gross nominal interest rate** $ R = 1 + r \in (1,2) $.
+
+**Accumulation**
+
+The geometric sequence $ 1, R, R^2, \cdots $ shows how invested dollars grow over time:
+
+$$
+x , xR , x R^2, \cdots
+$$
+
+**Discounting**
+
+The sequence $ 1, R^{-1}, R^{-2}, \cdots $ helps discount future dollars to present value:
+
+$$
+\text{Value of } x \text{ dollars at time } t = x R^{-j}
+$$
+
+### Application to Asset Pricing
+
+For a lease with payments $ x_t = G^t x_0 $, where $ G = (1+g) $ and $ g \in (0,1) $, the present value is:
+
+$$
+p_0  = x_0 \frac{1}{1 - G R^{-1}}
+$$
+
+Using approximations:
+
+$$
+p_0 \approx \frac{x_0}{r - g}
+$$
+
+For finite leases, the present value is:
+
+$$
+p_0 = \frac{x_0(1-G^{T+1}R^{-(T+1)})}{1-GR^{-1}}
+$$
+
+Using Taylor series approximations:
+
+$$
+p_0 \approx x_0(T+1) + \frac{x_0rg(T+1)}{r-g}
+$$
+
+We will plot the true finite stream present value and its approximations in Python.
+
+```python
+# True present value of a finite lease
+def finite_lease_pv_true(T, g, r, x_0):
+    G = (1 + g)
+    R = (1 + r)
+    return (x_0 * (1 - G**(T + 1) * R**(-T - 1))) / (1 - G * R**(-1))
+# First approximation for our finite lease
+
+def finite_lease_pv_approx_1(T, g, r, x_0):
+    p = x_0 * (T + 1) + x_0 * r * g * (T + 1) / (r - g)
+    return p
+
+# Second approximation for our finite lease
+def finite_lease_pv_approx_2(T, g, r, x_0):
+    return (x_0 * (T + 1))
+
+# Infinite lease
+def infinite_lease(g, r, x_0):
+    G = (1 + g)
+    R = (1 + r)
+    return x_0 / (1 - G * R**(-1))
+```
+
+The comparison between the true present value and the approximations for various lease lengths $ T $:
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the true present value and approximation functions
+def finite_lease_pv_true(T, g, r, x_0):
+    R = 1 + r
+    G = 1 + g
+    return x_0 * (1 - G**(T+1) * R**(-(T+1))) / (1 - G * R**-1)
+
+def finite_lease_pv_approx_1(T, g, r, x_0):
+    R = 1 + r
+    G = 1 + g
+    return x_0 * (T + 1) + x_0 * r * g * (T + 1) / (r - g)
+
+def finite_lease_pv_approx_2(T, g, r, x_0):
+    return x_0 * (T + 1)
+
+# Plotting functions
+def plot_function(axes, x_vals, func, args):
+    axes.plot(x_vals, func(*args), label=func.__name__)
+
+# Parameters
+T_max = 50
+T = np.arange(0, T_max + 1)
+g = 0.02
+r = 0.03
+x_0 = 1
+
+# Functions to compare
+funcs = [finite_lease_pv_true, finite_lease_pv_approx_1, finite_lease_pv_approx_2]
+our_args = (T, g, r, x_0)
+
+# Plot
+fig, ax = plt.subplots()
+for f in funcs:
+    plot_function(ax, T, f, our_args)
+ax.legend()
+ax.set_xlabel('$T$ Periods Ahead')
+ax.set_ylabel('Present Value, $p_0$')
+plt.title('Comparison of Lease Present Value Approximations')
+plt.show()
+```
+
+### Explanation
+
+1. **Define Functions**: `finite_lease_pv_true` computes the exact present value of the lease, while `finite_lease_pv_approx_1` and `finite_lease_pv_approx_2` provide the approximations.
+2. **Plotting Function**: `plot_function` plots each function against the range of $ T $ values.
+3. **Parameters**: Set up parameters for $ T $, $ g $, $ r $, and $ x_0 $.
+4. **Plot**: Generate the plot comparing the true present value with the approximations for lease lengths $ T $.
+
+```python
+# Convergence of infinite and finite
+T_max = 1000
+T = np.arange(0, T_max+1)
+fig, ax = plt.subplots()
+f_1 = finite_lease_pv_true(T, g, r, x_0)
+f_2 = np.full(T_max+1, infinite_lease(g, r, x_0))
+ax.plot(T, f_1, label='T-period lease PV')
+ax.plot(T, f_2, '--', label='Infinite lease PV')
+ax.set_xlabel('$T$ Periods Ahead')
+ax.set_ylabel('Present Value, $p_0$')
+ax.legend()
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/geom_series_files/geom_series_20_0.png)
+
+The chart above illustrates that as the lease duration $ T $ tends towards infinity, the value of a lease with duration $ T $ converges to that of a perpetuity.
+
+Next, we'll explore two perspectives on the effects of variations in $ r $ and $ g $.
+
+```python
+# First view
+# Changing r and g
+fig, ax = plt.subplots()
+ax.set_ylabel('Present Value, $p_0$')
+ax.set_xlabel('$T$ periods ahead')
+T_max = 10
+T=np.arange(0, T_max+1)
+
+rs, gs = (0.9, 0.5, 0.4001, 0.4), (0.4, 0.4, 0.4, 0.5),
+comparisons = ('$\gg$', '$>$', r'$\approx$', '$<$')
+for r, g, comp in zip(rs, gs, comparisons):
+    ax.plot(finite_lease_pv_true(T, g, r, x_0), label=f'r(={r}) {comp} g(={g})')
+
+ax.legend()
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/geom_series_files/geom_series_22_0.png)
+
+This chart strongly suggests why the condition $ r > g $ is crucial for ensuring that a lease of infinite length $ T = +\infty $ has a finite value.
+
+For those who appreciate 3-D graphs, the same insight is presented in the following 3-D visualization.
+
+If 3-D graphs aren't your preference, you can skip the next visualization!
+
+```python
+# Second view
+fig = plt.figure(figsize = [16, 5])
+T = 3
+ax = plt.subplot(projection='3d')
+r = np.arange(0.01, 0.99, 0.005)
+g = np.arange(0.011, 0.991, 0.005)
+
+rr, gg = np.meshgrid(r, g)
+z = finite_lease_pv_true(T, gg, rr, x_0)
+
+# Removes points where undefined
+same = (rr == gg)
+z[same] = np.nan
+surf = ax.plot_surface(rr, gg, z, cmap=cm.coolwarm,
+    antialiased=True, clim=(0, 15))
+fig.colorbar(surf, shrink=0.5, aspect=5)
+ax.set_xlabel('$r$')
+ax.set_ylabel('$g$')
+ax.set_zlabel('Present Value, $p_0$')
+ax.view_init(20, 8)
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/geom_series_files/geom_series_24_0.png)
+
+To explore how the present value $ p_0 $ of a lease changes with respect to $ r $ and $ g $, we can apply some calculus.
+
+We will use a library called [SymPy](https://www.sympy.org/), which allows for symbolic mathematics and includes tools for computing derivatives of algebraic expressions.
+
+We'll start by creating a symbolic expression for the present value formula of an infinite lease and then use SymPy to calculate its derivatives.
+
+```python
+# Creates algebraic symbols that can be used in an algebraic expression
+g, r, x0 = sym.symbols('g, r, x0')
+G = (1 + g)
+R = (1 + r)
+p0 = x0 / (1 - G * R**(-1))
+init_printing(use_latex='mathjax')
+print('Our formula is:')
+p0
+```
+
+    Our formula is:
+
+$\displaystyle \frac{x_{0}}{- \frac{g + 1}{r + 1} + 1}$
+
+```python
+print('dp0 / dg is:')
+dp_dg = sym.diff(p0, g)
+dp_dg
+```
+
+    dp0 / dg is:
+
+$\displaystyle \frac{x_{0}}{\left(r + 1\right) \left(- \frac{g + 1}{r + 1} + 1\right)^{2}}$
+
+```python
+print('dp0 / dr is:')
+dp_dr = sym.diff(p0, r)
+dp_dr
+```
+
+    dp0 / dr is:
+
+$\displaystyle - \frac{x_{0} \left(g + 1\right)}{\left(r + 1\right)^{2} \left(- \frac{g + 1}{r + 1} + 1\right)^{2}}$
+
+We observe that $ \frac{\partial p_0 }{\partial r} < 0 $ as long as $ r > g $, $ r > 0 $, $ g > 0 $, and $ x_0 $ is positive. Thus, $ \frac{\partial p_0}{\partial r} $ will always be negative.
+
+In contrast, $ \frac{ \partial p_0 }{\partial g} > 0 $ under the same conditions, meaning $ \frac{ \partial p_0 }{\partial g} $ will always be positive.
+
+## Revisiting the Keynesian Multiplier
+
+Next, we'll return to the Keynesian multiplier case and plot the time path of $ y_t $, considering that consumption is a constant fraction of national income and investment remains fixed.
+
+```python
+# Function that calculates a path of y
+def calculate_y(i, b, g, T, y_init):
+    y = np.zeros(T+1)
+    y[0] = i + b * y_init + g
+    for t in range(1, T+1):
+        y[t] = b * y[t-1] + i + g
+    return y
+
+# Initial values
+i_0 = 0.3
+g_0 = 0.3
+# 2/3 of income goes towards consumption
+b = 2/3
+y_init = 0
+T = 100
+
+fig, ax = plt.subplots()
+ax.set_xlabel('$t$')
+ax.set_ylabel('$y_t$')
+ax.plot(np.arange(0, T+1), calculate_y(i_0, b, g_0, T, y_init))
+# Output predicted by geometric series
+ax.hlines(i_0 / (1 - b) + g_0 / (1 - b), xmin=-1, xmax=101, linestyles='--')
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/geom_series_files/geom_series_31_0.png)
+
+In this model, income increases over time and eventually approaches the sum of the infinite geometric series of income.
+
+Next, we will explore the effects of varying the **marginal propensity to consume**, which is the fraction of income that is consumed.
+
+```python
+bs = (1/3, 2/3, 5/6, 0.9)
+
+fig,ax = plt.subplots()
+ax.set_ylabel('$y_t$')
+ax.set_xlabel('$t$')
+x = np.arange(0, T+1)
+for b in bs:
+    y = calculate_y(i_0, b, g_0, T, y_init)
+    ax.plot(x, y, label=r'$b=$'+f"{b:.2f}")
+ax.legend()
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/geom_series_files/geom_series_33_0.png)
+
+Raising the marginal propensity to consume, $ b $, leads to an increase in the output trajectory over time.
+
+Next, we will compare how increases in investment and government spending affect output.
+
+```python
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(6, 10))
+fig.subplots_adjust(hspace=0.3)
+
+x = np.arange(0, T+1)
+values = [0.3, 0.4]
+
+for i in values:
+    y = calculate_y(i, b, g_0, T, y_init)
+    ax1.plot(x, y, label=f"i={i}")
+for g in values:
+    y = calculate_y(i_0, b, g, T, y_init)
+    ax2.plot(x, y, label=f"g={g}")
+
+axes = ax1, ax2
+param_labels = "Investment", "Government Spending"
+for ax, param in zip(axes, param_labels):
+    ax.set_title(f'An Increase in {param} on Output')
+    ax.legend(loc ="lower right")
+    ax.set_ylabel('$y_t$')
+    ax.set_xlabel('$t$')
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/geom_series_files/geom_series_35_0.png)
+
+Observe that whether government spending rises from 0.3 to 0.4 or investment increases from 0.3 to 0.4, the changes in the graphs are identical.

@@ -1,0 +1,529 @@
+---
+title: Inflation History
+draft: false
+summary: Backtest statistics are essential for evaluating the efficacy of investment strategies.
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+# Price Level Histories
+
+This lecture provides historical data on changes in aggregate price index levels. First, let's install the required Python packages. The `xlrd` package is utilized by `pandas` for handling Excel files.
+
+```python
+!pip install xlrd
+```
+
+```python
+from importlib.metadata import version
+from packaging.version import Version
+
+if Version(version("pandas")) < Version('2.1.4'):
+    !pip install "pandas>=2.1.4"
+```
+
+```python
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+```
+
+The **inflation** rate, often discussed in the media and among central bankers and treasury officials, refers to the rate at which the price level grows. The price level is quantified as units of domestic currency per unit of a standard bundle of goods.
+
+In the US, for instance, the price level at time $t$ is expressed in dollars (for month $t$ or year $t$) per unit of this consumption bundle. Historically, until the early 20th century, many Western economies experienced fluctuations in price levels year by year, but without a significant trend. Often, the price levels at the end of a century were similar to those at the beginning. However, the 20th century brought notable changes, which will be explored in this lecture.
+
+A common explanation for this shift is the abandonment of gold and silver standards by many countries in the early 20th century. This lecture will introduce theories that macroeconomists use to analyze the determinants of price levels, including the Monetarist Theory of Price Levels and the Monetarist Theory of Price Levels with Adaptive Expectations. (Refer to section 8 for more details.)
+
+## Four centuries of price levels
+
+We will start by presenting data from page 35 of [Sargent and Velde, 2002](/courses/Introduction-to-Quantitative-Economics/References#id12), which shows price levels for four "hard currency" countries from 1600 to 1914:
+
+- France
+- Spain (Castile)
+- United Kingdom
+- United States
+
+In this context, "hard currency" refers to countries that were on a commodity-money standard, where money was composed of gold and silver coins, and their values were largely determined by their gold and silver content.
+
+> **Note**: Under a gold or silver standard, some forms of money included “warehouse certificates,” which were paper claims on gold or silver coins. Banknotes issued by governments or private banks can be considered examples of such “warehouse certificates.”
+
+Next, we will import the data into pandas from a spreadsheet.
+
+```python
+# Import data and clean up the index
+data_url = "https://github.com/Quantifiable-AI/datasets/blob/05dab57de64369656854f755732630a53d1db509/longprices.xls"
+df_fig5 = pd.read_excel(data_url,
+                        sheet_name='all',
+                        header=2,
+                        index_col=0).iloc[1:]
+df_fig5.index = df_fig5.index.astype(int)
+```
+
+We will start by plotting the price levels for the period 1600-1914. For most of these years, the countries adhered to a gold or silver standard.
+
+```python
+df_fig5_befe1914 = df_fig5[df_fig5.index <= 1914]
+
+# Create plot
+cols = ['UK', 'US', 'France', 'Castile']
+
+fig, ax = plt.subplots(figsize=(10,6))
+
+for col in cols:
+    ax.plot(df_fig5_befe1914.index,
+            df_fig5_befe1914[col], label=col, lw=2)
+
+ax.legend()
+ax.set_ylabel('Index  1913 = 100')
+ax.set_xlabel('Year')
+ax.set_xlim(xmin=1600)
+plt.tight_layout()
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/inflation_history_files/inflation_history_21_0.png)
+
+The term "most years" is used because there were occasional departures from the gold or silver standard. By examining Fig. 4.1 closely, you might be able to identify these temporary lapses, which were also periods when price levels significantly spiked:
+
+- 1791-1797 in France (French Revolution)
+- 1776-1790 in the US (War of Independence from Great Britain)
+- 1861-1865 in the US (Civil War)
+
+During these times, the gold/silver standard was temporarily abandoned as governments printed paper money to fund war expenses. Despite these temporary deviations, one notable observation from the figure is that price levels remained relatively stable over three centuries. Early in the period, two key features of this data drew the attention of [Irving Fisher](https://en.wikipedia.org/wiki/Irving_Fisher) of Yale University and [John Maynard Keynes](https://en.wikipedia.org/wiki/John_Maynard_Keynes) of Cambridge University:
+
+- Although price levels were anchored at an average level over long periods, there were significant year-to-year fluctuations.
+- While using gold and silver coins helped stabilize the price level by limiting the money supply, it required real resources.
+- The use of gold and silver as money incurred a high “opportunity cost” since these materials could have been used for valuable jewelry and other durable goods.
+
+Keynes and Fisher suggested a more efficient approach to achieving price level stability that:
+
+- Would be as firmly anchored as under a gold or silver standard.
+- Would exhibit fewer short-term fluctuations from year to year.
+
+They proposed that a central bank could stabilize the price level by:
+
+- Issuing **limited supplies** of paper currency.
+- Avoiding the printing of money to cover government expenses.
+
+This approach led John Maynard Keynes to describe the commodity standard as a “barbarous relic.” A paper currency or “fiat money” system eliminates the need for reserves behind a currency. However, while a gold or silver standard provided an automatic mechanism to limit the money supply and stabilize prices, a fiat money system relies on a central bank with the authority and commitment to manage the money supply and prevent counterfeiting.
+
+Next, we will examine what happened to the price levels in the four countries after 1914, when they successively abandoned the gold/silver standard, by reviewing the complete graph from page 35 of [Sargent and Velde, 2002](/courses/Introduction-to-Quantitative-Economics/References#id12). Fig. 4.2 displays the logarithm of price levels for these four “hard currency” countries from 1600 to 2000.
+
+> **Note**: Although earlier graphs did not use logarithms, we now use them to include observations after 1914 in the same graph as the earlier data.
+
+Following the onset of the Great War in 1914, the four countries abandoned the gold standard and gained the ability to print money to finance government expenditures.
+
+```python
+fig, ax = plt.subplots(dpi=200)
+
+for col in cols:
+    ax.plot(df_fig5.index, df_fig5[col], lw=2)
+    ax.text(x=df_fig5.index[-1]+2,
+            y=df_fig5[col].iloc[-1], s=col)
+
+ax.set_yscale('log')
+ax.set_ylabel('Logs of price levels (Index  1913 = 100)')
+ax.set_ylim([10, 1e6])
+ax.set_xlabel('year')
+ax.set_xlim(xmin=1600)
+plt.tight_layout()
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/inflation_history_files/inflation_history_11_0.png)
+
+Fig. 4.2 illustrates that central banks using paper money did not manage to stabilize price levels as effectively as those adhering to a gold or silver standard.
+
+This outcome might have surprised or disappointed Irving Fisher and John Maynard Keynes. However, the idea of fiat money systems was already considered by earlier economists and statesmen before Keynes and Fisher's advocacy in the early 20th century. Critics of fiat money systems, especially proponents of commodity money, doubted the ability of governments and central banks to manage such systems effectively.
+
+These critics were willing to bear the costs associated with maintaining a commodity money system. Given the high and persistent inflation experienced by many countries after abandoning commodity money in the 20th century, it's understandable why advocates of the gold or silver standard preferred to stick with the pre-1914 gold/silver standard. The scale and duration of inflation during the 20th century under fiat money systems are historically unparalleled.
+
+## Four Major Inflations
+
+Following World War I, which ended in November 1918, monetary and fiscal authorities faced challenges in achieving price level stability without a gold or silver standard. We present four graphs from “The Ends of Four Big Inflations” in chapter 3 of [Sargent, 2013](/courses/Introduction-to-Quantitative-Economics/References#id13). These graphs show logarithms of price levels for the early post-World War I years in four countries:
+
+- Figure 3.1: Retail prices in Austria, 1921-1924 (page 42)
+- Figure 3.2: Wholesale prices in Hungary, 1921-1924 (page 43)
+- Figure 3.3: Wholesale prices in Poland, 1921-1924 (page 44)
+- Figure 3.4: Wholesale prices in Germany, 1919-1924 (page 45)
+
+We have added logarithms of exchange rates against the US dollar to each of these graphs from chapter 3 of [Sargent, 2013](/courses/Introduction-to-Quantitative-Economics/References#id13).
+
+The underlying data for these graphs can be found in the appendix of chapter 3 in [Sargent, 2013](/courses/Introduction-to-Quantitative-Economics/References#id13). We have transcribed this data into a spreadsheet, which can be accessed [here](https://github.com/Quantifiable-AI/datasets/blob/05dab57de64369656854f755732630a53d1db509/chapter_3.xlsx).
+
+In the code cell below, we will clean the data and create a `pandas.DataFrame`.
+
+```python
+def process_entry(entry):
+    "Clean each entry of a dataframe."
+
+    if type(entry) == str:
+        # Remove leading and trailing whitespace
+        entry = entry.strip()
+        # Remove comma
+        entry = entry.replace(',', '')
+
+        # Remove HTML markers
+        item_to_remove = ['<s>a</s>', '<s>c</s>',
+                          '<s>d</s>', '<s>e</s>']
+
+        # <s>b</s> represents a billion
+        if '<s>b</s>' in entry:
+            entry = entry.replace('<s>b</s>', '')
+            entry = float(entry) * 1e9
+        else:
+            for item in item_to_remove:
+                if item in entry:
+                    entry = entry.replace(item, '')
+    return entry
+
+def process_df(df):
+    "Clean and reorganize the entire dataframe."
+
+    # Remove HTML markers from column names
+    for item in ['<s>a</s>', '<s>c</s>', '<s>d</s>', '<s>e</s>']:
+        df.columns = df.columns.str.replace(item, '')
+
+    # Convert years to int
+    df['Year'] = df['Year'].apply(lambda x: int(x))
+
+    # Set index to datetime with year and month
+    df = df.set_index(
+            pd.to_datetime(
+                (df['Year'].astype(str) + \
+                 df['Month'].astype(str)),
+                format='%Y%B'))
+    df = df.drop(['Year', 'Month'], axis=1)
+
+    # Handle duplicates by keeping the first
+    df = df[~df.index.duplicated(keep='first')]
+
+    # Convert attribute values to numeric
+    df = df.map(lambda x: float(x) \
+                if x != '—' else np.nan)
+
+    # Finally, we only focus on data between 1919 and 1925
+    mask = (df.index >= '1919-01-01') & \
+           (df.index < '1925-01-01')
+    df = df.loc[mask]
+
+    return df
+```
+
+Next, we will create plotting functions named `pe_plot` and `pr_plot`. These functions will generate figures displaying the price levels, exchange rates, and inflation rates for each country of interest.
+
+```python
+def pe_plot(p_seq, e_seq, index, labs, ax):
+    "Generate plots for price and exchange rates."
+
+    p_lab, e_lab = labs
+
+    # Plot price and exchange rates
+    ax.plot(index, p_seq, label=p_lab, color='tab:blue', lw=2)
+
+    # Add a new axis
+    ax1 = ax.twinx()
+    ax1.plot([None], [None], label=p_lab, color='tab:blue', lw=2)
+    ax1.plot(index, e_seq, label=e_lab, color='tab:orange', lw=2)
+
+    # Set log axes
+    ax.set_yscale('log')
+    ax1.set_yscale('log')
+
+    # Define the axis label format
+    ax.xaxis.set_major_locator(
+        mdates.MonthLocator(interval=5))
+    ax.xaxis.set_major_formatter(
+        mdates.DateFormatter('%b %Y'))
+    for label in ax.get_xticklabels():
+        label.set_rotation(45)
+
+    # Set labels
+    ax.set_ylabel('Price level')
+    ax1.set_ylabel('Exchange rate')
+
+    ax1.legend(loc='upper left')
+
+    return ax1
+
+def pr_plot(p_seq, index, ax):
+    "Generate plots for inflation rates."
+
+    #  Calculate the difference of log p_seq
+    log_diff_p = np.diff(np.log(p_seq))
+
+    # Calculate and plot moving average
+    diff_smooth = pd.DataFrame(log_diff_p).rolling(3, center=True).mean()
+    ax.plot(index[1:], diff_smooth, label='Moving average (3 period)', alpha=0.5, lw=2)
+    ax.set_ylabel('Inflation rate')
+
+    ax.xaxis.set_major_locator(
+        mdates.MonthLocator(interval=5))
+    ax.xaxis.set_major_formatter(
+        mdates.DateFormatter('%b %Y'))
+
+    for label in ax.get_xticklabels():
+        label.set_rotation(45)
+
+    ax.legend()
+
+    return ax
+```
+
+We will now prepare the data for each country.
+
+```python
+# Import data
+data_url = "https://github.com/Quantifiable-AI/datasets/blob/05dab57de64369656854f755732630a53d1db509/chapter_3.xlsx"
+xls = pd.ExcelFile(data_url)
+
+# Select relevant sheets
+sheet_index = [(2, 3, 4),
+               (9, 10),
+               (14, 15, 16),
+               (21, 18, 19)]
+
+# Remove redundant rows
+remove_row = [(-2, -2, -2),
+              (-7, -10),
+              (-6, -4, -3),
+              (-19, -3, -6)]
+
+# Unpack and combine series for each country
+df_list = []
+
+for i in range(4):
+
+    indices, rows = sheet_index[i], remove_row[i]
+
+    # Apply process_entry on the selected sheet
+    sheet_list = [
+        pd.read_excel(xls, 'Table3.' + str(ind),
+            header=1).iloc[:row].map(process_entry)
+        for ind, row in zip(indices, rows)]
+
+    sheet_list = [process_df(df) for df in sheet_list]
+    df_list.append(pd.concat(sheet_list, axis=1))
+
+df_aus, df_hun, df_pol, df_deu = df_list
+```
+
+We will now create graphs for each of the four countries. Each country will have two graphs:
+
+1. The first graph will plot:
+
+- The logarithms of price levels
+- Exchange rates against US dollars
+
+In each graph, the scale on the right side will represent the price level, while the scale on the left side will represent the exchange rate.
+
+2. The second graph will display a centered three-month moving average of the inflation rate, calculated as $ \frac{p*{t-1} + p_t + p*{t+1}}{3} $.
+
+### Austria
+
+The data sources for Austria are:
+
+- Table 3.3: Retail price level $ \exp p $
+- Table 3.4: Exchange rate with the US
+
+```python
+p_seq = df_aus['Retail price index, 52 commodities']
+e_seq = df_aus['Exchange Rate']
+
+lab = ['Retail price index',
+       'Austrian Krones (Crowns) per US cent']
+
+# Create plot
+fig, ax = plt.subplots(dpi=200)
+_ = pe_plot(p_seq, e_seq, df_aus.index, lab, ax)
+
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/inflation_history_files/inflation_history_21_0.png)
+
+```python
+# Plot moving average
+fig, ax = plt.subplots(dpi=200)
+_ = pr_plot(p_seq, df_aus.index, ax)
+
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/inflation_history_files/inflation_history_22_0.png)
+
+Examining Fig. 4.3 and Fig. 4.4 reveals the following observations:
+
+- An episode of “hyperinflation,” characterized by a rapidly rising logarithmic price level and extremely high monthly inflation rates.
+- A sudden halt to the hyperinflation, as evidenced by the abrupt leveling off of the logarithmic price level and a significant, permanent decline in the three-month average of inflation.
+- An exchange rate with the US dollar that closely follows the price level.
+
+We will observe similar patterns in the next three episodes that we will examine.
+
+### Hungary
+
+The data source for Hungary is:
+
+- Table 3.10: Price level $ \exp p $ and exchange rate
+
+```python
+p_seq = df_hun['Hungarian index of prices']
+e_seq = 1 / df_hun['Cents per crown in New York']
+
+lab = ['Hungarian index of prices',
+       'Hungarian Koronas (Crowns) per US cent']
+
+# Create plot
+fig, ax = plt.subplots(dpi=200)
+_ = pe_plot(p_seq, e_seq, df_hun.index, lab, ax)
+
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/inflation_history_files/inflation_history_25_0.png)
+
+```python
+# Plot moving average
+fig, ax = plt.subplots(dpi=200)
+_ = pr_plot(p_seq, df_hun.index, ax)
+
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/inflation_history_files/inflation_history_26_0.png)
+
+### Poland
+
+The data sources for Poland are:
+
+- Table 3.15: Price level $ \exp p $
+- Table 3.15: Exchange rate
+
+> **Note**: To construct the price level series from the spreadsheet data, we followed the procedures outlined in chapter 3 of [Sargent, 2013](/courses/Introduction-to-Quantitative-Economics/References#id13). We combined three series - Wholesale Price Index, Wholesale Price Index: On Paper Currency Basis, and Wholesale Price Index: On Zloty Basis. We adjusted the series based on the price level ratio at the end of the previous series and merged them to form a single continuous series. We discontinued the exchange rate data after June 1924, when the zloty was introduced, as we lacked price data in zloty. We used the old currency in June to compute the exchange rate adjustment.
+
+```python
+# Splice three price series in different units
+p_seq1 = df_pol['Wholesale price index'].copy()
+p_seq2 = df_pol['Wholesale Price Index: '
+                'On paper currency basis'].copy()
+p_seq3 = df_pol['Wholesale Price Index: '
+                'On zloty basis'].copy()
+
+# Non-nan part
+mask_1 = p_seq1[~p_seq1.isna()].index[-1]
+mask_2 = p_seq2[~p_seq2.isna()].index[-2]
+
+adj_ratio12 = (p_seq1[mask_1] / p_seq2[mask_1])
+adj_ratio23 = (p_seq2[mask_2] / p_seq3[mask_2])
+
+# Glue three series
+p_seq = pd.concat([p_seq1[:mask_1],
+                   adj_ratio12 * p_seq2[mask_1:mask_2],
+                   adj_ratio23 * p_seq3[mask_2:]])
+p_seq = p_seq[~p_seq.index.duplicated(keep='first')]
+
+# Exchange rate
+e_seq = 1/df_pol['Cents per Polish mark (zloty after May 1924)']
+e_seq[e_seq.index > '05-01-1924'] = np.nan
+```
+
+```python
+lab = ['Wholesale price index',
+       'Polish marks per US cent']
+
+# Create plot
+fig, ax = plt.subplots(dpi=200)
+ax1 = pe_plot(p_seq, e_seq, df_pol.index, lab, ax)
+
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/inflation_history_files/inflation_history_29_0.png)
+
+```python
+# Plot moving average
+fig, ax = plt.subplots(dpi=200)
+_ = pr_plot(p_seq, df_pol.index, ax)
+
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/inflation_history_files/inflation_history_30_0.png)
+
+### Germany
+
+The data sources for Germany are the following tables from chapter 3 of [Sargent, 2013](/courses/Introduction-to-Quantitative-Economics/References#id13):
+
+- Table 3.18: Wholesale price level $ \exp p $
+- Table 3.19: Exchange rate
+
+```python
+p_seq = df_deu['Price index (on basis of marks before July 1924,'
+                '  reichsmarks after)'].copy()
+e_seq = 1/df_deu['Cents per mark']
+
+lab = ['Price index',
+       'Marks per US cent']
+
+# Create plot
+fig, ax = plt.subplots(dpi=200)
+ax1 = pe_plot(p_seq, e_seq, df_deu.index, lab, ax)
+
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/inflation_history_files/inflation_history_32_0.png)
+
+```python
+p_seq = df_deu['Price index (on basis of marks before July 1924,'
+                '  reichsmarks after)'].copy()
+e_seq = 1/df_deu['Cents per mark'].copy()
+
+# Adjust the price level/exchange rate after the currency reform
+p_seq[p_seq.index > '06-01-1924'] = p_seq[p_seq.index
+                                          > '06-01-1924'] * 1e12
+e_seq[e_seq.index > '12-01-1923'] = e_seq[e_seq.index
+                                          > '12-01-1923'] * 1e12
+
+lab = ['Price index (marks or converted to marks)',
+       'Marks per US cent(or reichsmark converted to mark)']
+
+# Create plot
+fig, ax = plt.subplots(dpi=200)
+ax1 = pe_plot(p_seq, e_seq, df_deu.index, lab, ax)
+
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/inflation_history_files/inflation_history_33_0.png)
+
+```python
+# Plot moving average
+fig, ax = plt.subplots(dpi=200)
+_ = pr_plot(p_seq, df_deu.index, ax)
+
+plt.show()
+```
+
+![png](/static/courses/Introduction-to-Quantitative-Economics/inflation_history_files/inflation_history_34_0.png)
+
+## Starting and Stopping Big Inflations
+
+It is notable how _quickly_ the logarithmic price levels in Austria, Hungary, Poland, and Germany stabilized after rising sharply. These “sudden stops” are also evident in the permanent declines in the three-month moving averages of inflation for these countries, as shown in the graphs above. Additionally, the exchange rates with the US dollar for each country closely mirrored their price levels.
+
+> **Note**: This pattern reflects a concept featured in the [purchasing power parity](https://en.wikipedia.org/wiki/Purchasing_power_parity) theory of exchange rates.
+
+Each of these major inflations appeared to “stop on a dime.” Chapter 3 of [Sargent and Velde, 2002](/courses/Introduction-to-Quantitative-Economics/References#id12) provides an explanation for this striking pattern. In summary:
+
+After World War I, the United States was on a gold standard, with the government ready to convert dollars into gold on demand. In contrast, immediately following the war, Hungary, Austria, Poland, and Germany were not on the gold standard.
+
+Their currencies were “fiat” or “unbacked,” meaning they were not supported by credible government commitments to exchange them for gold or silver. These governments printed new paper notes to finance goods and services.
+
+> **Note**: Technically, these notes were “backed” mainly by treasury bills. However, it was unlikely that these bills would be repaid through taxation; instead, more notes or treasury bills would be issued.
+
+This extensive printing led to dramatic currency depreciation. Eventually, the exchange rates stabilized as follows: the German mark at 1 trillion ($10^{12}$) paper marks to the prewar gold mark, the Polish mark at 1.8 million paper marks to the gold zloty, the Austrian crown at 14,400 paper crowns to the prewar Austro-Hungarian crown, and the Hungarian krone at 14,500 paper crowns to the prewar Austro-Hungarian crown. Chapter 3 of [Sargent and Velde, 2002](/courses/Introduction-to-Quantitative-Economics/References#id12) describes the deliberate policy changes that Hungary, Austria, Poland, and Germany implemented to end their hyperinflations. Each government ceased printing money for expenditures and made their currency convertible to either the US dollar or the UK pound. The narrative in [Sargent and Velde, 2002](/courses/Introduction-to-Quantitative-Economics/References#id12) is based on a _monetarist theory of the price level_, discussed in the Monetarist Theory of Price Levels and Monetarist Theory of Price Levels with Adaptive Expectations lectures.
+
+These lectures explore the theories regarding the mindset of those holding rapidly depreciating currencies and how their expectations influenced inflation responses to governmental monetary and fiscal policies.

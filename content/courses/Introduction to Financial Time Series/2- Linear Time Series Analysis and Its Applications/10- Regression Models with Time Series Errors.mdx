@@ -1,0 +1,126 @@
+---
+title: Regression Models with Time Series Errors
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Regression Models with Time Series Errors
+
+Regression models with time series errors are essential tools in econometrics, particularly when modeling relationships between variables where the error terms exhibit serial correlation. This section explores the formulation, estimation, and implications of such models.
+
+### Model Specification
+
+Consider the linear regression model:
+
+$$
+y_t = \beta_0 + \beta_1 x_{1t} + \beta_2 x_{2t} + \cdots + \beta_k x_{kt} + u_t
+$$
+
+where $y_t$ is the dependent variable, $x_{1t}, x_{2t}, \ldots, x_{kt}$ are independent variables, $\beta_0, \beta_1, \ldots, \beta_k$ are coefficients to be estimated, and $u_t$ is the error term.
+
+In time series data, $u_t$ often exhibits serial correlation, meaning that it is correlated with its past values. This violates the classical assumption of ordinary least squares (OLS) regression that error terms are uncorrelated.
+
+### Time Series Errors
+
+Assume that the error term $u_t$ follows an ARMA(p,q) process:
+
+$$
+u_t = \phi_1 u_{t-1} + \phi_2 u_{t-2} + \cdots + \phi_p u_{t-p} + a_t - \theta_1 a_{t-1} - \theta_2 a_{t-2} - \cdots - \theta_q a_{t-q}
+$$
+
+where $\{a_t\}$ is a white noise process. This implies that $u_t$ is not white noise but has a structured form of dependence over time.
+
+### Estimation
+
+#### Ordinary Least Squares (OLS)
+
+Applying OLS directly to the regression model when errors are serially correlated results in inefficient estimates of $\beta_i$ and biased standard errors. This inefficiency arises because OLS assumes that the error term is uncorrelated across time.
+
+#### Generalized Least Squares (GLS)
+
+To address serial correlation in the error terms, generalized least squares (GLS) can be used. GLS transforms the original model to eliminate serial correlation in the errors:
+
+1. **Transform the Model**: Apply a transformation to remove autocorrelation from $u_t$. For an AR(1) process:
+
+$$
+y'_t = y_t - \rho y_{t-1}
+$$
+
+$$
+x'_{it} = x_{it} - \rho x_{i,t-1}
+$$
+
+$$
+u'_t = u_t - \rho u_{t-1}
+$$
+
+where $\rho$ is an estimate of the autocorrelation coefficient.
+
+2. **Apply OLS**: Use OLS on the transformed model:
+
+$$
+y'_t = \beta_0 (1-\rho) + \beta_1 x'_{1t} + \cdots + \beta_k x'_{kt} + u'_t
+$$
+
+This transformation ensures that $u'_t$ is uncorrelated across time.
+
+#### Feasible Generalized Least Squares (FGLS)
+
+When $\rho$ is unknown, feasible generalized least squares (FGLS) can be used:
+
+1. **Estimate $\rho$**: Use OLS residuals to estimate $\rho$.
+2. **Transform and Re-estimate**: Transform the model using estimated $\rho$, then apply OLS to obtain FGLS estimates.
+
+### Implications of Serial Correlation
+
+Serial correlation in regression models has several implications:
+
+1. **Inefficiency**: OLS estimates remain unbiased but are inefficient when errors are serially correlated.
+
+2. **Biased Standard Errors**: Standard errors of OLS estimates are biased, leading to incorrect inference (e.g., t-statistics and confidence intervals).
+
+3. **Hypothesis Testing**: Tests based on OLS standard errors may lead to incorrect conclusions about statistical significance due to underestimated standard errors.
+
+### Example: Modeling Economic Indicators
+
+Consider modeling GDP growth ($y_t$) as a function of investment ($x_{1t}$), consumption ($x_{2t}$), and government spending ($x_{3t}$):
+
+$$
+y_t = \beta_0 + \beta_1 x_{1t} + \beta_2 x_{2t} + \beta_3 x_{3t} + u_t
+$$
+
+Suppose $u_t$ follows an AR(1) process:
+
+$$
+u_t = \phi_1 u_{t-1} + a_t
+$$
+
+To estimate this model:
+
+1. **Estimate $\phi_1$**: Use OLS residuals to estimate $\phi_1$.
+
+2. **Transform Data**: Apply transformation using estimated $\phi_1$:
+
+$$
+y'_t = y_t - \hat{\phi}_1 y_{t-1}
+$$
+
+$$
+x'_{it} = x_{it} - \hat{\phi}_1 x_{i,t-1}
+$$
+
+3. **Estimate Transformed Model**: Apply OLS on transformed data to obtain efficient estimates of $\beta_i$.
+
+### Summary
+
+Regression models with time series errors account for serial correlation in error terms, ensuring efficient estimation and valid inference:
+
+- **OLS Limitations**: Inefficiency and biased standard errors when errors are correlated.
+- **GLS/FGLS Solutions**: Transformations that remove serial correlation for efficient estimation.
+- **Practical Application**: Essential for accurate modeling in econometric analysis involving time series data.
+
+Understanding these models helps improve econometric analysis by addressing serial dependencies often present in financial and economic data series.

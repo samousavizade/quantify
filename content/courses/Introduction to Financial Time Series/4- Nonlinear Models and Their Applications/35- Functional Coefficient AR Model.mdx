@@ -1,0 +1,135 @@
+---
+title: Functional Coefficient AR Model
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Functional Coefficient AR Model
+
+The functional coefficient autoregressive (FAR) model, introduced by Chen and Tsay (1993), is a flexible nonlinear time series model that allows the AR coefficients to vary as smooth functions of past values. This model generalizes the threshold autoregressive (TAR) model by allowing for smooth transitions between regimes.
+
+### Model Specification
+
+A FAR model of order $p$ is defined as:
+
+$$
+r_t = f_0(u_t) + \sum_{i=1}^p f_i(u_t)r_{t-i} + a_t
+$$
+
+where:
+
+- $r_t$ is the time series of interest
+- $u_t$ is a variable that determines the functional coefficients (often a lagged value of $r_t$ or a function of lagged values)
+- $f_0(u_t), f_1(u_t), \ldots, f_p(u_t)$ are smooth functions of $u_t$
+- $a_t$ is a white noise process with mean 0 and variance $\sigma^2$
+
+The functions $f_i(u_t)$ are not specified parametrically but are estimated from the data using nonparametric techniques such as local polynomial regression.
+
+### Key Features
+
+1. **Flexibility**: The FAR model can capture a wide range of nonlinear dynamics by allowing the AR coefficients to vary smoothly with $u_t$.
+
+2. **Generalization of TAR**: When the functions $f_i(u_t)$ are step functions, the FAR model reduces to a TAR model.
+
+3. **Smooth Transitions**: Unlike the TAR model, which has abrupt changes between regimes, the FAR model allows for smooth transitions in the AR coefficients.
+
+4. **Data-Driven**: The functional forms of $f_i(u_t)$ are determined by the data, making the model highly adaptive.
+
+### Estimation
+
+Estimation of the FAR model typically involves the following steps:
+
+1. **Choice of $u_t$**: Select an appropriate variable $u_t$. This is often based on prior knowledge or exploratory analysis.
+
+2. **Nonparametric Regression**: For each $i = 0, 1, \ldots, p$, estimate $f_i(u_t)$ using a nonparametric regression technique such as local polynomial regression.
+
+3. **Bandwidth Selection**: Choose an appropriate bandwidth for the nonparametric estimation. This can be done using cross-validation or other data-driven methods.
+
+4. **Model Checking**: Assess the adequacy of the fitted model using residual diagnostics and other model checking techniques.
+
+### Local Polynomial Estimation
+
+A common approach to estimating the functional coefficients is local polynomial regression. For a given point $u$, we approximate $f_i(u_t)$ in a neighborhood of $u$ using a Taylor expansion:
+
+$$
+f_i(u_t) \approx f_i(u) + f'_i(u)(u_t - u) + \frac{1}{2}f''_i(u)(u_t - u)^2 + \cdots + \frac{1}{q!}f^{(q)}_i(u)(u_t - u)^q
+$$
+
+where $q$ is the order of the local polynomial.
+
+The estimation then proceeds by solving the weighted least squares problem:
+
+$$
+\min_{\beta_{ij}} \sum_{t=p+1}^T \left(r_t - \sum_{i=0}^p \sum_{j=0}^q \beta_{ij}(u_t - u)^j r_{t-i}\right)^2 K_h(u_t - u)
+$$
+
+where:
+
+- $K_h(\cdot)$ is a kernel function with bandwidth $h$
+- $\beta_{ij}$ are the coefficients of the local polynomial
+
+The estimate of $f_i(u)$ is then given by $\hat{f}_i(u) = \hat{\beta}_{i0}$.
+
+### Bandwidth Selection
+
+The choice of bandwidth $h$ is crucial in the estimation of FAR models. A common approach is to use cross-validation. The leave-one-out cross-validation criterion is defined as:
+
+$$
+CV(h) = \frac{1}{T-p} \sum_{t=p+1}^T (r_t - \hat{r}_{t,-t}(h))^2
+$$
+
+where $\hat{r}_{t,-t}(h)$ is the fitted value for $r_t$ obtained by leaving out the $t$-th observation in the estimation process.
+
+The optimal bandwidth is then chosen as:
+
+$$
+h_{opt} = \arg\min_h CV(h)
+$$
+
+### Statistical Inference
+
+Inference for FAR models is typically based on bootstrap methods due to the complexity of deriving asymptotic distributions for the nonparametric estimators. Confidence bands for the functional coefficients can be constructed using techniques such as the wild bootstrap.
+
+### Example: FAR Model for Exchange Rates
+
+Consider modeling the daily log returns of the exchange rate between the US Dollar and the Japanese Yen. Let $r_t$ be the log return at time $t$. We might specify a FAR(2) model as:
+
+$$
+r_t = f_0(r_{t-1}) + f_1(r_{t-1})r_{t-1} + f_2(r_{t-1})r_{t-2} + a_t
+$$
+
+Here, $u_t = r_{t-1}$, meaning the functional coefficients depend on the previous day's return.
+
+The functions $f_0(r_{t-1}), f_1(r_{t-1}),$ and $f_2(r_{t-1})$ would be estimated nonparametrically using local polynomial regression. The resulting estimates might reveal, for example:
+
+1. A nonlinear mean-reversion effect if $f_1(r_{t-1})$ is decreasing in $|r_{t-1}|$.
+2. Volatility clustering if $f_0(r_{t-1})$ is increasing in $|r_{t-1}|$.
+3. Complex dynamics in the second-order autocorrelation captured by $f_2(r_{t-1})$.
+
+### Advantages and Limitations
+
+Advantages of the FAR model include:
+
+1. **Flexibility**: Can capture a wide range of nonlinear dynamics.
+2. **Interpretability**: The functional coefficients provide insights into how the dynamics of the series change with $u_t$.
+3. **Data-Driven**: The form of nonlinearity is determined by the data rather than imposed a priori.
+
+Limitations include:
+
+1. **Curse of Dimensionality**: As with many nonparametric methods, the FAR model can suffer from the curse of dimensionality if too many lags are included.
+2. **Computational Intensity**: Estimation and inference can be computationally demanding, especially for large datasets.
+3. **Choice of $u_t$**: The model's performance can be sensitive to the choice of $u_t$.
+
+### Extensions
+
+Several extensions of the basic FAR model have been proposed:
+
+1. **Multivariate FAR**: Extending the model to multiple time series.
+2. **Adaptive FAR**: Allowing the functions to evolve over time.
+3. **FAR-GARCH**: Combining FAR with GARCH models for conditional heteroskedasticity.
+
+In conclusion, the Functional Coefficient AR model provides a flexible framework for modeling nonlinear time series dynamics. Its ability to capture smooth transitions in the autoregressive structure makes it a valuable tool in financial econometrics, particularly for modeling complex dynamics in asset returns, exchange rates, and other financial time series.

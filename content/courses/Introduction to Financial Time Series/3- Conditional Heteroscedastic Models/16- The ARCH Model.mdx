@@ -1,0 +1,218 @@
+---
+title: The ARCH Model
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## The ARCH Model
+
+The autoregressive conditional heteroscedastic (ARCH) model was introduced by Engle (1982) to model the volatility of UK inflation. Since then, it has found many applications in finance. The basic idea of ARCH models is that:
+
+1. The shock $a_t$ of an asset return is serially uncorrelated, but dependent.
+2. The dependence of $a_t$ can be described by a simple quadratic function of its lagged values.
+
+Specifically, an ARCH(m) model assumes that
+
+$$
+a_t = \sigma_t \epsilon_t, \quad \sigma_t^2 = \alpha_0 + \alpha_1 a_{t-1}^2 + \cdots + \alpha_m a_{t-m}^2
+$$
+
+where $\{\epsilon_t\}$ is a sequence of independent and identically distributed (iid) random variables with mean zero and variance 1, $\alpha_0 > 0$, and $\alpha_i \geq 0$ for $i > 0$. The coefficients $\alpha_i$ must satisfy some regularity conditions to ensure that the unconditional variance of $a_t$ is finite. In practice, $\epsilon_t$ is often assumed to follow the standard normal or a standardized Student-$t$ distribution.
+
+From the model definition, we can obtain some properties of $a_t$:
+
+1. $E(a_t | F_{t-1}) = E(\sigma_t \epsilon_t | F_{t-1}) = \sigma_t E(\epsilon_t) = 0$
+2. $Var(a_t | F_{t-1}) = E(a_t^2 | F_{t-1}) = E(\sigma_t^2 \epsilon_t^2 | F_{t-1}) = \sigma_t^2$
+
+where $F_{t-1}$ denotes the information set available at time $t-1$. These properties show that $a_t$ is serially uncorrelated with mean zero, but its conditional variance $\sigma_t^2$ evolves over time.
+
+### Properties of ARCH Models
+
+To derive some properties of ARCH models, we focus on the simple ARCH(1) model:
+
+$$
+a_t = \sigma_t \epsilon_t, \quad \sigma_t^2 = \alpha_0 + \alpha_1 a_{t-1}^2
+$$
+
+where $\alpha_0 > 0$ and $\alpha_1 \geq 0$.
+
+#### Unconditional Moments
+
+Taking expectations on both sides of the variance equation, we have:
+
+$$
+E(\sigma_t^2) = \alpha_0 + \alpha_1 E(a_{t-1}^2)
+$$
+
+For a weakly stationary $a_t$ series, we have $E(a_t^2) = E(a_{t-1}^2) = E(\sigma_t^2)$. Therefore,
+
+$$
+E(a_t^2) = \frac{\alpha_0}{1 - \alpha_1}
+$$
+
+provided that $\alpha_1 < 1$. This result shows that:
+
+1. The unconditional variance of $a_t$ is finite if $\alpha_1 < 1$.
+2. The unconditional variance of $a_t$ is greater than $\alpha_0$.
+
+To obtain the kurtosis of $a_t$, we assume that $\epsilon_t$ follows a standard normal distribution. Then:
+
+$$
+E(a_t^4) = E[\sigma_t^4 \epsilon_t^4] = 3E(\sigma_t^4)
+$$
+
+Using the variance equation, we have:
+
+$$
+E(\sigma_t^4) = E[(\alpha_0 + \alpha_1 a_{t-1}^2)^2] = \alpha_0^2 + 2\alpha_0\alpha_1 E(a_{t-1}^2) + \alpha_1^2 E(a_{t-1}^4)
+$$
+
+Substituting $E(a_t^2) = \alpha_0 / (1 - \alpha_1)$ into the prior equation and solving for $E(a_t^4)$, we obtain:
+
+$$
+E(a_t^4) = \frac{3\alpha_0^2(1 + \alpha_1)}{(1 - \alpha_1)(1 - 3\alpha_1^2)}
+$$
+
+provided that $3\alpha_1^2 < 1$ or $\alpha_1 < 1/\sqrt{3} \approx 0.577$. The kurtosis of $a_t$ is then:
+
+$$
+K(a_t) = \frac{E(a_t^4)}{[E(a_t^2)]^2} = \frac{3(1 - \alpha_1^2)}{1 - 3\alpha_1^2} > 3
+$$
+
+This result shows that the ARCH(1) model has a heavier tail than the normal distribution.
+
+#### Autocorrelation Function
+
+The autocorrelation function (ACF) of $a_t$ is zero, but the ACF of $a_t^2$ is not. To see this, consider:
+
+$$
+\begin{aligned}
+Cov(a_t^2, a_{t-k}^2) &= E(a_t^2 a_{t-k}^2) - [E(a_t^2)]^2 \\
+&= E[\sigma_t^2 \epsilon_t^2 a_{t-k}^2] - [E(a_t^2)]^2 \\
+&= E[\sigma_t^2 a_{t-k}^2] - [E(a_t^2)]^2
+\end{aligned}
+$$
+
+For $k = 1$, we have:
+
+$$
+\begin{aligned}
+E[\sigma_t^2 a_{t-1}^2] &= E[(\alpha_0 + \alpha_1 a_{t-1}^2)a_{t-1}^2] \\
+&= \alpha_0 E(a_{t-1}^2) + \alpha_1 E(a_{t-1}^4) \\
+&= \frac{\alpha_0^2}{1 - \alpha_1} + \alpha_1 \frac{3\alpha_0^2(1 + \alpha_1)}{(1 - \alpha_1)(1 - 3\alpha_1^2)}
+\end{aligned}
+$$
+
+Therefore, the lag-1 autocorrelation of $a_t^2$ is:
+
+$$
+\rho_1 = Corr(a_t^2, a_{t-1}^2) = \alpha_1
+$$
+
+For $k > 1$, we can show that:
+
+$$
+\rho_k = \alpha_1^k
+$$
+
+Thus, the ACF of $a_t^2$ of an ARCH(1) model decays exponentially with $\alpha_1$ as the base.
+
+### Weaknesses of ARCH Models
+
+ARCH models are simple and easy to handle, but they have some weaknesses:
+
+1. The model assumes that positive and negative shocks have the same effects on volatility because it depends on the square of the previous shocks. In practice, it is well known that price of a financial asset responds differently to positive and negative shocks.
+
+2. The ARCH model is rather restrictive. For instance, $\alpha_1$ of an ARCH(1) model must be in the interval $[0, \frac{1}{3}]$ to ensure that the fourth moment of $a_t$ exists.
+
+3. The ARCH model does not provide any new insight for understanding the source of variations of a financial time series. It only provides a mechanical way to describe the behavior of the conditional variance. It gives no indication about what causes such behavior to occur.
+
+4. ARCH models are likely to overpredict the volatility because they respond slowly to large isolated shocks to the return series.
+
+### Building an ARCH Model
+
+Building an ARCH model for a return series consists of four steps:
+
+1. Specify a mean equation by testing for serial dependence in the data and, if necessary, build an econometric model (e.g., an ARMA model) for the return series to remove any linear dependence.
+
+2. Use the residuals of the mean equation to test for ARCH effects.
+
+3. Specify a volatility model if ARCH effects are statistically significant and perform a joint estimation of the mean and volatility equations.
+
+4. Check the fitted model carefully and refine it if necessary.
+
+#### Step 1: Build a Mean Equation
+
+Consider the simple return series $\{r_t\}$ of an asset. We begin by testing for serial correlations in $r_t$. This can be done by examining the autocorrelation function (ACF) and the Ljung-Box statistics of $r_t$. If serial correlations are found to be statistically significant, then an appropriate time series model (e.g., an ARMA model) is built for the conditional mean of $r_t$. Denote the mean equation by:
+
+$$
+r_t = \mu_t + a_t
+$$
+
+where $\mu_t = E(r_t | F_{t-1})$ is the conditional mean of $r_t$ given the information set $F_{t-1}$ available at time $t-1$, and $a_t$ is the shock or innovation at time $t$. For many high-frequency financial time series, $\mu_t$ is zero or a constant.
+
+#### Step 2: Test for ARCH Effects
+
+After obtaining the mean equation, we calculate the residual series $\hat{a}_t = r_t - \hat{\mu}_t$, where $\hat{\mu}_t$ is the fitted value of the mean equation. The series $\hat{a}_t$ is then used to test for ARCH effects. There are several ways to test for ARCH effects, but we focus on two approaches here.
+
+1. **Ljung-Box Test of Squared Residuals**: Apply the Ljung-Box statistics to the squared residual series $\{\hat{a}_t^2\}$. Under the null hypothesis that $a_t$ is a sequence of independent and identically distributed normal random variables with mean zero, the squared series $\{a_t^2\}$ should not have serial correlations.
+
+2. **Lagrange Multiplier Test**: This test is equivalent to the usual F statistic for testing $\alpha_i = 0$ $(i = 1, ..., m)$ in the linear regression:
+
+$$
+\hat{a}_t^2 = \alpha_0 + \alpha_1 \hat{a}_{t-1}^2 + ... + \alpha_m \hat{a}_{t-m}^2 + e_t
+$$
+
+where $e_t$ denotes the error term and $m$ is a prespecified positive integer. Under the null hypothesis that there is no ARCH effect, we have $\alpha_i = 0$ for all $i > 0$. The test statistic is:
+
+$$
+(T - m) R^2 \sim \chi^2(m)
+$$
+
+where $T$ is the sample size, $R^2$ is the coefficient of determination of the regression, and $\chi^2(m)$ denotes the chi-squared distribution with $m$ degrees of freedom. In practice, $m = 5$ or $m = 10$ is often used.
+
+#### Step 3: Estimate the Model
+
+If ARCH effects are found to be statistically significant, then a volatility model is specified. The general form of an ARCH(m) model is:
+
+$$
+\begin{aligned}
+r_t &= \mu_t + a_t \\
+a_t &= \sigma_t \epsilon_t \\
+\sigma_t^2 &= \alpha_0 + \alpha_1 a_{t-1}^2 + ... + \alpha_m a_{t-m}^2
+\end{aligned}
+$$
+
+where $\{\epsilon_t\}$ is a sequence of iid random variables with mean zero and variance 1. The functional form of $\mu_t$ and the probability distribution of $\epsilon_t$ must be specified to complete the model.
+
+Maximum likelihood estimation is commonly used to estimate ARCH models. Assuming that $\epsilon_t$ follows a standard normal distribution, the conditional log-likelihood function of the model given the initial values $a_0, ..., a_{1-m}$ is:
+
+$$
+l(\Theta) = -\frac{1}{2} \sum_{t=1}^T \left[ \log(2\pi) + \log(\sigma_t^2) + \frac{a_t^2}{\sigma_t^2} \right]
+$$
+
+where $\Theta$ denotes the parameter vector of the model.
+
+#### Step 4: Check the Fitted Model
+
+After estimating the parameters of an ARCH model, the fitted model is checked for possible misspecification. In particular, the standardized residuals:
+
+$$
+\hat{\epsilon}_t = \frac{\hat{a}_t}{\hat{\sigma}_t}
+$$
+
+should behave like an iid sequence if the fitted model is adequate. Therefore, we can apply the Ljung-Box statistics to $\{\hat{\epsilon}_t\}$ and $\{\hat{\epsilon}_t^2\}$ to check the adequacy of the fitted mean and volatility equations. Other diagnostic tools such as the quantile plot of the standardized residuals can also be used to assess the adequacy of the specified probability distribution of $\epsilon_t$.
+
+### Some Examples
+
+The section then provides several detailed examples of applying ARCH models to real financial data, including:
+
+1. Monthly simple returns of S&P 500 index from January 1926 to December 2008
+2. Monthly excess returns of S&P 500 index for the same period
+3. Weekly returns of CRSP equal-weighted index from July 1962 to December 2008
+
+For each example, the text walks through the model building steps, including testing for ARCH effects, estimating the model parameters, and checking model adequacy. It also discusses interpretation of the results and compares different model specifications.

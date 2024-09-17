@@ -1,0 +1,98 @@
+---
+title: Forecasting
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Forecasting
+
+Forecasting using nonlinear models is more complicated than that of linear models because the conditional expectation of a nonlinear function of a random variable is not equal to the function of the conditional expectation of the random variable. For instance, consider the simple threshold autoregressive model
+
+$$
+r_t = \begin{cases}
+\phi_{10} + \phi_{11} r_{t-1} + a_t & \text{if } r_{t-1} \leq r_0 \\
+\phi_{20} + \phi_{21} r_{t-1} + a_t & \text{if } r_{t-1} > r_0
+\end{cases}
+$$
+
+where $\{a_t\}$ is a sequence of independent and identically distributed random variables with mean zero and variance $\sigma_a^2$. Let $h$ be the forecast origin and $F_h$ be the information set available at time $h$. The 1-step ahead forecast of $r_{h+1}$ is
+
+$$
+\hat{r}_h(1) = E(r_{h+1} | F_h) = \begin{cases}
+\phi_{10} + \phi_{11} r_h & \text{if } r_h \leq r_0 \\
+\phi_{20} + \phi_{21} r_h & \text{if } r_h > r_0
+\end{cases}
+$$
+
+This forecast is easy to compute. However, for the 2-step ahead forecast, we have
+
+$$
+\begin{align*}
+\hat{r}_h(2) &= E(r_{h+2} | F_h) \\
+&= E[E(r_{h+2} | F_{h+1}) | F_h] \\
+&= E[\phi_{10} I(r_{h+1} \leq r_0) + \phi_{11} r_{h+1} I(r_{h+1} \leq r_0) \\
+&\quad + \phi_{20} I(r_{h+1} > r_0) + \phi_{21} r_{h+1} I(r_{h+1} > r_0) | F_h]
+\end{align*}
+$$
+
+where $I(A)$ is the indicator function such that $I(A) = 1$ if the event $A$ occurs and $I(A) = 0$ otherwise. The conditional expectation in the last equation is hard to evaluate analytically. In practice, simulation methods are often used to compute multistep ahead forecasts of a nonlinear model.
+
+### Parametric Bootstrap
+
+A simple way to compute multistep ahead forecasts of a nonlinear model is to use the parametric bootstrap method. The idea is to generate many realizations of the future observations and use their average as the point forecast. Specifically, for the threshold model in Eq. (4.1), we can use the following steps to compute $\hat{r}_h(l)$ for $l > 1$:
+
+1. Generate $a_{h+1}^{(i)}$ from the specified distribution of $a_t$.
+
+2. Compute $r_{h+1}^{(i)} = \phi_{10} I(r_h \leq r_0) + \phi_{11} r_h I(r_h \leq r_0) + \phi_{20} I(r_h > r_0) + \phi_{21} r_h I(r_h > r_0) + a_{h+1}^{(i)}$.
+
+3. Generate $a_{h+2}^{(i)}$ from the specified distribution of $a_t$.
+
+4. Compute $r_{h+2}^{(i)} = \phi_{10} I(r_{h+1}^{(i)} \leq r_0) + \phi_{11} r_{h+1}^{(i)} I(r_{h+1}^{(i)} \leq r_0) + \phi_{20} I(r_{h+1}^{(i)} > r_0) + \phi_{21} r_{h+1}^{(i)} I(r_{h+1}^{(i)} > r_0) + a_{h+2}^{(i)}$.
+
+5. Continue the process until $r_{h+l}^{(i)}$ is obtained.
+
+6. Repeat steps 1-5 for $i = 1, \ldots, m$, where $m$ is a prespecified integer.
+
+7. Use $\hat{r}_h(l) = \frac{1}{m} \sum_{i=1}^m r_{h+l}^{(i)}$ as the $l$-step ahead forecast.
+
+The bootstrap method can easily be modified to compute interval forecasts. For instance, we can use the 2.5th and 97.5th percentiles of the $m$ realizations $\{r_{h+l}^{(i)}\}$ to form a 95% interval forecast of $r_{h+l}$.
+
+### Forecasting Evaluation
+
+To evaluate forecasting performance of a model, we divide the data into two parts. The first part is used to build the model and is referred to as the estimation or in-sample period. The second part is used to check the forecasting performance of the fitted model and is called the holdout or out-of-sample period. Let $n$ be the sample size of the estimation period and $s$ be that of the holdout sample. Denote the actual returns of the holdout sample by $r_{n+1}, \ldots, r_{n+s}$. For each observation in the holdout sample, we use the fitted model to compute 1-step to $k$-step ahead forecasts, where $k$ is a prespecified positive integer. Specifically, for $j = 1, \ldots, s$, we compute $\hat{r}_{n+j-1}(i)$ for $i = 1, \ldots, k$. These are out-of-sample forecasts because data of the holdout sample are not used in model building. The forecasting performance of the model is then evaluated by comparing the forecasts with the actual holdout observations.
+
+There are many statistics available to measure forecasting performance. We consider four commonly used measures. Let $e_t(i) = r_t - \hat{r}_{t-i}(i)$ be the $i$-step ahead forecast error. The four measures are:
+
+1. Mean squared error: $\text{MSE}(i) = \frac{1}{s-i+1} \sum_{t=n+i}^{n+s} e_t^2(i)$
+
+2. Mean absolute error: $\text{MAE}(i) = \frac{1}{s-i+1} \sum_{t=n+i}^{n+s} |e_t(i)|$
+
+3. Mean absolute percentage error: $\text{MAPE}(i) = \frac{100}{s-i+1} \sum_{t=n+i}^{n+s} |\frac{e_t(i)}{r_t}|$
+
+4. Mean percentage error: $\text{MPE}(i) = \frac{100}{s-i+1} \sum_{t=n+i}^{n+s} \frac{e_t(i)}{r_t}$
+
+The MSE and MAE are scale-dependent measures, whereas MAPE and MPE are scale-independent. The MPE can be used to check whether the forecasts are biased. If the forecasts are unbiased, then MPE should be close to zero.
+
+In addition to these measures, we can also use the following statistics to evaluate the relative performance between two forecasting methods:
+
+5. Relative MSE: $\text{RMSE}(i) = \frac{\text{MSE}_1(i)}{\text{MSE}_2(i)}$
+
+6. Relative MAE: $\text{RMAE}(i) = \frac{\text{MAE}_1(i)}{\text{MAE}_2(i)}$
+
+where the subscripts 1 and 2 denote the two forecasting methods under consideration. A relative measure less than 1 indicates that method 1 outperforms method 2 in forecasting.
+
+For 1-step ahead forecasts, we can also use the Diebold and Mariano (1995) test to compare the forecasting performance of two models. Let $d_t = g(e_{1t}) - g(e_{2t})$, where $g(\cdot)$ is a particular loss function such as the squared error loss $g(e) = e^2$ or the absolute error loss $g(e) = |e|$, and $e_{it}$ is the 1-step ahead forecast error of model $i$ at time $t$. The null hypothesis of equal forecast accuracy is $E(d_t) = 0$. Let $\bar{d} = \frac{1}{s} \sum_{t=n+1}^{n+s} d_t$ be the sample mean of $d_t$. Under some regularity conditions, Diebold and Mariano show that
+
+$$
+\sqrt{s} \frac{\bar{d}}{\hat{\sigma}_d} \xrightarrow{d} N(0,1)
+$$
+
+where $\hat{\sigma}_d^2 = \frac{1}{s} [\hat{\gamma}_0 + 2 \sum_{k=1}^{q} (1 - \frac{k}{q+1}) \hat{\gamma}_k]$, $\hat{\gamma}_k = \frac{1}{s} \sum_{t=k+1}^s (d_t - \bar{d})(d_{t-k} - \bar{d})$, and $q$ is a suitably chosen lag truncation parameter. In practice, $q = h - 1$, where $h$ is the forecast horizon, is often used.
+
+For comparing out-of-sample forecasting performance of two models, one can also use the superior predictive ability (SPA) test of Hansen (2005). This test takes into account the effects of data-snooping in comparing forecasts of multiple models. For details, see Hansen (2005) or Teräsvirta, Tjøstheim, and Granger (2010, Chapter 16).
+
+In summary, forecasting with nonlinear models often requires simulation methods such as parametric bootstrap. Various measures can be used to evaluate forecasting performance, including scale-dependent and scale-independent measures, as well as statistical tests for comparing forecasts from different models.

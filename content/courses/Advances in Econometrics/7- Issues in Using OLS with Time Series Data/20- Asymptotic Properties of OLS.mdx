@@ -1,0 +1,82 @@
+---
+title: Asymptotic Properties of OLS
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+### **Asymptotic Properties of OLS**
+
+The asymptotic properties of Ordinary Least Squares (OLS) estimators are crucial in understanding their behavior as the sample size becomes large. These properties provide the foundation for making inferences about the population parameters from sample data, especially when the assumptions of classical linear regression may not hold exactly.
+
+#### **Consistency**
+
+**Definition**: An estimator is consistent if it converges in probability to the true parameter value as the sample size tends to infinity. For OLS estimators, consistency implies that as we gather more data, our estimates of the regression coefficients approach the true population values.
+
+**Mathematical Representation**:
+
+- Let $$\hat{\beta}_n$$ be the OLS estimator of a parameter $$\beta$$ based on a sample of size $$n$$.
+- The estimator is consistent if:
+  $$
+  \lim_{n \to \infty} P(|\hat{\beta}_n - \beta| > \epsilon) = 0
+  $$
+  for any positive $$\epsilon$$.
+
+**Conditions for Consistency**:
+
+- **Linear in Parameters**: The model must be correctly specified as linear in parameters.
+- **Random Sampling**: Observations must be independently and identically distributed (i.i.d.).
+- **No Perfect Multicollinearity**: The independent variables must not be perfectly collinear.
+- **Zero Conditional Mean**: The error term must have an expected value of zero given any value of the explanatory variables.
+
+#### **Asymptotic Normality**
+
+**Definition**: Asymptotic normality means that as the sample size increases, the sampling distribution of the estimator becomes approximately normal, regardless of the distribution of the error terms.
+
+**Central Limit Theorem (CLT)**:
+
+- Under certain conditions, the distribution of the OLS estimator can be approximated by a normal distribution for large sample sizes.
+
+**Mathematical Representation**:
+
+- If $$\hat{\beta}_n$$ is an OLS estimator, then:
+  $$
+  \sqrt{n}(\hat{\beta}_n - \beta) \xrightarrow{d} N(0, \sigma^2)
+  $$
+  where $$\xrightarrow{d}$$ denotes convergence in distribution, and $$\sigma^2$$ is the variance of the estimator.
+
+#### **Asymptotic Efficiency**
+
+**Definition**: An estimator is asymptotically efficient if it achieves the lowest possible variance among all consistent estimators as the sample size tends to infinity.
+
+**Gauss-Markov Theorem (Asymptotic Version)**:
+
+- Under the assumptions of linearity, no perfect multicollinearity, and homoskedasticity, OLS is asymptotically efficient among the class of linear unbiased estimators.
+
+### **Implications for Econometric Analysis**
+
+1. **Inference and Hypothesis Testing**:
+
+- The asymptotic properties allow us to construct confidence intervals and conduct hypothesis tests using large-sample approximations.
+- Even if small-sample properties are not ideal, asymptotic results provide a basis for inference in large samples.
+
+2. **Model Specification and Assumptions**:
+
+- Understanding these properties helps in diagnosing model specification issues and assessing whether assumptions are likely to hold in practice.
+
+3. **Robustness to Non-Normality**:
+
+- Asymptotic normality ensures that inference remains valid even if error terms are not normally distributed, provided that other assumptions hold.
+
+By leveraging these asymptotic properties, econometricians can make reliable inferences about economic relationships from sample data, even when faced with practical limitations such as non-normality or heteroskedasticity.
+
+[^1]: https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/30626316/2be59c8f-ac44-43e7-a595-38c5bea42df7/Jeffrey_M_Wooldridge_Introductory_Econometrics_A_Modern_Approach.pdf
+[^2]: https://www.bauer.uh.edu/rsusmel/phd/ec1-7.pdf
+[^3]: https://www.statlect.com/fundamentals-of-statistics/OLS-estimator-properties
+[^4]: https://gregorygundersen.com/blog/2022/01/29/ols-consistency/
+[^5]: https://www2.econ.osaka-u.ac.jp/~tanizaki/class/2019/econome2/TA_session01.pdf
+[^6]: https://cameron.econ.ucdavis.edu/e240a/asymptotic.pdf
+[^7]: https://www.albert.io/blog/ultimate-properties-of-ols-estimators-guide/

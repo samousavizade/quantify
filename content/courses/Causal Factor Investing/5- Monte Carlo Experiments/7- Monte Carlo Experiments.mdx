@@ -1,0 +1,418 @@
+---
+title: Monte Carlo Simulation and Causality
+draft: false
+summary: Backtest statistics are essential for evaluating the efficacy of investment strategies.
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+# 7 Monte Carlo Experiments
+
+As explained in Section 6.4.2, factor model specification errors can lead to false positives and false negatives. This section presents three instances of causal structures where the application of standard econometric procedures leads to mistaking association with causation, and ultimately to type-B spurious factor claims. Standard econometric procedures are expected to perform equally poorly on more complex causal structures.
+
+## 7.1 Fork
+
+Three variables $X, Y, Z$ form a fork when variable $Z$ is a direct cause of variable $X$ and variable $Y$ (see Figure 13). Consider a researcher who wishes to model $Y$ as a function of $X$. In that case, $Z$ is said to be a confounding variable because not controlling for the effect of $Z$ on $X$ and $Y$ will bias the estimation of the effect of $X$ on $Y$.
+
+Given a probability distribution $P$, the application of Bayesian network factorization on the fork represented by Figure 13 yields[^36]:
+
+$$
+P(X, Y, Z) = P(Z)P(X|Z)P(Y|Z) \quad (17)
+$$
+
+which implies a (noncausal) association between $X$ and $Y$, since
+
+$$
+P(X, Y) = \sum_Z P(Z)P(X|Z)P(Y|Z) \neq P(X)P(Y). \quad (18)
+$$
+
+This is an example of noncausal association, because $X$ and $Y$ are associated through the backdoor path $Y \leftarrow Z \rightarrow X$, even though there is no causal path between $X$ and $Y$. The effect of conditioning by $Z$ is equivalent to simulating a do-operation (an intervention), because it blocks the backdoor path, resulting in the conditional independence of $X$ and $Y$,
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![Figure 13](/static/courses/Causal-Factor-Investing/Figure-13.png)
+</div>
+> Figure 13 Causal graph with a confounder $Z$, before (left) and after (right) control
+
+$$
+P(X, Y|Z) = \frac{P(X, Y, Z)}{P(Z)} = P(X|Z)P(Y|Z). \quad (19)
+$$
+
+Conditioning by variable $Z$ de-confounds $P(X, Y)$ in this causal graph, however not in other causal graphs. The widespread notion that econometricians should condition (or control) for all variables involved in a phenomenon is misleading, as explained in Section 6.4.2.2. The precise de-confounding variables are determined by do-calculus rules (see Section 4.3.2).
+
+The above conclusions can be verified through the following numerical experiment. First, draw 5,000 observations from the data-generating process characterized by the structural equation model,
+
+$$
+Z_t := \xi_t \quad (20)
+$$
+
+$$
+X_t := Z_t + \epsilon_t \quad (21)
+$$
+
+$$
+Y_t := Z_t + \zeta_t \quad (22)
+$$
+
+where $\xi_t, \epsilon_t, \zeta_t$ are three independent random variables that follow a standard Normal distribution. Second, fit on the 5,000 observations the linear equation,
+
+$$
+Y_t = \alpha + \beta X_t + \epsilon_t. \quad (23)
+$$
+
+Table 14 reports the results of the least-squares estimate. Following the econometric canon, a researcher will conclude that $\hat{\beta}$ is statistically significant.
+
+| Dep. Variable    | Y                | R-squared          | 0.247     |
+| ---------------- | ---------------- | ------------------ | --------- |
+| Model            | OLS              | Adj. R-squared     | 0.247     |
+| Method           | Least Squares    | F-statistic        | 1640.     |
+| Date             | Sun, 14 Aug 2022 | Prob (F-statistic) | 2.69e-310 |
+| Time             | 13:14:32         | Log-Likelihood     | -8052.6   |
+| No. Observations | 5000             | AIC                | 1.611e+04 |
+| Df Residuals     | 4998             | BIC                | 1.612e+04 |
+| Df Model         | 1                |                    |           |
+| Covariance Type  | nonrobust        |                    |           |
+
+|       | coef   | std err | t      | P>\|t\| | [0.025 | 0.975] |
+| ----- | ------ | ------- | ------ | ------- | ------ | ------ |
+| const | 0.0090 | 0.017   | 0.524  | 0.600   | -0.025 | 0.043  |
+| X     | 0.4964 | 0.012   | 40.493 | 0.000   | 0.472  | 0.520  |
+
+> Table 14 False positive due to missing confounder $Z$
+
+Given the causal content injected by the researcher through the least-squares model specification, a statistically significant $\hat{\beta}$ implies the statement "$X$ causes $Y$," not the statement "$X$ is associated with $Y$" (Section 5.2). If the researcher intended to establish association, he should have used an associational model, such as Pearson's correlation coefficient, or orthogonal regression (Section 5.1). At the same time, Figure 13 shows that there is no causal path from $X$ to $Y$. The claim of statistical significance is type-B spurious because $Y$ is not a function of $X$, as implied by the model's specification. This is the effect of missing a single confounder.
+
+As explained in Section 6.4.2.1, it is possible to remove the confounder-induced bias by adding $Z$ as a regressor (the partial correlations method),
+
+$$
+Y_t = \alpha + \beta X_t + \gamma Z_t + \epsilon_t \quad (24)
+$$
+
+Table 15 reports the result of this adjustment. With the correct model specification, the researcher will conclude that $X$ does not cause $Y$. The code for this experiment can be found in the Appendix.
+
+| Dep. Variable    | Y                | R-squared          | 0.495     |
+| ---------------- | ---------------- | ------------------ | --------- |
+| Model            | OLS              | Adj. R-squared     | 0.495     |
+| Method           | Least Squares    | F-statistic        | 2447.     |
+| Date             | Sun, 14 Aug 2022 | Prob (F-statistic) | 0.00      |
+| Time             | 13:14:32         | Log-Likelihood     | -7054.9   |
+| No. Observations | 5000             | AIC                | 1.412e+04 |
+| Df Residuals     | 4997             | BIC                | 1.414e+04 |
+| Df Model         | 2                |                    |           |
+| Covariance Type  | nonrobust        |                    |           |
+
+|       | coef   | std err | t      | P>\|t\| | [0.025 | 0.975] |
+| ----- | ------ | ------- | ------ | ------- | ------ | ------ |
+| const | 0.0054 | 0.014   | 0.383  | 0.702   | -0.022 | 0.033  |
+| X     | 0.0007 | 0.014   | 0.051  | 0.959   | -0.027 | 0.029  |
+| Z     | 0.9957 | 0.020   | 49.506 | 0.000   | 0.956  | 1.035  |
+
+> Table 15 De-confounding through the partial correlations method
+
+## 7.2 Immorality
+
+Three variables $X, Y, Z$ form an immorality when variable $Z$ is directly caused by variable $X$ and variable $Y$ (see Figure 16). Consider a researcher who wishes to model $Y$ as a function of $X$. In that case, $Z$ is said to be a collider variable.
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![Figure 16](/static/courses/Causal-Factor-Investing/Figure-16.png)
+</div>
+> Figure 16 Causal graph with a collider $Z$, with (left) and without (right) control
+
+Colliders should be particularly concerning to econometricians because controlling for the effect of $Z$ on $X$ and $Y$ biases the estimation of the effect of $X$ on $Y$. Given a probability distribution $P$, the application of Bayesian network factorization on the immorality represented by Figure 16 yields:
+
+$$
+P(X, Y, Z) = P(X)P(Y)P(Z|X, Y). \quad (25)
+$$
+
+There is no association between $X$ and $Y$ because
+
+$$
+P(X, Y) = \sum_Z P(X)P(Y)P(Z|X, Y) = P(X)P(Y) \sum_Z P(Z|X, Y) = P(X)P(Y). \quad (26)
+$$
+
+However, conditioning on $Z$ opens the backdoor path between $X$ and $Y$ that $Z$ was blocking $(Y \rightarrow Z \leftarrow X)$. The following analytical example illustrates this fact. Consider the data-generating process
+
+$$
+X_t := \epsilon_t \quad (27)
+$$
+
+$$
+Y_t := \zeta_t \quad (28)
+$$
+
+$$
+Z_t := X_t + Y_t + \xi_t \quad
+$$
+
+where $\xi_t, \epsilon_t, \zeta_t$ are three independent random variables that follow a standard Normal distribution. Then, the covariance between $X$ and $Y$ is
+
+$$
+\text{Cov}(X, Y) = E[(X - E[X])(Y - E[Y])] = E[XY] = E[X]E[Y] = 0 \quad (30)
+$$
+
+The problem is, a researcher who (wrongly) conditions on $Z$ will find a negative covariance between $X$ and $Y$, even though there is no causal path between $X$ and $Y$, because
+
+$$
+\text{Cov}(X, Y|Z) = -\frac{1}{3} \quad (31)
+$$
+
+The Appendix contains a proof of the above proposition. Compare the causal graph in Figure 16 with the causal graph in Figure 13. Figure 13 has a structure $X \leftarrow Z \rightarrow Y$, where not controlling for confounder $Z$ results in under-controlling. The direction of causality is reversed in Figure 16, transforming the confounder into a collider. In the structure $X \rightarrow Z \leftarrow Y$, controlling for $Z$ results in over-controlling. This is an instance of Berkson's fallacy, whereby a noncausal association is observed between two independent variables, as a result of conditioning on a collider ([Pearl 2009, p. 17](/courses/Causal-Factor-Investing/References)).
+
+This finding is problematic for econometricians because the direction of causality cannot always be solely determined by observational studies ([Peters et al. 2017, pp. 44–45](/courses/Causal-Factor-Investing/References)), and solving the confounder-collider conundrum often requires the injection of extra-statistical (beyond observational) information. Causal graphs inject the required extra-statistical information, by making explicit assumptions that complement the information contributed by observations.[^37] Accordingly, the statistical and econometric mantra "data speaks for itself" is in fact misleading, because two econometricians who rely solely on observational evidence can consistently reach contradicting conclusions from the analysis of the same data. With a careful selection of colliders, a researcher can present evidence in support of any type-B spurious investment factor.
+
+The correct causal treatment of a collider is to indicate its presence and explain why researchers should not control for it. A key takeaway is that researchers must declare and justify the hypothesized causal graph that supports their chosen model specification, or else submit to the healthy skepticism of their peers.
+
+We can verify the above conclusions with the following numerical experiment. First, draw 5,000 observations from the above data-generating process. Second, fit on the 5,000 observations the linear equation
+
+$$
+Y_t = \alpha + \beta X_t + \gamma Z_t + \epsilon_t \quad (32)
+$$
+
+Table 17 reports the results of the least-squares estimate. Following the econometric canon, a researcher will conclude that $\hat{\beta}$ is statistically significant. This claim of statistical significance is type-B spurious because $Y$ is not a function of $X$, as implied by the model's specification. This is the effect of controlling for a collider.
+
+| Dep. Variable    | Y                | R-squared          | 0.499     |
+| ---------------- | ---------------- | ------------------ | --------- |
+| Model            | OLS              | Adj. R-squared     | 0.499     |
+| Method           | Least Squares    | F-statistic        | 2490.     |
+| Date             | Sun, 14 Aug 2022 | Prob (F-statistic) | 0.00      |
+| Time             | 13:11:51         | Log-Likelihood     | -5314.4   |
+| No. Observations | 5000             | AIC                | 1.063e+04 |
+| Df Residuals     | 4997             | BIC                | 1.065e+04 |
+| Df Model         | 2                |                    |           |
+| Covariance Type  | nonrobust        |                    |           |
+
+|       | coef    | std err | t       | P>\|t\| | [0.025 | 0.975] |
+| ----- | ------- | ------- | ------- | ------- | ------ | ------ |
+| const | -0.0138 | 0.010   | -1.388  | 0.165   | -0.033 | 0.006  |
+| X     | -0.4963 | 0.012   | -40.405 | 0.000   | -0.520 | -0.472 |
+| Z     | 0.4988  | 0.007   | 70.575  | 0.000   | 0.485  | 0.513  |
+
+> Table 17 False positive due to adding collider $Z$
+
+We can remove the bias induced by collider $Z$ by excluding that variable from the model's specification,
+
+$$
+Y_t = \alpha + \beta X_t + \epsilon_t \quad (33)
+$$
+
+Table 18 reports the results of this adjustment. Note that the misspecified model delivered higher explanatory power, hence specification-searching would have misled the researcher into a false positive. With the correct model specification, the researcher will conclude that $X$ does not cause $Y$. The code for this experiment can be found in the Appendix.
+
+| Dep. Variable    | Y                | R-squared          | 0.000     |
+| ---------------- | ---------------- | ------------------ | --------- |
+| Model            | OLS              | Adj. R-squared     | -0.000    |
+| Method           | Least Squares    | F-statistic        | 0.01120   |
+| Date             | Sun, 14 Aug 2022 | Prob (F-statistic) | 0.916     |
+| Time             | 13:11:51         | Log-Likelihood     | -7043.2   |
+| No. Observations | 5000             | AIC                | 1.409e+04 |
+| Df Residuals     | 4998             | BIC                | 1.410e+04 |
+| Df Model         | 1                |                    |           |
+| Covariance Type  | nonrobust        |                    |           |
+
+|       | coef    | std err | t      | P>\|t\| | [0.025 | 0.975] |
+| ----- | ------- | ------- | ------ | ------- | ------ | ------ |
+| const | -0.0221 | 0.014   | -1.580 | 0.114   | -0.050 | 0.005  |
+| X     | 0.0015  | 0.014   | 0.106  | 0.916   | -0.026 | 0.029  |
+
+> Table 18 Debiasing by removing collider $Z$
+
+Here is the content of section 7.3 "Chain", with references and citations linked, and mathematical expressions converted to LaTeX:
+
+## 7.3 Chain
+
+Three variables $X, Y, Z$ form a chain when variable $Z$ mediates the causal flow from variable $X$ to variable $Y$ (see Figure 19). Consider a researcher who wishes to model $Y$ as a function of $X$. In that case, $Z$ is said to be a mediator variable.
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![Figure 19](/static/courses/Causal-Factor-Investing/Figure-19.png)
+</div>
+> Figure 19 Causal graph with mediator $Z$, before (top) and after (bottom) control
+
+Given a probability distribution $P$, the application of Bayesian network factorization on the chain represented by Figure 19 yields:
+
+$$
+P(X, Y, Z) = P(X)P(Z|X)P(Y|Z). \quad (34)
+$$
+
+This implies an association between $X$ and $Y$, since
+
+$$
+P(X, Y) = \sum_Z P(X)P(Z|X)P(Y|Z) \neq P(X)P(Y). \quad (35)
+$$
+
+There is no backdoor path in Figure 19. This is an example of association with causation, because $X$ and $Y$ are associated only through the causal path mediated by $Z$. Like in the case of a fork, the effect of conditioning by $Z$ is equivalent to simulating a do-operation (an intervention), resulting in the conditional independence of $X$ and $Y$,
+
+$$
+P(X, Y|Z) = \frac{P(X, Y, Z)}{P(Z)} = P(X|Z)P(Y|Z). \quad (36)
+$$
+
+The problem with conditioning on a mediator is that it may disrupt the very causal association that the researcher wants to estimate (an instance of over-controlling, see Section 6.4.2.2), leading to a false negative. Making matters more complex, conditioning on a mediator can also lead to a false positive.
+
+This statement can be verified through the following numerical experiment. First, draw 5,000 observations from the data-generating process characterized by the structural equation model,
+
+$$
+X_t := \epsilon_t \quad (37)
+$$
+
+$$
+W_t := \eta_t \quad (38)
+$$
+
+$$
+Z_t := X_t + W_t + \xi_t \quad (39)
+$$
+
+$$
+Y_t := Z_t + W_t + \zeta_t \quad (40)
+$$
+
+where $\xi_t, \epsilon_t, \zeta_t, \eta_t$ are four independent random variables that follow a standard Normal distribution. Figure 20 displays the relevant causal graph.[^38]
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![Figure 20](/static/courses/Causal-Factor-Investing/Figure-20.png)
+</div>
+> Figure 20 A confounded mediator ($Z$), with (left) and without (right) control
+
+Second, fit on the 5,000 observations the linear equation,
+
+$$
+Y_t = \alpha + \beta X_t + \gamma Z_t + \epsilon_t. \quad (41)
+$$
+
+Table 21 reports the results of the least-squares estimate. While it is true that $X$ causes $Y$ (through $Z$), this result is still a false positive, because the reported association did not flow through the causal path $X \rightarrow Z \rightarrow Y$. The reason is, $Z$ also operates as a collider to $X$ and $W$, and controlling for $Z$ has opened the backdoor path $X \rightarrow Z \leftarrow W \rightarrow Y$. This is the reason $\hat{\beta} \ll 0$, despite all effects being positive. This phenomenon is known as the mediation fallacy, which involves conditioning on the mediator when the mediator and the outcome are confounded ([Pearl and MacKenzie 2018, p. 315](/courses/Causal-Factor-Investing/References)). This experiment also illustrates Simpson’s paradox, which occurs when an association is observed in several groups of data, but it disappears or reverses when the groups are combined ([Pearl et al. 2016, pp. 1–6](/courses/Causal-Factor-Investing/References)).
+
+This graph shows the relationships between various financial factors: Market, MOM (Momentum), SML (Small Minus Large), Ret (Return), and HML (High Minus Low). HML is highlighted as the target variable.
+
+| Dep. Variable    | Y                | R-squared          | 0.784     |
+| ---------------- | ---------------- | ------------------ | --------- |
+| Model            | OLS              | Adj. R-squared     | 0.784     |
+| Method           | Least Squares    | F-statistic        | 9069.     |
+| Date             | Sun, 14 Aug 2022 | Prob (F-statistic) | 0.00      |
+| Time             | 13:04:29         | Log-Likelihood     | -8061.9   |
+| No. Observations | 5000             | AIC                | 1.613e+04 |
+| Df Residuals     | 4997             | BIC                | 1.615e+04 |
+| Df Model         | 2                |                    |           |
+| Covariance Type  | nonrobust        |                    |           |
+
+|       | coef    | std err | t       | P>\|t\| | [0.025 | 0.975] |
+| ----- | ------- | ------- | ------- | ------- | ------ | ------ |
+| const | 0.0027  | 0.017   | 0.160   | 0.873   | -0.031 | 0.036  |
+| X     | -0.4814 | 0.021   | -22.621 | 0.000   | -0.523 | -0.440 |
+| Z     | 1.4899  | 0.012   | 121.680 | 0.000   | 1.466  | 1.514  |
+
+> Table 21: False positive due to adding a confounded mediator $Z$
+
+Following the rules of do-calculus, the effect of $X$ on $Y$ in this causal graph can be estimated without controls. The reason is, the noncausal path through $W$ is already blocked by $Z$. Controlling for $W$ is not strictly necessary to debias $\hat{\beta}$, however it can help improve the precision of the estimates. The following model specification produces an unbiased estimate of $\beta$:
+
+$$
+Y_t = \alpha + \beta X_t + \epsilon_t. \quad (42)
+$$
+
+Table 22 reports the results. Note that the correct model specification has much lower explanatory power: the adjusted R-squared drops from 0.784 to 0.144, and the F-statistic drops from 9,069 to 840.8. A specification-searching researcher would have chosen and reported the wrong model, because it has higher explanatory power, resulting in a misspecified model that misattributes risk and performance (Section 6.4.2.3). With the proper model specification, as informed by the declared causal graph, the researcher correctly concludes that $X$ causes $Y$, and that $\hat{\beta} \gg 0$. The code for this experiment can be found in the Appendix.
+
+| Dep. Variable    | Y                | R-squared          | 0.144     |
+| ---------------- | ---------------- | ------------------ | --------- |
+| Model            | OLS              | Adj. R-squared     | 0.144     |
+| Method           | Least Squares    | F-statistic        | 840.8     |
+| Date             | Sun, 14 Aug 2022 | Prob (F-statistic) | 5.32e-171 |
+| Time             | 13:04:29         | Log-Likelihood     | -11504.   |
+| No. Observations | 5000             | AIC                | 2.301e+04 |
+| Df Residuals     | 4998             | BIC                | 2.303e+04 |
+| Df Model         | 1                |                    |           |
+| Covariance Type  | nonrobust        |                    |           |
+
+|       | coef    | std err | t      | P>\|t\| | [0.025 | 0.975] |
+| ----- | ------- | ------- | ------ | ------- | ------ | ------ |
+| const | -0.0222 | 0.034   | -0.650 | 0.515   | -0.089 | 0.045  |
+| X     | 1.0055  | 0.035   | 28.996 | 0.000   | 0.938  | 1.073  |
+
+> Table 22 De-confounding by removing the confounded mediator
+
+Here is the content of section 7.4 "An Alternative Explanation for Factors", with references and citations linked, and mathematical expressions converted to LaTeX:
+
+### 7.4 An Alternative Explanation for Factors
+
+Consider the influential three-factor and five-factor models proposed by Fama and French (1993) and Fama and French (2015). These journal articles, henceforth referred to as FF93 and FF15 respectively, have inspired and served as templates for thousands of academic papers purporting the discovery of hundreds of factors. FF93 postulates that the cross-section of average stock returns is partly explained by a linear function of three factors, namely the broad market, size (quantified as stock price times number of shares), and value (quantified as book-to-market equity). FF15 added to this mix two quality-inspired factors, profitability and investment, on the premise of improving the model’s explanatory power.
+
+The model specifications proposed by FF93 and FF15 raise several objections:
+
+1. **P-Hacking**: The authors fail to report and adjust for all the trials carried out before selecting their model, thus p-hacking has likely taken place (Section 6.4.1.1).
+2. **Specification-Searching**: The authors justify the proposed specifications in terms of explanatory power, instead of a causal graph, thus the model is likely misspecified due to specification-searching (Section 6.4.2.3).
+3. **Missing Confounders**: The authors ignore known macroeconomic confounders, such as inflation, GDP, stage of the business cycle, steepness of the yield curve, etc. Strangely, section 2.1.2 of FF93 makes explicit mention to the confounding effect of business cycles on size, and yet that confounder is inexplicably absent in the model. This points to a missing confounder (Section 6.4.2.1).
+4. **Interaction Between Factors**: It is well documented that there is an interaction between the momentum and value factors (Barroso and Santa-Clara 2015). This interaction could be explained by a confounding relation between momentum and value, making momentum another likely missing confounding variable.
+5. **Lack of Causal Mechanism**: The authors do not provide the causal mechanism responsible for the reported observations, in denial of the causal content of their model, hence obstructing mediation analysis and falsification efforts (Section 6.3).
+
+Carhart (1997) (henceforth C97) expanded FF93 by adding momentum as a fourth factor; however, the justification for that expansion was that the four-factor model achieved higher explanatory power (an associational argument), not that controlling for momentum de-confounded the estimate of value’s causal effect. This is the same self-contradictory argument that FF15 used to add the two quality factors (Section 6.4.2.3).
+
+As demonstrated in Section 7.3, a correctly specified model can deliver lower explanatory power than a misspecified model on the same dataset. Improving on FF93’s explanatory power does not make C97’s model better specified, or its estimates less biased. Furthermore, the de-confounding control variable (momentum) is highly correlated with the confounded variable (value), thus exchanging confounder bias for multicollinearity. There are better ways of debiasing value’s causal effect estimate. Instead of the partial correlations method, authors could apply the backdoor adjustment (or some other do-calculus adjustment), in order to avoid the multicollinearity caused by the inversion of that covariance matrix.
+
+There is a plausible sixth objection to the specification of FF93, FF15, and C97. Suppose that:
+
+- A company’s stock returns and size are independent variables.
+- Both variables influence the company’s book-to-market equity (a collider).
+
+In this case, as explained in Section 6.4.2.2 and illustrated in Section 7.2, conditioning on book-to-market equity introduces a negative noncausal association between the two independent variables in (1). In other words, by adding book-to-market equity to their model specification, FF93, FF15, and C97 may have inadvertently induced a noncausal negative correlation between stock returns and size, making the size factor a false discovery.
+
+<div
+  className="my-1 overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2"
+  style={{
+    display: 'block',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    width: '90%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  ![Figure 23](/static/courses/Causal-Factor-Investing/Figure-23.png)
+</div>
+> Figure 23 Example of a causal graph under which the findings in FF93, FF15, and C97 are biased.
+
+The numerical experiments in Section 7 demonstrate that general causal structures can explain away the findings in FF93, FF15, and C97 as type-B spurious. Figure 23 provides an example of a causal graph under which the estimates in FF93, FF15, and C97 are biased by confounders and colliders. This particular graph may not be correct, however, the burden of proving it wrong belongs to the authors claiming the existence of investment factors.
+
+To address these concerns, those authors should make their models’ causal content explicit, declare the hypothesized causal mechanism, control for the missing confounders, and justify their belief that none of the chosen explanatory variables is a collider. If FF93, FF15, and C97 had proposed a predictive model, producing such biased estimates of the factor coefficients would not be problematic, because the prediction might still lead to a profitable investment strategy. However, as explained in Section 6.1, the purpose of a factor model (such as FF93, FF15, and C97) is to build portfolios exposed to a particular risk characteristic presumably rewarded by the market. This is the reason value factor funds typically create a portfolio by ranking stocks in terms of their book-to-market ratio, not the model’s residuals.
+
+To summarize, the findings in FF93, FF15, and C97 are likely type-A spurious, due to p-hacking, or type-B spurious, due to under-controlling of confounders, over-controlling of mediators, specification-searching, and missing mediation analysis. This is not a criticism of these three papers relative to the rest of the factor investing literature. On the contrary, with all their flaws, these three papers are as good as any other associational financial econometric study, and continue to be deeply influential. Other papers in this field share the same or similar methodological errors that make their promoted factors likely spurious.
+
+[^36]: For an introduction to the calculus of Bayesian network factorization, see [Pearl et al. (2016, pp. 29–32)](/courses/Causal-Factor-Investing/References) and [Neal (2020, pp. 20–22)](/courses/Causal-Factor-Investing/References).
+[^37]: In the absence of an interventional study or a natural experiment, the statement $X$ causes $Y$ is an assumption, which may be consistent with, however not proved by, observational evidence (Section 4.3).
+[^38]: The reader may find this diagram familiar, from Section 4.3.2.4. Should $Z$ be the treatment variable, $X$ would be an instrumental variable capable of de-confounding the effect of $Z$ on $Y$ from the bias introduced by $W$. However, in this case $Z$ is a mediator, and $X$ is the treatment variable, not an instrument.

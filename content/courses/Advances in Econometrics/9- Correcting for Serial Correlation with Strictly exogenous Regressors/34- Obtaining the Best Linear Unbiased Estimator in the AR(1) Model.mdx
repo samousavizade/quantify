@@ -1,0 +1,71 @@
+---
+title: Correcting for Serial Correlation with Strictly Exogenous Regressors
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+### Correcting for Serial Correlation with Strictly Exogenous Regressors
+
+#### Introduction
+
+Serial correlation in the error terms of a regression model can lead to inefficient estimates and invalid inference. When dealing with strictly exogenous regressors, it is possible to correct for serial correlation and obtain efficient estimators. This section discusses methods for addressing serial correlation in models with strictly exogenous regressors, focusing on obtaining the Best Linear Unbiased Estimator (BLUE) in the AR(1) model.
+
+#### Strictly Exogenous Regressors
+
+Strictly exogenous regressors are variables that are uncorrelated with past, present, and future values of the error term. This assumption simplifies the correction for serial correlation because it rules out feedback from the dependent variable to the regressors.
+
+#### Obtaining the Best Linear Unbiased Estimator in the AR(1) Model
+
+###### The AR(1) Model
+
+Consider a regression model with AR(1) serial correlation in the errors:
+
+$$
+y_t = \beta_0 + \beta_1 x_{t} + u_t
+$$
+
+where:
+
+$$
+u_t = \rho u_{t-1} + \epsilon_t
+$$
+
+Here, $$ \epsilon_t $$ is a white noise error term with mean zero and constant variance, and $$ |\rho| < 1 $$ ensures stationarity.
+
+###### Feasible Generalized Least Squares (FGLS)
+
+To obtain the BLUE in the presence of AR(1) serial correlation, we can use Feasible Generalized Least Squares (FGLS). FGLS involves transforming the original model to eliminate serial correlation and then applying OLS to the transformed model.
+
+####### Steps for FGLS Estimation
+
+1. **Estimate the Original Model**: Begin by estimating your regression model using OLS to obtain residuals $$ \hat{u}\_t $$.
+
+2. **Estimate $$ \rho $$**: Regress $$ \hat{u}_t $$ on $$ \hat{u}_{t-1} $$ to estimate $$ \rho $$. The estimated coefficient is denoted as $$ \hat{\rho} $$.
+
+3. **Transform the Model**: Use $$ \hat{\rho} $$ to transform the original regression model:
+
+$$
+y_t - \hat{\rho} y_{t-1} = (\beta_0 (1-\hat{\rho})) + \beta_1 (x_t - \hat{\rho} x_{t-1}) + v_t
+$$
+
+where $$ v*t = \epsilon_t - \hat{\rho} \epsilon*{t-1} $$ is a transformed error term that is not serially correlated.
+
+4. **Estimate Transformed Model**: Apply OLS to the transformed model to obtain efficient estimates of the parameters.
+
+####### Properties of FGLS Estimators
+
+- **Efficiency**: FGLS estimators are more efficient than OLS estimators when serial correlation is present.
+- **Consistency**: FGLS estimators are consistent under standard assumptions.
+- **Unbiasedness**: FGLS estimators are unbiased if all assumptions hold.
+
+#### Comparing OLS and FGLS
+
+While OLS estimators remain unbiased in the presence of serial correlation, they are inefficient. In contrast, FGLS provides efficient estimates by accounting for the structure of serial correlation. However, FGLS requires an accurate estimate of $$ \rho $$. If this estimate is poor, FGLS may not perform better than OLS.
+
+#### Conclusion
+
+Correcting for serial correlation with strictly exogenous regressors involves transforming the model using FGLS to obtain efficient estimates. By addressing serial correlation, researchers can ensure reliable inference and improve the precision of their econometric analysis.

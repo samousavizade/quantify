@@ -1,0 +1,86 @@
+---
+title: A t Test for AR(1) Serial Correlation with Strictly Exogenous Repressors
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+### A t Test for AR(1) Serial Correlation with Strictly Exogenous Repressors
+
+#### Introduction
+
+In time series econometrics, one common issue is the presence of serial correlation in the error terms of a regression model. Specifically, AR(1) serial correlation occurs when the error term in one period is correlated with the error term in the previous period. This can lead to inefficient estimators and invalid inference if not properly addressed. When dealing with strictly exogenous regressors, there are specific tests designed to detect AR(1) serial correlation.
+
+#### Strictly Exogenous Regressors
+
+A regressor is strictly exogenous if it is uncorrelated with past, present, and future values of the error term. In mathematical terms, this means that for a regressor $$ X_t $$, we have:
+
+$$
+E(u_t | X_1, X_2, \ldots, X_T) = 0
+$$
+
+for all $$ t $$, where $$ u_t $$ is the error term at time $$ t $$. This assumption simplifies the analysis of serial correlation because it rules out feedback from the dependent variable to the regressors.
+
+#### The AR(1) Model
+
+Consider a simple linear regression model with AR(1) serial correlation in the errors:
+
+$$
+y_t = \beta_0 + \beta_1 x_{t} + u_t
+$$
+
+where:
+
+$$
+u_t = \rho u_{t-1} + \epsilon_t
+$$
+
+Here, $$ \epsilon_t $$ is a white noise error term with mean zero and constant variance, and $$ |\rho| < 1 $$ ensures stationarity.
+
+#### Testing for AR(1) Serial Correlation
+
+To test for AR(1) serial correlation in the presence of strictly exogenous regressors, we can use a t-test based on the residuals from an OLS regression.
+
+###### Steps for Conducting a t-Test for AR(1)
+
+1. **Estimate the OLS Regression**: First, estimate the regression model using OLS and obtain the residuals $$ \hat{u}_t = y_t - \hat{\beta}\_0 - \hat{\beta}\_1 x_{t} $$.
+
+2. **Regress Residuals on Lagged Residuals**: Perform a regression of $$ \hat{u}_t $$ on $$ \hat{u}_{t-1} $$:
+
+$$
+\hat{u}_t = \phi_0 + \phi_1 \hat{u}_{t-1} + v_t
+$$
+
+3. **Conduct a t-Test**: The null hypothesis for no serial correlation is $$ H_0: \phi_1 = 0 $$. The alternative hypothesis is $$ H_a: \phi_1 \neq 0 $$.
+
+4. **Calculate the Test Statistic**: The test statistic is given by:
+
+$$
+t = \frac{\hat{\phi}_1}{SE(\hat{\phi}_1)}
+$$
+
+where $$ SE(\hat{\phi}\_1) $$ is the standard error of $$ \hat{\phi}\_1 $$.
+
+5. **Decision Rule**: Compare the calculated t-statistic to the critical value from the t-distribution with $$ n-2 $$ degrees of freedom (where $$ n $$ is the sample size). If $$ |t| > t\_{\alpha/2} $$, reject $$ H_0 $$.
+
+#### Implications of Serial Correlation
+
+If serial correlation is present and not accounted for, it can lead to:
+
+- **Inefficient Estimators**: The OLS estimators are no longer BLUE (Best Linear Unbiased Estimators).
+- **Invalid Inference**: Standard errors are biased, leading to incorrect hypothesis tests and confidence intervals.
+
+#### Correcting for Serial Correlation
+
+If AR(1) serial correlation is detected, several methods can be used to correct it:
+
+- **Newey-West Standard Errors**: Adjust standard errors to be robust to serial correlation.
+- **Feasible Generalized Least Squares (FGLS)**: Transform the model to eliminate serial correlation.
+- **Include Lagged Dependent Variables**: Sometimes including lagged values of dependent variables can help capture dynamic relationships.
+
+#### Conclusion
+
+Testing for AR(1) serial correlation with strictly exogenous regressors involves regressing residuals on their lagged values and conducting a t-test. Detecting and correcting for serial correlation ensures valid inference in time series regression models.

@@ -1,0 +1,391 @@
+---
+title: Backtest Statistics Categories
+draft: false
+summary: Backtest statistics are essential for evaluating the efficacy of investment strategies.
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+<div style={{ marginBottom: '2rem' }} />
+
+Backtest statistics are essential for evaluating the efficacy of investment strategies. These metrics fall into different categories:
+
+- **General Features**: Includes metrics like Time range, Average AUM, Capacity, and Leverage.
+- **Performance Metrics**: Such as PnL, annualized rate of return, hit ratio, etc.
+
+<div style={{display: 'flex', justifyContent: 'center'}}>
+    <table style={{tableLayout: 'fixed', width: '90%'}}>
+        <thead>
+        <tr>
+            <th style={{width: '50%', textAlign: 'center'}}>Python</th>
+            <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```python
+                def bet_timing(
+                target_positions: pd.Series
+                ):
+
+                ```
+
+            </td>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```julia
+                function betTiming(
+                targetPositions::TimeArray
+                )
+                end
+                ```
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+View More: [Python](https://www.github.com/risklabai/RiskLabAI.py) | [Julia](https://www.github.com/risklabai/RiskLabAI.jl)
+
+## Time-Weighted Rate of Return (TWRR)
+
+TWRR is a method for calculating returns that adjusts for external cash flows. The formula is complex but can be summarized with:
+
+- $r_{i, t}$: TWRR for portfolio $i$ between time $[t-1, t]$.
+
+- $\pi_{i, t}$: Mark-to-market profit or loss for portfolio $i$ at time $t$.
+
+- $K_{i, t}$: Market value of assets managed by portfolio $i$ over sub-period $t$.
+
+$$
+r_{i, t} =\frac{\pi_{i, t}}{K_{i, t}}
+$$
+
+<div style={{display: 'flex', justifyContent: 'center'}}>
+    <table style={{tableLayout: 'fixed', width: '90%'}}>
+        <thead>
+        <tr>
+            <th style={{width: '50%', textAlign: 'center'}}>Python</th>
+            <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```python
+                def holding_period(
+                target_positions: pd.Series
+                ):
+
+                ```
+
+            </td>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```julia
+                function holdingPeriod(
+                targetPositions::TimeArray
+                )
+                end
+                ```
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+View More: [Python](https://www.github.com/risklabai/RiskLabAI.py) | [Julia](https://www.github.com/risklabai/RiskLabAI.jl)
+
+## Performance Statistics
+
+Performance statistics that are not risk-adjusted include:
+
+- **PnL**: Total dollars earned.
+
+- **PnL from Long Positions**: Earnings from only long holdings.
+
+- **Annualized Rate of Return**: Includes all forms of earnings and expenses.
+
+- **Hit Ratio**: Percentage of profitable bets.
+
+# Runs and Risk Metrics in Investment Strategies
+
+Investment strategies often contain series of returns, known as "runs," that can be either positive or negative. Understanding the concentration of these runs and their impact on risk factors like drawdowns and time under water is essential for assessing a strategy's viability.
+
+## Returns Concentration
+
+Consider a time series of bet returns, $r_t$, with a length $T$. We can split these returns into positive and negative subsets, $r^+$ and $r^-$. Two weight series, $w^+$ and $w^-$, can be defined as:
+
+$$
+w^+ = \frac{r^+}{\sum r^+} \quad \text{and} \quad w^- = \frac{r^-}{\sum r^-}
+$$
+
+We define the Herfindahl-Hirschman Index (HHI)-based concentration of positive returns ($h^+$) and negative returns ($h^-$) as:
+
+$$
+h^+ = \frac{\sum (w^+)^2 - 1/\|w^+\|}{1 - 1/\|w^+\|}
+$$
+
+$$
+h^- = \frac{\sum (w^-)^2 - 1/\|w^-\|}{1 - 1/\|w^-\|}
+$$
+
+Desirable strategy characteristics include:
+
+- High Sharpe ratio
+- Many bets per year
+- High hit ratio (low $w^-$)
+- Low $h^+$
+- Low $h^-$
+
+### HHI Concentration Functions
+
+<div style={{display: 'flex', justifyContent: 'center'}}>
+    <table style={{tableLayout: 'fixed', width: '90%'}}>
+        <thead>
+        <tr>
+            <th style={{width: '50%', textAlign: 'center'}}>Python</th>
+            <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```python
+                def hhi_concentration(
+                returns: pd.Series
+                ):
+                ```
+
+            </td>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```julia
+                function HHIConcentration(
+                returns::TimeArray
+                )
+                ```
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+View More: [Python](https://www.github.com/risklabai/RiskLabAI.py) | [Julia](https://www.github.com/risklabai/RiskLabAI.jl)
+
+These functionalities are available in both Python and Julia in the RiskLabAI library.
+
+## Drawdown and Time Under Water
+
+Drawdown (DD) is the most significant loss between two high watermarks (HWMs), while Time under Water (TuW) is the duration taken to surpass a previous HWM.
+
+### DD and TuW Functions
+
+<div style={{display: 'flex', justifyContent: 'center'}}>
+    <table style={{tableLayout: 'fixed', width: '90%'}}>
+        <thead>
+        <tr>
+            <th style={{width: '50%', textAlign: 'center'}}>Python</th>
+            <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```python
+                def compute_drawdowns_time_under_water(
+                series: pd.Series,
+                dollars: bool = False
+                ):
+                ```
+
+            </td>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```julia
+                function computeDrawDownsTimeUnderWater(
+                series::TimeArray,
+                dollars::Bool=false
+                )
+                ```
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+View More: [Python](https://www.github.com/risklabai/RiskLabAI.py) | [Julia](https://www.github.com/risklabai/RiskLabAI.jl)
+
+These functionalities are available in both Python and Julia in the RiskLabAI library.
+
+## Runs Statistics for Performance Evaluation
+
+**Key Metrics:**
+
+- HHI index for both positive and negative returns.
+- Time between bets measured by HHI index.
+- 95th percentile of Drawdown (DD) and Time under Water (TuW).
+
+These metrics are useful to understand the concentration of portfolio returns and the risk involved.
+
+### Code for Calculating Runs Statistics
+
+<div style={{display: 'flex', justifyContent: 'center'}}>
+    <table style={{tableLayout: 'fixed', width: '90%'}}>
+        <thead>
+        <tr>
+            <th style={{width: '50%', textAlign: 'center'}}>Python</th>
+            <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```python
+                def getHHI(ret: pd.Series) -> float:
+                ...
+                ```
+
+            </td>
+            <td style={{border: '1px solid transparent'}}>
+
+                ```julia
+                function getHHI(ret::DataFrame)::Float64
+                ...
+                ```
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+View More: [Python](https://www.github.com/risklabai/RiskLabAI.py) | [Julia](https://www.github.com/risklabai/RiskLabAI.jl)
+
+## Implementation Failure Metrics
+
+Key Metrics to prevent investment plans from failing:
+
+- Broker fees per turnover
+- Average slippage per turnover
+- Dollar performance per turnover
+- Return on execution costs
+
+These metrics help you understand how your portfolio could be affected by hidden costs.
+
+## Efficiency Metrics
+
+### Sharpe Ratio (SR)
+
+This ratio measures performance by dividing the average returns by the standard deviation of returns.
+
+$$
+\text{SR} = \frac{\mu}{\sigma}
+$$
+
+### Probabilistic Sharpe Ratio (PSR)
+
+This metric adjusts the Sharpe ratio to account for data distortions like skewness and kurtosis.
+
+$$
+\widehat{PSR}[SR^{*}] = Z\left[\frac{(\widehat{SR}-SR^{*})\sqrt{T-1}}{\sqrt{1-\hat{\gamma}_{3}\widehat{SR}+\frac{\hat{\gamma}_{4}-1}{4}\widehat{SR}^{2}}}\right]
+$$
+
+### Deflated Sharpe Ratio (DSR)
+
+This is an extension of PSR, which accounts for the number of trials performed to obtain the Sharpe ratio.
+
+$$
+SR^{*} = \sqrt{V[\{\widehat{SR}_{n}\}]}\left((1-\gamma)Z^{-1}[1-\frac{1}{N}]+\gamma Z^{-1}[1-\frac{1}{N}e^{-1}]\right)
+$$
+
+### Other Efficiency Metrics
+
+- **Annualized Sharpe Ratio**
+- **Information Ratio**
+- **Probabilistic Sharpe Ratio (PSR)**
+- **Deflated Sharpe Ratio (DSR)**
+
+## Classification Scores
+
+Metrics for evaluating the performance of machine learning algorithms in trading strategies include:
+
+- **Accuracy**:
+
+$$
+\text{Accuracy} = \frac{TP+TN}{TP+TN+FP+FN}
+$$
+
+- **Precision**:
+
+$$
+\text{Precision} = \frac{TP}{TP+FP}
+$$
+
+- **Recall**:
+
+$$
+\text{Recall} = \frac{TP}{TP+FN}
+$$
+
+- **F1 Score**:
+  $$
+  F1 = 2\frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}
+  $$
+
+These metrics help you gauge how accurately your machine learning model is performing in real trading scenarios.
+
+<div style={{display: 'flex', justifyContent: 'center'}}>
+    <table style={{tableLayout: 'fixed', width: '90%'}}>
+        <thead>
+        <tr>
+            <th style={{width: '50%', textAlign: 'center'}}>Python</th>
+            <th style={{width: '50%', textAlign: 'center'}}>Julia</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td style={{overflow: 'hidden', width: '50%', border: '1px solid transparent'}}>
+
+                ```python
+                def calculate_metrics(TP: int, TN: int, FP: int, FN: int) -> Tuple[float, float, float, float]:
+                ...
+                ```
+
+            </td>
+            <td style={{width: '50%', border: '1px solid transparent'}}>
+
+                ```julia
+                function calculate_metrics(TP::Int, TN::Int, FP::Int,
+                FN::Int)::Tuple
+                ...
+                ```
+
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+### References
+
+1. De Prado, M. L. (2018). Advances in financial machine learning. John Wiley & Sons.
+2. De Prado, M. M. L. (2020). Machine learning for asset managers. Cambridge University Press.

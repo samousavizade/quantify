@@ -1,0 +1,110 @@
+---
+title: Kurtosis of GARCH Models
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Kurtosis of GARCH Models
+
+The kurtosis of a GARCH model can be derived analytically under certain conditions. Here we focus on the GARCH(1,1) model:
+
+$$
+r_t = \mu + a_t, \quad a_t = \sigma_t \epsilon_t, \quad \sigma_t^2 = \alpha_0 + \alpha_1 a_{t-1}^2 + \beta_1 \sigma_{t-1}^2
+$$
+
+where $\{\epsilon_t\}$ is a sequence of independent and identically distributed random variables with mean zero and variance 1. We assume that $\epsilon_t$ follows a standard normal distribution.
+
+To derive the kurtosis, we need the following moments:
+
+1. $E(a_t) = 0$
+2. $E(a_t^2) = E(\sigma_t^2) = \frac{\alpha_0}{1-\alpha_1-\beta_1}$
+3. $E(a_t^4) = E(\sigma_t^4)E(\epsilon_t^4) = 3E(\sigma_t^4)$
+
+The last equality holds because $\epsilon_t$ follows a standard normal distribution.
+
+To obtain $E(\sigma_t^4)$, we square both sides of the volatility equation:
+
+$$
+\sigma_t^4 = (\alpha_0 + \alpha_1 a_{t-1}^2 + \beta_1 \sigma_{t-1}^2)^2
+$$
+
+Expanding the right-hand side and taking expectations, we have:
+
+$$
+\begin{aligned}
+E(\sigma_t^4) &= \alpha_0^2 + 2\alpha_0\alpha_1 E(a_{t-1}^2) + 2\alpha_0\beta_1 E(\sigma_{t-1}^2) + \alpha_1^2 E(a_{t-1}^4) \\
+&\quad + 2\alpha_1\beta_1 E(a_{t-1}^2\sigma_{t-1}^2) + \beta_1^2 E(\sigma_{t-1}^4)
+\end{aligned}
+$$
+
+Under stationarity, we have $E(\sigma_t^4) = E(\sigma_{t-1}^4)$. Also, $E(a_{t-1}^2) = E(\sigma_{t-1}^2) = \frac{\alpha_0}{1-\alpha_1-\beta_1}$ and $E(a_{t-1}^4) = 3E(\sigma_{t-1}^4)$. For the cross-product term, we have:
+
+$$
+E(a_{t-1}^2\sigma_{t-1}^2) = E[\sigma_{t-1}^2 E(a_{t-1}^2|\mathcal{F}_{t-2})] = E(\sigma_{t-1}^4)
+$$
+
+Substituting these results into the equation for $E(\sigma_t^4)$, we obtain:
+
+$$
+\begin{aligned}
+E(\sigma_t^4) &= \alpha_0^2 + \frac{2\alpha_0^2(\alpha_1+\beta_1)}{1-\alpha_1-\beta_1} + 3\alpha_1^2 E(\sigma_t^4) + 2\alpha_1\beta_1 E(\sigma_t^4) + \beta_1^2 E(\sigma_t^4) \\
+&= \alpha_0^2 + \frac{2\alpha_0^2(\alpha_1+\beta_1)}{1-\alpha_1-\beta_1} + (\alpha_1^2 + 2\alpha_1\beta_1 + \beta_1^2)E(\sigma_t^4)
+\end{aligned}
+$$
+
+Solving for $E(\sigma_t^4)$, we get:
+
+$$
+E(\sigma_t^4) = \frac{\alpha_0^2(1-\alpha_1-\beta_1+2\alpha_1\beta_1+\beta_1^2)}{(1-\alpha_1-\beta_1)(1-\alpha_1^2-2\alpha_1\beta_1-\beta_1^2)}
+$$
+
+Now we can compute $E(a_t^4)$:
+
+$$
+E(a_t^4) = 3E(\sigma_t^4) = \frac{3\alpha_0^2(1-\alpha_1-\beta_1+2\alpha_1\beta_1+\beta_1^2)}{(1-\alpha_1-\beta_1)(1-\alpha_1^2-2\alpha_1\beta_1-\beta_1^2)}
+$$
+
+The kurtosis of $a_t$ is defined as:
+
+$$
+K(a_t) = \frac{E(a_t^4)}{[E(a_t^2)]^2}
+$$
+
+Substituting the expressions for $E(a_t^4)$ and $E(a_t^2)$, we obtain:
+
+$$
+K(a_t) = \frac{3(1-\alpha_1-\beta_1+2\alpha_1\beta_1+\beta_1^2)}{(1-\alpha_1-\beta_1)(1-\alpha_1^2-2\alpha_1\beta_1-\beta_1^2)}
+$$
+
+This result shows that the kurtosis of a GARCH(1,1) model is always greater than 3, which is the kurtosis of a normal distribution. This explains why GARCH models can capture the heavy-tailed behavior commonly observed in financial time series.
+
+For the kurtosis to exist, we need:
+
+$$
+1 - \alpha_1^2 - 2\alpha_1\beta_1 - \beta_1^2 > 0
+$$
+
+This condition is more stringent than the second-moment condition $\alpha_1 + \beta_1 < 1$.
+
+Example:
+Consider a GARCH(1,1) model with $\alpha_0 = 0.1$, $\alpha_1 = 0.1$, and $\beta_1 = 0.8$. The kurtosis of this model is:
+
+$$
+K(a_t) = \frac{3(1-0.1-0.8+2(0.1)(0.8)+0.8^2)}{(1-0.1-0.8)(1-0.1^2-2(0.1)(0.8)-0.8^2)} = 9.11
+$$
+
+This kurtosis is much higher than that of a normal distribution, indicating that the GARCH(1,1) model can generate heavy-tailed distributions.
+
+It's worth noting that while GARCH models can capture excess kurtosis, they may still underestimate the true kurtosis of some financial time series. This is one reason why researchers often consider using non-normal distributions for $\epsilon_t$, such as the Student's t-distribution or the generalized error distribution (GED).
+
+The kurtosis of a GARCH model is related to its persistence. As the persistence (measured by $\alpha_1 + \beta_1$) increases, the kurtosis also increases. In the limit, as $\alpha_1 + \beta_1$ approaches 1, the kurtosis approaches infinity. This relationship explains why highly persistent volatility processes are often associated with heavy-tailed return distributions.
+
+For higher-order GARCH models, deriving the kurtosis becomes more complex. However, the general principle remains the same: GARCH models generate excess kurtosis through the time-varying nature of the conditional variance.
+
+In practice, the theoretical kurtosis derived here can be compared with the sample kurtosis of the residuals from a fitted GARCH model. If the sample kurtosis is significantly higher than the theoretical kurtosis, it may indicate that the GARCH model with normal innovations is not fully capturing the heavy-tailed behavior of the data. In such cases, considering alternative distributions for $\epsilon_t$ or exploring more flexible volatility models might be appropriate.
+
+Understanding the kurtosis properties of GARCH models is crucial for risk management and option pricing applications. The ability of GARCH models to generate heavy-tailed distributions makes them valuable tools for modeling financial returns, which often exhibit more extreme values than would be expected under a normal distribution.

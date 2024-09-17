@@ -1,0 +1,126 @@
+---
+title: Bilinear Model
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Bilinear Model
+
+Bilinear models are simple nonlinear time series models that extend the linear ARMA models by including interactions between past observations and past innovations. The general form of a bilinear model is:
+
+$$
+r_t = \mu + \sum_{i=1}^p \phi_i r_{t-i} + \sum_{j=1}^q \theta_j a_{t-j} + \sum_{i=1}^m \sum_{j=1}^n \beta_{ij} r_{t-i} a_{t-j} + a_t
+$$
+
+where $\{a_t\}$ is a sequence of independent and identically distributed (iid) random variables with mean zero and variance $\sigma_a^2$, and $\mu$, $\phi_i$, $\theta_j$, and $\beta_{ij}$ are parameters. The last double summation term represents the bilinear component of the model. When all $\beta_{ij} = 0$, the model reduces to a linear ARMA model.
+
+A simple bilinear model is the BL(1,0,1,1) model:
+
+$$
+r_t = \phi_1 r_{t-1} + \beta_{11} r_{t-1} a_{t-1} + a_t
+$$
+
+This model says that the current value $r_t$ depends not only linearly on $r_{t-1}$, but also on the interaction between $r_{t-1}$ and $a_{t-1}$. The bilinear term $\beta_{11} r_{t-1} a_{t-1}$ introduces asymmetry into the model.
+
+### Properties of Bilinear Models
+
+1. **Stationarity**: The stationarity conditions for bilinear models are more complex than those for linear models. For the BL(1,0,1,1) model, a sufficient condition for stationarity is:
+
+$$
+\phi_1^2 + \beta_{11}^2 \sigma_a^2 < 1
+$$
+
+This condition ensures that the impact of past values diminishes over time.
+
+2. **Moments**: The moments of bilinear models can be derived, but the calculations are often complicated. For the BL(1,0,1,1) model, assuming $a_t$ is normally distributed:
+
+$$
+E[r_t] = 0
+$$
+
+$$
+Var(r_t) = \frac{\sigma_a^2}{1 - \phi_1^2 - \beta_{11}^2 \sigma_a^2}
+$$
+
+3. **Asymmetry**: Bilinear models can capture asymmetric effects in time series data. For example, in the BL(1,0,1,1) model, if $\beta_{11} > 0$, positive shocks tend to have a larger impact on future values than negative shocks of the same magnitude.
+
+4. **Non-Gaussianity**: Even if the innovations $a_t$ are Gaussian, the resulting bilinear process $r_t$ is generally non-Gaussian due to the nonlinear terms.
+
+### Estimation of Bilinear Models
+
+Estimation of bilinear models is more challenging than for linear models due to their nonlinear nature. Several methods have been proposed:
+
+1. **Conditional Least Squares**: This method minimizes the sum of squared one-step ahead prediction errors:
+
+$$
+\sum_{t=2}^T (r_t - E[r_t | r_{t-1}, r_{t-2}, ...])^2
+$$
+
+For the BL(1,0,1,1) model, this involves minimizing:
+
+$$
+\sum_{t=2}^T (r_t - \phi_1 r_{t-1} - \beta_{11} r_{t-1} a_{t-1})^2
+$$
+
+where $a_{t-1}$ is replaced by its estimate from the previous iteration.
+
+2. **Maximum Likelihood Estimation**: Assuming Gaussian innovations, the log-likelihood function can be maximized numerically. However, the likelihood function is often complex and may have multiple local maxima.
+
+3. **Method of Moments**: This approach equates sample moments to their theoretical counterparts and solves the resulting system of equations.
+
+### Forecasting with Bilinear Models
+
+Forecasting with bilinear models is more complex than with linear models due to the interaction terms. For the BL(1,0,1,1) model, the one-step ahead forecast at time $h$ is:
+
+$$
+\hat{r}_{h+1} = E[r_{h+1} | r_h, r_{h-1}, ...] = \phi_1 r_h + \beta_{11} r_h a_h
+$$
+
+For multi-step forecasts, the nonlinearity of the model leads to complications. The exact conditional expectation is often intractable, and approximations or simulation methods may be necessary.
+
+### Applications of Bilinear Models
+
+Bilinear models have found applications in various fields, including:
+
+1. **Finance**: Modeling asymmetric effects in stock returns and volatility.
+2. **Economics**: Capturing nonlinear dynamics in macroeconomic variables.
+3. **Environmental Science**: Modeling complex interactions in ecological systems.
+
+### Limitations of Bilinear Models
+
+Despite their flexibility, bilinear models have some limitations:
+
+1. **Interpretability**: The interaction terms can be difficult to interpret, especially for higher-order models.
+2. **Estimation Challenges**: The nonlinear nature of the model can lead to difficulties in parameter estimation, including convergence issues and multiple local optima.
+3. **Model Selection**: Choosing the appropriate orders for the bilinear terms can be challenging, as traditional model selection criteria may not be directly applicable.
+
+### Example: Simulating a Bilinear Process
+
+To illustrate the behavior of a bilinear model, consider the following R code that simulates a BL(1,0,1,1) process:
+
+```r
+set.seed(123)
+T <- 1000
+phi1 <- 0.5
+beta11 <- 0.3
+sigma_a <- 1
+
+r <- numeric(T)
+a <- rnorm(T, 0, sigma_a)
+
+for (t in 2:T) {
+  r[t] <- phi1 * r[t-1] + beta11 * r[t-1] * a[t-1] + a[t]
+}
+
+plot(r, type = "l", main = "Simulated BL(1,0,1,1) Process")
+```
+
+This code generates a time series following a BL(1,0,1,1) model with $\phi_1 = 0.5$, $\beta_{11} = 0.3$, and $\sigma_a = 1$. The resulting plot would show the nonlinear and potentially asymmetric behavior of the bilinear process.
+
+### Conclusion
+
+Bilinear models offer a simple yet flexible approach to modeling nonlinear time series. They extend linear ARMA models by incorporating interaction terms between past observations and innovations. While this allows for capturing more complex dynamics, including asymmetric effects, it also introduces challenges in estimation and interpretation. As with any modeling approach, careful consideration should be given to the trade-off between model complexity and interpretability when applying bilinear models to real-world data.

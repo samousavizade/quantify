@@ -1,0 +1,123 @@
+---
+title: The CHARMA Model
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## The CHARMA Model
+
+The conditional heteroscedastic ARMA (CHARMA) model of Tsay (1987) generalizes the ARCH model by allowing the conditional variance to depend on both past innovations and past observed values. Specifically, a CHARMA(p,q) model assumes that
+
+$$
+r_t = \mu_t + a_t, \quad a_t = \sigma_t \epsilon_t
+$$
+
+where $\mu_t$ is the conditional mean of $r_t$ given $\mathcal{F}_{t-1}$, $\{\epsilon_t\}$ is a sequence of independent and identically distributed random variables with mean zero and variance 1, and the conditional variance $\sigma_t^2$ is
+
+$$
+\sigma_t^2 = \alpha_0 + \sum_{i=1}^p \alpha_i a_{t-i}^2 + \sum_{j=1}^q \beta_j r_{t-j}^2
+$$
+
+where $\alpha_0 > 0$, $\alpha_i \geq 0$, and $\beta_j \geq 0$. The model reduces to an ARCH(p) model if all $\beta_j = 0$. It becomes a GARCH model if $r_{t-j}^2$ is replaced by $\sigma_{t-j}^2$ in the second summation.
+
+The CHARMA model has some advantages over the GARCH model:
+
+1. It is easier to identify the order (p,q) of a CHARMA model than that of a GARCH model because $r_t^2$ is observable, whereas $\sigma_t^2$ is not.
+
+2. The model can be estimated by a two-stage method similar to that of Engle (1982).
+
+3. The model allows for negative correlations between $r_t^2$ and $r_{t-j}^2$ for some lags j.
+
+However, the CHARMA model also has some drawbacks:
+
+1. The nonnegativity constraints on the parameters are hard to check, especially when q > 0.
+
+2. The stationarity condition of the model is not easy to obtain.
+
+3. The model may not be as parsimonious as the GARCH model in describing the volatility of an asset return.
+
+To overcome the difficulty of parameter constraints, one can use
+
+$$
+\sigma_t^2 = \alpha_0 + \sum_{i=1}^p \alpha_i |a_{t-i}| + \sum_{j=1}^q \beta_j |r_{t-j}|
+$$
+
+This specification ensures that $\sigma_t^2 > 0$ for all t provided that $\alpha_0 > 0$.
+
+### Estimation
+
+The CHARMA model can be estimated by the method of maximum likelihood. Assuming that $\epsilon_t$ follows a standard normal distribution, the conditional log likelihood function of the model is
+
+$$
+\ell(\Theta) = -\frac{1}{2} \sum_{t=1}^T [\log(2\pi) + \log(\sigma_t^2) + \frac{a_t^2}{\sigma_t^2}]
+$$
+
+where $\Theta$ denotes the parameter vector of the model. This log likelihood function can be maximized numerically to obtain the maximum likelihood estimates.
+
+Alternatively, one can use a two-stage method to estimate the model. In the first stage, estimate the conditional mean equation to obtain the residual series $\{\hat{a}_t\}$. In the second stage, use $\{\hat{a}_t\}$ to estimate the conditional variance equation. The two-stage method is computationally simpler, but the estimates are not as efficient as those of the maximum likelihood method.
+
+### Model Checking
+
+The adequacy of a fitted CHARMA model can be checked by examining the standardized residuals
+
+$$
+\hat{\epsilon}_t = \frac{\hat{a}_t}{\hat{\sigma}_t}
+$$
+
+where $\hat{a}_t$ is the residual series and $\hat{\sigma}_t$ is the fitted conditional standard deviation. If the model is adequate, then $\{\hat{\epsilon}_t\}$ should behave like an iid sequence with mean zero and variance 1. The Ljung-Box statistics of $\{\hat{\epsilon}_t\}$ and $\{\hat{\epsilon}_t^2\}$ can be used to check for any remaining serial correlations in the standardized residuals and their squares.
+
+### Forecasting
+
+For an estimated CHARMA model, the 1-step ahead forecast of volatility at the forecast origin h is
+
+$$
+\hat{\sigma}_h^2(1) = \hat{\alpha}_0 + \sum_{i=1}^p \hat{\alpha}_i a_{h+1-i}^2 + \sum_{j=1}^q \hat{\beta}_j r_{h+1-j}^2
+$$
+
+where $\hat{\alpha}_i$ and $\hat{\beta}_j$ are the parameter estimates. Multi-step ahead forecasts can be obtained recursively, but they are more complicated because $E(r_{h+k}^2|\mathcal{F}_h) \neq [E(r_{h+k}|\mathcal{F}_h)]^2$ for $k > 1$.
+
+### Effects of Explanatory Variables
+
+The CHARMA model can be extended to include the effects of explanatory variables on volatility. Let $x_t$ be a vector of explanatory variables. A CHARMA-X model is
+
+$$
+\sigma_t^2 = \alpha_0 + \sum_{i=1}^p \alpha_i a_{t-i}^2 + \sum_{j=1}^q \beta_j r_{t-j}^2 + \gamma' x_t
+$$
+
+where $\gamma$ is a vector of coefficients. This model allows external factors to influence the conditional variance of $r_t$. For instance, $x_t$ may include macroeconomic variables, trading volume, or other market indicators that are believed to affect volatility.
+
+The inclusion of explanatory variables can improve the model's forecasting performance if the variables have significant predictive power for volatility. However, care must be taken to ensure that the explanatory variables are available at the time of forecasting.
+
+### Example
+
+Consider modeling the daily returns of a stock using a CHARMA(1,1) model with trading volume as an explanatory variable:
+
+$$
+r_t = \mu + a_t, \quad a_t = \sigma_t \epsilon_t
+$$
+
+$$
+\sigma_t^2 = \alpha_0 + \alpha_1 a_{t-1}^2 + \beta_1 r_{t-1}^2 + \gamma \log(V_t)
+$$
+
+where $V_t$ is the trading volume. The log transformation is often applied to volume to reduce the impact of extreme values.
+
+After estimating this model, one might find:
+
+$$
+\hat{\sigma}_t^2 = 0.00001 + 0.05 a_{t-1}^2 + 0.85 r_{t-1}^2 + 0.000002 \log(V_t)
+$$
+
+This result would suggest that:
+
+1. Past squared returns have a larger impact on current volatility than past squared innovations.
+2. Trading volume has a positive but small effect on volatility.
+3. The volatility process shows high persistence, as $\alpha_1 + \beta_1 = 0.90$ is close to 1.
+
+To check the model's adequacy, one would examine the ACF and PACF of the standardized residuals and their squares, as well as conduct formal tests like the Ljung-Box test.
+
+In summary, the CHARMA model provides a flexible framework for modeling conditional heteroscedasticity, allowing for both ARCH effects and direct dependence on past observed values. The inclusion of explanatory variables further extends its capability to capture various sources of volatility. However, the model's complexity in terms of parameter constraints and stationarity conditions makes it less popular in practice compared to GARCH models.

@@ -1,0 +1,95 @@
+---
+title: Conclusion
+draft: false
+summary: Backtest statistics are essential for evaluating the efficacy of investment strategies.
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+# 8 Conclusions
+
+A scientific theory is a falsifiable statement of the form “X causes Y through mechanism M.” Observed associations amount to phenomenological evidence, but do not rise to the status of scientific knowledge, for three reasons:
+
+- **Type-A Spuriosity**: The observed association can be type-A spurious, due to p-hacking or backtest overfitting.
+- **Non-Causal Association**: Even if true, the association is not necessarily causal.
+- **Lack of Falsifiable Mechanism**: Even if causal, the association does not propose a falsifiable mechanism M by which X causes Y.
+
+Scientific theories should matter to investors for at least three reasons:
+
+1. **Deterrent Against Type-A Spuriosity**: Theories force scientists to justify their modeling choices, allowing researchers to conduct natural experiments and other types of causal inference that were not possible in the twentieth century.
+2. **Transparency and Confidence**: Causal factor investing will serve a social purpose beyond the reach of (associational) factor investing: help asset managers fulfill their fiduciary duties with the transparency and confidence that only the scientific method can deliver.
+3. **Noble Goal**: To achieve this noble goal, the dawn of scientific investing, the factor investing community must first wake up from its associational slumber.
+
+### Implications for Factor Investing
+
+The current state of factor investing literature is characterized by associational claims without a clear causal mechanism. This has led to several issues:
+
+- **Lack of Causal Mechanism**: Factor investing researchers do not identify the causal graph consistent with the observed phenomenon, nor do they propose experiments for falsifying causal mechanisms. This makes their findings likely false due to rampant backtest overfitting and incorrect specification choices.
+- **Type-A and Type-B Spuriosity**: The literature is plagued by type-A spurious claims due to p-hacking and backtest overfitting, and type-B spurious claims due to under-controlling or over-controlling for confounders, specification-searching, and missing mediation analysis.
+- **Need for Causal Inference**: To advance beyond the phenomenological stage, factor investing must adopt methods from causal inference, such as interventional studies, natural experiments, and simulated interventions.
+
+### Path Forward
+
+For factor investing to become a truly scientific discipline, researchers must:
+
+- **Declare Causal Assumptions**: Make all causal assumptions explicit through a causal graph.
+- **Propose Falsifiable Mechanisms**: State the falsifiable causal mechanism responsible for the claimed causal effect.
+- **Provide Empirical Evidence**: Offer empirical evidence in support of the proposed causal mechanism.
+- **Avoid P-Hacking and Specification-Searching**: Implement methods to prevent p-hacking and avoid specification-searching, which can lead to false positives and misspecified models.
+
+By adopting these practices, the field of factor investing can transition from an associational to a causal framework, enhancing its scientific rigor and reliability.
+
+## 8.1 Factor Investing Is a Black-Box
+
+**Virtually all journal articles in the factor investing literature deny or ignore the causal content of factor models.** Authors do not identify the causal graph consistent with the observed sample, they justify their chosen model specification in associational terms (e.g., optimizing the coefficient of determination), and they rarely theorize a falsifiable causal mechanism able to explain their findings. Absent a causal theory, it is nearly impossible to falsify their claims thoroughly (Section 3). It could take decades to collect enough out-of-sample evidence to determine that the association is false, and in-sample evidence is highly susceptible to p-hacking and backtest overfitting.
+
+**The outcome from a backtest or a factor model is yet another associational claim, prone to the same misunderstandings and spurious claims discussed in Sections 5 and 6.** For example, the factor models and backtests of strategies based on FF93, FF15, and C97 do not prove that holding value stocks causes a portfolio to outperform the market, because that causal claim can only be tested by the methods described in Section 4. Even if it were true that holding value stocks causes a portfolio to outperform the market, neither a factor model nor a backtest tells us why.
+
+**Consider the large losses experienced by value funds between late 2017 and early 2022.** Investors never received a straight answer to the question “why did value funds perform so poorly?” The reason is, in absence of a causal theory, nobody knows why value funds should have performed well in the first place, or what turned the sign of value’s $ \hat{\beta} $ (a hallmark of type-B spurious factors, see Section 6.4.2). Asset managers will not admit their confusion to clients, as that would invite large-scale redemptions.
+
+**Answering the “why” question requires a falsifiable causal mechanism, which to this day remains unknown for value investments.** Due to the omission of causal mechanisms (Section 6.2), factor investment strategies are promoted like associational investment strategies, through inductive arguments. For example, a researcher may find that value and momentum strategies have been profitable for many years (enumerative induction) or in many different geographies (variative induction). This associational finding generates the expectation that, whatever the unknown cause of value and momentum, and whatever the mechanism responsible for their profitability, history will continue to repeat itself, even though there is no scientific-deductive basis for such belief.
+
+**Ironically, commercial asset managers routinely require investors to accept disclaimers such as “past performance is not indicative of future results,” in direct contradiction with the inductive claims that authors promote and managers sell to customers.** Answering the “why” question is of particular importance for institutional investors, such as pension funds, sovereign wealth funds, endowments, and insurance companies. These investors manage funds for the benefit of the general public, and have a limited appetite for gambling. Factor investing may be an appropriate strategy for a high-net-worth individual, who can afford losing a large portion of his fortune. However, a salaried worker who has saved for 50 years and depends on those savings to retire should not be induced to wager his future wellbeing on investment strategies that, even if apparently profitable, are black-boxes.
+
+As long as asset managers remain unable to answer the “why” question, they should refrain from promoting to the general public factor investing products as scientific, and institutional investors should question whether factor investing products are investment grade.
+
+### 8.2 The Economic Incentives for Associational Studies
+
+**The financial industry's economic incentives play a significant role in driving the academic agenda in factor investing.** Here are the key points regarding these incentives:
+
+- **Scale of Factor Investing Industry**: In 2019, J.P. Morgan estimated that over USD 2.5 trillion (more than 20 percent of the US equity market capitalization) was managed by quant-style funds. BlackRock estimated that the factor investing industry managed USD 1.9 trillion in 2017 and projected that amount to grow to USD 3.4 trillion by 2022.
+
+**Economic Motivations**: The massive scale of this industry has been built on academic output, not on results for investors. Harvey (2022) argues that economic incentives, rather than scientific considerations, may be driving the academic agenda.
+
+- **Cost and Ease of Production**: The financial industry funds associational studies because they are cheaper and easier to produce than causal (scientific) studies. These associational studies help achieve annual revenues in the tens of billions of US dollars.
+
+**Dismissal of Scientific Concerns**: Unless asset owners demand change, the academic establishment will likely dismiss the need for causality, just as it continues to dismiss the existence of a reproducibility crisis caused by rampant p-hacking and backtest overfitting. This dismissal is in defiance of warnings issued by scientific bodies such as the American Statistical Association, the American Mathematical Society, and the Royal Statistical Society.
+
+The economic incentives favor the production of associational studies over causal ones, which hampers the advancement of factor investing into a truly scientific discipline.
+
+### 8.3 The Dawn of Causal Factor Investing
+
+Answering the “why” question is more than an academic pursuit. Causal factor theories would be highly beneficial to all types of investors, for several reasons:
+
+1. **Efficiency**: Causal models attribute risk and performance correctly. With proper risk and performance attribution, researchers can build portfolios that concentrate exposure on rewarded risks and hedge unrewarded risks.
+2. **Interpretability**: Every institutional investor owes it to its beneficial owners to explain why they may have to delay their plans (e.g., retirement).
+3. **Transparency**: A causal graph makes explicit all the assumptions involved in a theorized mechanism. Investment strategies based on causal theories are not black-boxes.
+4. **Reproducibility**: A causal explanation reduces the chances of (i) random variation (type-A spuriosity), by confining the search space to plausible theories, and (ii) noncausal association (type-B spuriosity), by providing some assurances that the phenomenon will continue to occur as long as the mechanism remains.
+5. **Adaptability**: The profitability of investment strategies founded on associational relations relies on the stability of the joint distribution’s parameters, which in turn depends on the stability of the entire causal graph (variable levels and parameters). In contrast, investment strategies based on causal relations are resilient to changes that do not involve the parameters in the causal path (see Section 6.4.2.1). This makes causal investment strategies more reliable than associational investment strategies.
+6. **Extrapolation**: Only an investment strategy supported by a causal theory is equipped to survive and profit from black-swan events, by monitoring the conditions that trigger them (e.g., liquidity strategies based on the PIN theory performed well during the 2010 flash crash).
+7. **Surveillance**: The validity of a causal mechanism can be assessed in more direct and immediate ways than estimating the probability of a structural break in performance. This attribute is of critical importance in a complex dynamic system like finance:
+
+- An investor in a causal factor investing strategy may be able to divest when the causal mechanism weakens, before losses compound to the point that a statistical test detects a structural break.
+- Causal mechanisms enable factor timing, dynamic bet sizing, and tactical asset allocation.
+
+8. **Improvement**: Causal theories can be refined, as a researcher learns more about the mechanism responsible for the observations. The fate of investment strategies based on causal theories is not unavoidable decay toward zero performance.
+
+These are all attributes that make an investment strategy appealing and trustworthy, and that current factor investments lack.
+
+Financial economists’ adoption of causal inference methods has the potential to transform investing into a truly scientific discipline. Economists are best positioned to inject, make explicit, and argue the extra-statistical information that complements and enriches the work of statisticians. Financial economists interested in causal research would do well in partnering with noncommercial asset managers, such as sovereign wealth funds and endowments. These institutional investors are not conflicted by commercial interests, and their objectives are aligned with their beneficial owners.
+
+The new discipline of “causal factor investing” will be characterized by the adaptation and adoption of tools from causal discovery and do-calculus to the study of the risk characteristics that are responsible for differences in asset returns. Every year, new alternative datasets become available at an increasing rate, allowing researchers to conduct natural experiments and other types of causal inference that were not possible in the twentieth century.
+
+Causal factor investing will serve a social purpose beyond the reach of (associational) factor investing: help asset managers fulfill their fiduciary duties with the transparency and confidence that only the scientific method can deliver. To achieve this noble goal, the dawn of scientific investing, the factor investing community must first wake up from its associational slumber.
