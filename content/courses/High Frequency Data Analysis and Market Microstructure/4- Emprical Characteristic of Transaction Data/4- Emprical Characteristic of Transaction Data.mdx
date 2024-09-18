@@ -10,7 +10,7 @@ import TOCInline from 'pliny/ui/TOCInline';
 
 # Emprical Characteristic of Transaction Data
 
-Let \( t_i \) be the calendar time, measured in seconds from midnight, at which the \( i \)-th transaction of an asset takes place. Associated with the transaction are several variables such as the transaction price, the transaction volume, the prevailing bid and ask quotes, and so on. The collection of \( t_i \) and the associated measurements are referred to as the transaction data. These data have several important characteristics that do not exist when the observations are aggregated over time. Some of the characteristics are given next.
+Let $ t_i $ be the calendar time, measured in seconds from midnight, at which the $ i $-th transaction of an asset takes place. Associated with the transaction are several variables such as the transaction price, the transaction volume, the prevailing bid and ask quotes, and so on. The collection of $ t_i $ and the associated measurements are referred to as the transaction data. These data have several important characteristics that do not exist when the observations are aggregated over time. Some of the characteristics are given next.
 
 1. **Unequally Spaced Time Intervals.** Transactions such as stock tradings on an exchange do not occur at equally spaced time intervals. As such, the observed transaction prices of an asset do not form an equally spaced time series. The time duration between trades becomes important and might contain useful information about market microstructure (e.g., trading intensity).
 
@@ -22,7 +22,7 @@ Let \( t_i \) be the calendar time, measured in seconds from midnight, at which 
 
 To demonstrate these characteristics, we consider first the IBM transactions data from November 1, 1990, to January 31, 1991. These data are from the Trades, Orders Reports, and Quotes (TORQ) data set; see Hasbrouck (1992). There are 63 trading days and 60,328 transactions. To simplify the discussion, we ignore the price changes between trading days and focus on the transactions that occurred in the normal trading hours from 9:30 am to 4:00 pm Eastern time. It is well known that overnight stock returns differ substantially from intraday returns; see Stoll and Whaley (1990) and the references therein.
 
-Table 5.1 gives the frequencies in percentages of price change measured in the tick size of \( \$1 = \$0.125 \). From the table, we make the following observations:
+Table 5.1 gives the frequencies in percentages of price change measured in the tick size of $ \$1 = \$0.125 $. From the table, we make the following observations:
 
 1. About two-thirds of the intraday transactions were without price change.
 2. The price changed in one tick approximately 29% of the intraday transactions.
@@ -30,7 +30,7 @@ Table 5.1 gives the frequencies in percentages of price change measured in the t
 4. Only about 1.3% of the transactions resulted in price changes of three ticks or more.
 5. The distribution of positive and negative price changes was approximately symmetric.
 
-Consider next, the number of transactions in a 5-minute time interval. Denote the series by \( x_t \). That is, \( x_1 \) is the number of IBM transactions from 9:30 am to 9:35 am on November 1, 1990, Eastern time; \( x_2 \) is the number of transactions from 9:35 am to 9:40 am; and so on. The time gaps between trading days are ignored.
+Consider next, the number of transactions in a 5-minute time interval. Denote the series by $ x_t $. That is, $ x_1 $ is the number of IBM transactions from 9:30 am to 9:35 am on November 1, 1990, Eastern time; $ x_2 $ is the number of transactions from 9:35 am to 9:40 am; and so on. The time gaps between trading days are ignored.
 
 | Number (tick) | ≤ -3 | -2   | -1    | 0     | 1     | 2    | ≥3   |
 | ------------- | ---- | ---- | ----- | ----- | ----- | ---- | ---- |
@@ -42,7 +42,7 @@ Consider next, the number of transactions in a 5-minute time interval. Denote th
 
 > Figure 5.1 IBM intraday transactions data from 11/01/90 to 1/31/91: (a) number of transactions in 5-minute time intervals and (b) sample ACF of series in part (a).
 
-Figure 5.1(a) shows the time plot of \( x_t \), and Figure 5.1(b) shows the sample ACF of \( x_t \) for lags 1–260. Of particular interest is the cyclical pattern of the ACF with a periodicity of 78, which is the number of 5-minute intervals in a trading day. The number of transactions thus exhibits a daily pattern. To further illustrate the daily trading pattern, Figure 5.2 shows the average number of transactions within 5-minute time intervals over the 63 days. There are 78 such averages. The plot exhibits a “smiling” or U shape, indicating heavier trading at the opening and closing of the market and thinner trading during the lunch hours.
+Figure 5.1(a) shows the time plot of $ x_t $, and Figure 5.1(b) shows the sample ACF of $ x_t $ for lags 1–260. Of particular interest is the cyclical pattern of the ACF with a periodicity of 78, which is the number of 5-minute intervals in a trading day. The number of transactions thus exhibits a daily pattern. To further illustrate the daily trading pattern, Figure 5.2 shows the average number of transactions within 5-minute time intervals over the 63 days. There are 78 such averages. The plot exhibits a “smiling” or U shape, indicating heavier trading at the opening and closing of the market and thinner trading during the lunch hours.
 
 ![Figure 5.2](/static/courses/High-Frequency-Data-Analysis-and-Market-Microstructure/Figure52.png)
 
@@ -50,7 +50,7 @@ Figure 5.1(a) shows the time plot of \( x_t \), and Figure 5.1(b) shows the samp
 
 Since we focus on transactions that occurred during normal trading hours of a trading day, there are 59,838 time intervals in the data. These intervals are called the intraday durations between trades. For IBM stock, there were 6,531 zero time intervals. That is, during the normal trading hours of the 63 trading days from November 1, 1990, to January 31, 1991, multiple transactions in a second occurred 6,531 times, which is about 10.91%. Among these multiple transactions, 1,002 of them had different prices, which is about 1.67% of the total number of intraday transactions. Therefore, multiple transactions (i.e., zero durations) may become an issue in statistical modeling of the time durations between trades.
 
-Table 5.2 provides a two-way classification of price movements. Here price movements are classified into “up,” “unchanged,” and “down.” We denote them by \( + \), \( 0 \), and \( - \), respectively. The table shows the price movements between two
+Table 5.2 provides a two-way classification of price movements. Here price movements are classified into “up,” “unchanged,” and “down.” We denote them by $ + $, $ 0 $, and $ - $, respectively. The table shows the price movements between two
 
 | (i)th trade     | +    | 0     | −     | Margin |
 | --------------- | ---- | ----- | ----- | ------ |
@@ -65,12 +65,12 @@ Table 5.2 provides a two-way classification of price movements. Here price movem
 
 Consecutive trades [i.e., from the (i − 1)th to the ith transaction] in the sample. From the table, trade-by-trade data show that:
 
-1. Consecutive price increases or decreases are relatively rare, which are about \( \frac{441}{59837} = 0.74\% \) and \( \frac{410}{59837} = 0.69\% \), respectively.
+1. Consecutive price increases or decreases are relatively rare, which are about $ \frac{441}{59837} = 0.74\% $ and $ \frac{410}{59837} = 0.69\% $, respectively.
 2. There is a slight edge to move from up to unchanged rather than to down; see row 1 of the table.
 3. There is a high tendency for the price to remain unchanged.
 4. The probabilities of moving from down to up or unchanged are about the same; see row 3.
 
-The first observation mentioned before is a clear demonstration of bid–ask bounce, showing price reversals in intraday transactions data. To confirm this phenomenon, we consider a directional series \( D_i \) for price movements, where \( D_i \) assumes the value \( +1, 0, \) and \( -1 \) for up, unchanged, and down price movement, respectively, for the \( i \)-th transaction. The ACF of \(\{D_i\}\) has a single spike at lag 1 with value \(-0.389\), which is highly significant for a sample size of 59,837 and confirms the price reversal in consecutive trades.
+The first observation mentioned before is a clear demonstration of bid–ask bounce, showing price reversals in intraday transactions data. To confirm this phenomenon, we consider a directional series $ D_i $ for price movements, where $ D_i $ assumes the value $ +1, 0, $ and $ -1 $ for up, unchanged, and down price movement, respectively, for the $ i $-th transaction. The ACF of $\{D_i\}$ has a single spike at lag 1 with value $-0.389$, which is highly significant for a sample size of 59,837 and confirms the price reversal in consecutive trades.
 
 As a second illustration, we consider the transactions data of IBM stock in December 1999 obtained from the TAQ database. The normal trading hours are from 9:30 am to 4:00 pm Eastern time, except for December 31 when the market closed at 1:00 pm. Comparing with the 1990–1991 data, two important changes have occurred. First, the number of intraday tradings has increased sixfold. There were 134,120 intraday tradings in December 1999 alone. The increased trading intensity also increased the chance of multiple transactions within a second. The percentage of trades with zero time duration doubled to 22.98%. At the extreme, there were 42 transactions within a given second that happened twice on December 3, 1999. Second, the tick size of price movement was $1 = \$0.0625$ instead of $1$. The change in tick size should reduce the bid–ask spread.
 
@@ -124,4 +124,4 @@ Finally, we consider the transactions data of Boeing stock on December 1, 2008. 
 
 > Table 5.4 Frequencies of Price Change for Boeing Stock on December 1, 2008
 
-Again, let \( t*i \) be the calendar time, measured in seconds from midnight, when the \( i \)th transaction took place. Let \( P*{t*i} \) be the transaction price. The price change from the \( (i−1) \)th to the \( i \)th trade is \( y_i \equiv P_t = P_t - P*{t-1} \) and the time duration is \( t*i = t_i - t*{i-1} \). Here it is understood that the subscript \( i \) in \( t_i \) and \( y_i \) denotes the time sequence of transactions, not the calendar time. In what follows, we consider models for \( y_i \) and \( t_i \) both individually and jointly.
+Again, let $ t*i $ be the calendar time, measured in seconds from midnight, when the $ i $th transaction took place. Let $ P*{t*i} $ be the transaction price. The price change from the $ (i−1) $th to the $ i $th trade is $ y_i \equiv P_t = P_t - P*{t-1} $ and the time duration is $ t*i = t_i - t*{i-1} $. Here it is understood that the subscript $ i $ in $ t_i $ and $ y_i $ denotes the time sequence of transactions, not the calendar time. In what follows, we consider models for $ y_i $ and $ t_i $ both individually and jointly.

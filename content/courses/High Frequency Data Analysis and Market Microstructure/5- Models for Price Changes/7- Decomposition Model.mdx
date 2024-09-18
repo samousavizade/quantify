@@ -8,37 +8,37 @@ import TOCInline from 'pliny/ui/TOCInline';
 
 <TOCInline toc={props.toc} asDisclosure />
 
-An alternative approach to modeling price change is to decompose it into three components and use conditional specifications for the components; see Rydberg and Shephard (2003). The three components are an indicator for price change, the direction of price movement if there is a change, and the size of price change if a change occurs. Specifically, the price change at the \(i\)th transaction can be written as
+An alternative approach to modeling price change is to decompose it into three components and use conditional specifications for the components; see Rydberg and Shephard (2003). The three components are an indicator for price change, the direction of price movement if there is a change, and the size of price change if a change occurs. Specifically, the price change at the $i$th transaction can be written as
 
 $$
 y_i \equiv P_t - P_{t-1} = A_i D_i S_i,
 $$
 
-where \(A_i\) is a binary variable defined as:
+where $A_i$ is a binary variable defined as:
 
-\[
+$$
 A_i =
 \begin{cases}
 1 & \text{if there is a price change at the } i\text{th trade}, \\
 0 & \text{if price remains the same at the } i\text{th trade},
 \end{cases}
-\]
+$$
 
-\(D_i\) is also a discrete variable signifying the direction of the price change if a change occurs, that is,
+$D_i$ is also a discrete variable signifying the direction of the price change if a change occurs, that is,
 
-\[
+$$
 D_i|(A_i = 1) =
 \begin{cases}
 1 & \text{if price increases at the } i\text{th trade}, \\
 -1 & \text{if price drops at the } i\text{th trade},
 \end{cases}
-\]
+$$
 
-where \(D_i |(A_i = 1)\) means that \(D_i\) is defined under the condition of \(A_i = 1\), and \(S_i\) is the size of the price change in ticks if there is a change at the \(i\)th trade and \(S_i = 0\) if there is no price change at the \(i\)th trade. When there is a price change, \(S_i\) is a positive integer-valued random variable.
+where $D_i |(A_i = 1)$ means that $D_i$ is defined under the condition of $A_i = 1$, and $S_i$ is the size of the price change in ticks if there is a change at the $i$th trade and $S_i = 0$ if there is no price change at the $i$th trade. When there is a price change, $S_i$ is a positive integer-valued random variable.
 
-Note that \(D_i\) is not needed when \(A_i = 0\), and there is a natural ordering in the decomposition. \(D_i\) is well defined only when \(A_i = 1\) and \(S_i\) is meaningful when \(A_i = 1\) and \(D_i\) is given. Model specification under the decomposition makes use of the ordering.
+Note that $D_i$ is not needed when $A_i = 0$, and there is a natural ordering in the decomposition. $D_i$ is well defined only when $A_i = 1$ and $S_i$ is meaningful when $A_i = 1$ and $D_i$ is given. Model specification under the decomposition makes use of the ordering.
 
-Let \(F*i\) be the information set available at the \(i\)th transaction. Examples of elements in \(F_i\) are \(t*{i-j}\), \(A*{i-j}\), \(D*{i-j}\), and \(S\_{i-j}\) for \(j \geq 0\). The evolution of price change under model (5.21) can then be partitioned as
+Let $F*i$ be the information set available at the $i$th transaction. Examples of elements in $F_i$ are $t*{i-j}$, $A*{i-j}$, $D*{i-j}$, and $S\_{i-j}$ for $j \geq 0$. The evolution of price change under model (5.21) can then be partitioned as
 
 $$
 P(y_i|F_{i-1}) = P(A_i D_i S_i|F_{i-1}) = P(S_i|D_i,A_i,F_{i-1})P(D_i|A_i,F_{i-1})P(A_i|F_{i-1}).
