@@ -13,7 +13,7 @@ import TOCInline from 'pliny/ui/TOCInline';
 Let $ y^_ $ be the unobservable price change of the asset under study (i.e., $ y^_ = P^_\_t - P^_\_{t-1} $), where $ P^_\_t $ is the virtual price of the asset at time $ t $. The ordered probit model assumes that $ y_i^_ $ is a continuous random variable and follows the model
 
 $$
-y_i^\* = x_i \beta + \varepsilon_i, \quad (5.15)
+y_i^* = x_i \beta + \varepsilon_i, \quad (5.15)
 $$
 
 where $ x*i $ is a $ p $-dimensional row vector of explanatory variables available at time $ t*{i-1} $, $ \beta $ is a $ p \times 1 $ parameter vector, $ E(\varepsilon_i | x_i) = 0 $, $ \text{Var}(\varepsilon_i | x_i) = \sigma_i^2 $, and $ \text{Cov}(\varepsilon_i, \varepsilon_j) = 0 $ for $ i \neq j $. The conditional variance $ \sigma_i^2 $ is assumed to be a positive function of the explanatory variable $ w_i $, that is,
@@ -27,7 +27,7 @@ Where $ g(\cdot) $ is a positive function. For financial transactions data, $ w*
 Suppose that the observed price change $ y*i $ may assume $ k $ possible values. In theory, $ k $ can be infinity, but countable. In practice, $ k $ is finite and may involve combining several categories into a single value. For example, we have $ k = 7 $ in Table 5.1, where the first value “−3 ticks” means that the price change is −3 ticks or lower. We denote the $ k $ possible values as $ \{s_1, ..., s_k\} $. The ordered probit model postulates the relationship between $ y_i^* $ and $ y*i^* $ as
 
 $$
-y*i = s_j \quad \text{if} \quad \alpha*{j-1} < y_i^\* \leq \alpha_j, \quad j = 1, ..., k, \quad (5.17)
+y*i = s_j \quad \text{if} \quad \alpha*{j-1} < y_i^* \leq \alpha_j, \quad j = 1, ..., k, \quad (5.17)
 $$
 
 Where $\alpha_j$ are real numbers satisfying $-\infty = \alpha_0 < \alpha_1 < \cdots < \alpha_{k-1} < \alpha_k = \infty$. Under the assumption of conditional Gaussian distribution, we have
@@ -114,7 +114,7 @@ The parameter estimates and their t ratios are given in Table 5.5. All the t rat
 | **Equation Parameters of the Probit Model** |          |         |
 | $\gamma_1$                                | 0.40     | 15.6    |
 | $\gamma_2$                                | 0.52     | 71.1    |
-| $\beta_1 : \Delta t_i^\*$                 | -0.12    | -11.4   |
+| $\beta_1 : \Delta t_i^*$                 | -0.12    | -11.4   |
 | $\beta*2 : y*{-1}$                        | -1.01    | -135.6  |
 | $\beta_3$                                 | -0.53    | -85.0   |
 | $\beta_4$                                 | -0.21    | -47.2   |
@@ -129,5 +129,5 @@ The parameter estimates and their t ratios are given in Table 5.5. All the t rat
 | $\beta\_{13}$                             | 0.02     | 7.7     |
 
 > Table 5.5 Parameter Estimates of Ordered Probit Model in Eqs. (5.19) and (5.20) for the 1988 Transaction Data of IBM, Where t Denotes the t Ratio
-> Reprinted with permission of Elsevier from Journal of Financial Economics (1992, Vol.31, p.345).\*
+> Reprinted with permission of Elsevier from Journal of Financial Economics (1992, Vol.31, p.345).*
 $$
