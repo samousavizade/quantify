@@ -5,13 +5,26 @@ import ArchitectureIcon from '@mui/icons-material/Architecture';
 import Tag from '@/components/Tag';
 import { motion } from 'framer-motion';
 
-// @ts-ignore
-const CourseCard = ({ courses }) => {
-  // @ts-ignore
+interface Course {
+  imageSrc: string;
+  title: string;
+  field: string;
+  tags: string[];
+  timeNeeded: string;
+  level: string;
+  provider: string;
+  rating: number;
+}
+
+interface CourseCardProps {
+  courses: Course[];
+}
+
+const CourseCard: React.FC<CourseCardProps> = ({ courses }) => {
   return (
     <ul className={'space-y-5'}>
       {courses.map(
-        ({ imageSrc, title, field, tags, timeNeeded, level, provider, rating }, index: number) => {
+        ({ imageSrc, title, field, tags, timeNeeded, level, provider, rating }, index) => {
           return (
             <motion.li
               key={title}
@@ -47,7 +60,7 @@ const CourseCard = ({ courses }) => {
                 </div>
 
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {tags.map((tag: string) => (
+                  {tags.map((tag) => (
                     <Tag key={tag} text={tag} />
                   ))}
                 </div>

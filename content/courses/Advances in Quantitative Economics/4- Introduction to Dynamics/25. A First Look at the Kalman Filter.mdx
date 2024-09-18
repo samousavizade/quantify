@@ -737,7 +737,7 @@ This competitor will use the conditional expectation $ \mathbb E[ x_t
 
 The conditional expectation is known to be the optimal prediction method for minimizing mean squared error.
 
-(More precisely, the minimizer of $ \mathbb E \, \|... x*t - g(x*{t-1}) \|^2 $ with respect to $ g $ is $ g^_(x_{t-1}) := \mathbb E[ x_t \,|\, x*{t-1}] $)
+(More precisely, the minimizer of $ \mathbb E \, \|... x*t - g(x*{t-1}) \|^2 $ with respect to $ g $ is $ \hat{g}(x\_{t-1}) := \mathbb E[ x_t \,|\, x^*{t-1}] $)
 
 So we're comparing the Kalman filter against a competitor with more
 information (able to observe the latent state) and
