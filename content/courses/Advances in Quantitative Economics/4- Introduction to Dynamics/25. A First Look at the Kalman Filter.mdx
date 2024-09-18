@@ -524,7 +524,7 @@ Equation [(25.8)](#equation-kalman-sdy) is known as a discrete-time Riccati diff
 
 Equation [(25.9)](#equation-kalman-dare) is known as a [discrete-time algebraic Riccati equation](https://en.wikipedia.org/wiki/Algebraic_Riccati_equation).
 
-Conditions for the existence of a fixed point and convergence of $ \{\Sigma_t\} $ to it are discussed in [[Anderson _et al._, 1996](/courses/Introduction-to-Quantitative-Economics/References#id148)] and [[Anderson and Moore, 2005](/courses/Introduction-to-Quantitative-Economics/References#id146)], chapter 4.
+Conditions for the existence of a fixed point and convergence of $ \{\Sigma*t\} $ to it are discussed in [[Anderson \_et al.*, 1996](/courses/Introduction-to-Quantitative-Economics/References#id148)] and [[Anderson and Moore, 2005](/courses/Introduction-to-Quantitative-Economics/References#id146)], chapter 4.
 
 A sufficient (but not necessary) condition is that all the eigenvalues $ \lambda_i $ of $ A $ satisfy $ |\lambda_i| < 1 $ (cf. e.g., [[Anderson and Moore, 2005](/courses/Introduction-to-Quantitative-Economics/References#id146)], p. 77).
 
@@ -737,7 +737,7 @@ This competitor will use the conditional expectation $ \mathbb E[ x_t
 
 The conditional expectation is known to be the optimal prediction method for minimizing mean squared error.
 
-(More precisely, the minimizer of $ \mathbb E \, \|... x*t - g(x*{t-1}) \|^2 $ with respect to $ g $ is $ g^\*(x*{t-1}) := \mathbb E[ x_t \,|\, x*{t-1}] $)
+(More precisely, the minimizer of $ \mathbb E \, \|... x*t - g(x*{t-1}) \|^2 $ with respect to $ g $ is $ g^_(x_{t-1}) := \mathbb E[ x_t \,|\, x*{t-1}] $)
 
 So we're comparing the Kalman filter against a competitor with more
 information (able to observe the latent state) and

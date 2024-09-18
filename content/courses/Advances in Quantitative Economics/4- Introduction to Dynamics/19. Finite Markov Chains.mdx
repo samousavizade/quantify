@@ -368,7 +368,7 @@ $$
 
 There are $ n $ such equations, one for each $ y \in S $.
 
-If we think of $ \psi\_{t+1} $ and $ \psi_t $ as _row vectors_, these $ n $ equations are summarized by the matrix expression
+If we think of $ \psi\_{t+1} $ and $ \psi*t $ as \_row vectors*, these $ n $ equations are summarized by the matrix expression
 
 $$
 \psi_{t+1} = \psi_t P \tag{19.4}
@@ -611,12 +611,12 @@ P = np.array([[0.4, 0.6],
 
 These distributions are termed **stationary** or **invariant**.
 
-Formally, a marginal distribution $ \psi^_ $ on $ S $ is termed **stationary** for $ P $ if $ \psi^_ = \psi^\* P $.
+Formally, a marginal distribution $ \hat{\psi} $ on $ S $ is termed **stationary** for $ P $ if $ \hat{\psi} = \psi^\* P $.
 
 (This is the same notion of stationarity we covered in the
 **lecture on AR(1) processes** applied to a different context.)
 
-From this equality, we immediately deduce $ \psi^_ = \psi^_ P^t $ for all $ t $.
+From this equality, we immediately deduce $ \hat{\psi} = \hat{\psi} P^t $ for all $ t $.
 
 This reveals an important fact: If the distribution of $ X_0 $ is stationary, then $ X_t $ will maintain this distribution for all $ t $.
 
@@ -668,7 +668,7 @@ Assuming $ \alpha \in (0,1) $ and $ \beta \in (0,1) $, the uniform ergodicity co
 
 Let $ \psi^\* = (p, 1-p) $ be the stationary distribution, so that $ p $ corresponds to unemployment (state 0).
 
-Using $ \psi^_ = \psi^_ P $ and a bit of algebra yields
+Using $ \hat{\psi} = \hat{\psi} P $ and a bit of algebra yields
 
 $$
 p = \frac{\beta}{\alpha + \beta}

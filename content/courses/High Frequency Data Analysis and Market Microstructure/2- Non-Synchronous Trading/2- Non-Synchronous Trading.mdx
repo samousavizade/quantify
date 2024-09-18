@@ -1,0 +1,129 @@
+---
+title: Non-Synchronous Trading
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+# Non-Synchronous Trading
+
+We begin with nonsynchronous trading. Stock tradings such as those on the NYSE do not occur in a synchronous manner; different stocks have different trading frequencies, and even for a single stock the trading intensity varies from hour to hour and from day to day. Yet we often analyze a return series in a fixed time interval such as daily, weekly, or monthly. For daily series, the price of a stock is its closing price, which is the last transaction price of the stock in a trading day. The actual time of the last transaction of the stock varies from day to day. As such we incorrectly assume daily returns as an equally spaced time series with a 24-hour interval. It turns out that such an assumption can lead to erroneous conclusions about the predictability of stock returns even if the true return series are serially independent.
+
+For daily stock returns, nonsynchronous trading can introduce (a) lag-1 cross correlation between stock returns, (b) lag-1 serial correlation in a portfolio return, and (c) in some situations negative serial correlations of the return series of a single stock. Consider stocks A and B. Assume that the two stocks are independent, and stock A is traded more frequently than stock B. For special news affecting the market that arrives near the closing hour on one day, stock A is more likely than B to show the effect of the news on the same day simply because A is traded more frequently. The effect of the news on B will eventually appear, but it may be delayed until the following trading day. If this situation indeed happens, return of stock A appears to lead that of stock B. Consequently, the return series may show a significant lag-1 cross correlation from A to B even though the two stocks are independent. For a portfolio that holds stocks A and B, the prior cross correlation would become a significant lag-1 serial correlation.
+
+In a more complicated manner, nonsynchronous trading can also induce erroneous negative serial correlations for a single stock. There are several models available in the literature to study this phenomenon; see Campbell, Lo, and MacKinlay (1997) and the references therein. Here we adopt a simplified version of the model proposed in Lo and MacKinlay (1990). Let $r_t$ be the continuously compounded return of a security at the time index $t$. For simplicity, assume that $\{r_t\}$ is a sequence of independent and identically distributed random variables with mean $E(r_t) = \mu$ and variance $Var(r_t) = \sigma^2$. For each time period, the probability that the security is not traded is $\pi$, which is time invariant and independent of $r_t$. Let $r^o_t$ be the observed return. When there is no trade at time index $t$, we have $r^o_t = 0$ because there is no information available. Yet when there is a trade at time index $t$, we define $r^o_t$ as the cumulative return from the previous trade (i.e., $r^o_t = r_t + r_{t-1} + \cdots + r_{t-k_t}$, where $k_t$ is the largest nonnegative integer such that no trade occurred in the periods $t - k_t, t - k_t + 1, \ldots, t - 1$). Mathematically, the relationship between $r_t$ and $r^o_t$ is
+
+$$
+r^o_t = \begin{cases}
+0 & \text{with probability } \pi \\
+r_t & \text{with probability } (1 - \pi)^2 \\
+r_t + r_{t-1} & \text{with probability } (1 - \pi)^2 \pi \\
+r_t + r_{t-1} + r_{t-2} & \text{with probability } (1 - \pi)^2 \pi^2 \\
+\vdots & \\
+\sum_{i=0}^{2k} r_{t-i} & \text{with probability } (1 - \pi)^2 \pi^{2k}
+\end{cases}
+$$
+
+These probabilities are easy to understand. For example, $r^o_t = r_t$ if and only if there are trades at both $t$ and $t-1$, $r^o_t = r_t + r_{t-1}$ if and only if there are trades at $t$ and $t-2$, but no trade at $t-1$, and $r^o_t = r_t + r_{t-1} + r_{t-2}$ if and only if there are trades at $t$ and $t - 3$, but no trades at $t - 1$ and $t - 2$, and so on. As expected, the total probability is 1 given by
+
+$$
+\pi + (1 - \pi)^2 (1 + \pi + \pi^2 + \cdots) = \pi + (1 - \pi)^2 \frac{1}{1-\pi} = \pi + 1 - \pi = 1.
+$$
+
+We are ready to consider the moment equations of the observed return series $\{r^o_t\}$. First, the expectation of $r^o_t$ is
+
+$$
+\begin{aligned}
+E(r^o_t) &= (1-\pi)^2 E(r_t) + (1-\pi)^2 \pi E(r_t + r_{t-1}) + \cdots \\
+&= (1 - \pi)^2 \mu + (1 - \pi)^2 \pi 2\mu + (1 - \pi)^2 \pi^2 3\mu + \cdots \\
+&= (1-\pi)^2 \mu (1 + 2\pi + 3\pi^2 + 4\pi^3 + \cdots) \\
+&= (1-\pi)^2 \mu \frac{1}{(1-\pi)^2} = \mu.
+\end{aligned}
+$$
+
+In the prior derivation, we use the result $1 + 2\pi + 3\pi^2 + 4\pi^3 + \cdots = 1/(1-\pi)^2$. Next, for the variance of $r^o_t$, we use $Var(r^o_t) = E[(r^o_t)^2] - [E(r^o_t)]^2$ and
+
+$$
+\begin{aligned}
+E[(r^o_t)^2] &= (1-\pi)^2 E[(r_t)^2] + (1-\pi)^2 \pi E[(r_t + r_{t-1})^2] + \cdots \\
+&= (1-\pi)^2 [(\sigma^2 + \mu^2) + \pi(2\sigma^2 + 4\mu^2) + \pi^2(3\sigma^2 + 9\mu^2) + \cdots] \\
+&= (1-\pi)^2 [\sigma^2(1 + 2\pi + 3\pi^2 + \cdots) + \mu^2(1 + 4\pi + 9\pi^2 + \cdots)]
+\end{aligned}
+$$
+
+In Eq. (5.3), we use
+
+$$
+E\left[\left(\sum_{i=0}^k r_{t-i}\right)^2\right] = Var\left(\sum_{i=0}^k r_{t-i}\right) + \left[E\left(\sum_{i=0}^k r_{t-i}\right)\right]^2 = (k + 1)\sigma^2 + [(k + 1)\mu]^2
+$$
+
+under the serial independence assumption of $r_t$. Using techniques similar to that of Eq. (5.2), we can show that the first term of Eq. (5.4) reduces to $\sigma^2$. For the second term of Eq. (5.4), we use the identity
+
+$$
+1 + 4\pi + 9\pi^2 + 16\pi^3 + \cdots = \frac{2}{(1-\pi)^3} - \frac{1}{(1-\pi)^2},
+$$
+
+which can be obtained as follows. Let
+
+$$
+H = 1 + 4\pi + 9\pi^2 + 16\pi^3 + \cdots \text{ and } G = 1 + 3\pi + 5\pi^2 + 7\pi^3 + \cdots.
+$$
+
+Then $(1 - \pi)H = G$ and
+
+$$
+\begin{aligned}
+(1 - \pi)G &= 1 + 2\pi + 2\pi^2 + 2\pi^3 + \cdots \\
+&= 2(1 + \pi + \pi^2 + \cdots) - 1 = \frac{2}{1-\pi} - 1.
+\end{aligned}
+$$
+
+Consequently, from Eqs. (5.2) and (5.5), we have
+
+$$
+\begin{aligned}
+Var(r^o_t) &= \sigma^2 + \mu^2 \left(\frac{2}{1-\pi} - 1\right) - \mu^2 \\
+&= \sigma^2 + \frac{2\pi\mu^2}{1-\pi}.
+\end{aligned}
+$$
+
+Consider next the lag-1 autocovariance of $\{r^o_t\}$. Here we use $Cov(r^o_t, r^o_{t-1}) = E(r^o_t r^o_{t-1}) - E(r^o_t) E(r^o_{t-1}) = E(r^o_t r^o_{t-1}) - \mu^2$. The question then reduces to finding $E(r^o_t r^o_{t-1})$. Notice that $r^o_t r^o_{t-1}$ is zero if there is no trade at $t$, no trade at $t - 1$, or no trade at both $t$ and $t - 1$. Therefore, we have
+
+$$
+r^o_t r^o_{t-1} = \begin{cases}
+0 & \text{with probability } 2\pi - \pi^2 \\
+r_t r_{t-1} & \text{with probability } (1 - \pi)^3 \\
+r_t(r_{t-1} + r_{t-2}) & \text{with probability } (1 - \pi)^3 \pi \\
+r_t(r_{t-1} + r_{t-2} + r_{t-3}) & \text{with probability } (1 - \pi)^3 \pi^2 \\
+\vdots & \\
+r_t \left(\sum_{i=1}^k r_{t-i}\right) & \text{with probability } (1 - \pi)^3 \pi^{k-1}
+\end{cases}
+$$
+
+Again the total probability is unity. To understand the prior result, notice that $r^o_t r^o_{t-1} = r_t r_{t-1}$ if and only if there are three consecutive trades at $t - 2$, $t - 1$, and $t$. Using Eq. (5.7) and the fact that $E(r_t r_{t-j}) = E(r_t) E(r_{t-j}) = \mu^2$ for $j > 0$, we have
+
+$$
+\begin{aligned}
+E(r^o_t r^o_{t-1}) &= (1-\pi)^3 E(r_t r_{t-1}) + \pi E[r_t(r_{t-1} + r_{t-2})] + \pi^2 E\left[r_t \left(\sum_{i=1}^3 r_{t-i}\right)\right] + \cdots \\
+&= (1-\pi)^3 \mu^2 (1 + 2\pi + 3\pi^2 + \cdots) = (1-\pi) \mu^2.
+\end{aligned}
+$$
+
+The lag-1 autocovariance of $\{r^o_t\}$ is then
+
+$$
+Cov(r^o_t, r^o_{t-1}) = -\pi\mu^2.
+$$
+
+Provided that $\mu$ is not zero, the nonsynchronous trading induces a negative lag-1 autocorrelation in $r^o_t$ given by
+
+$$
+\rho_1(r^o_t) = \frac{-(1-\pi)\pi\mu^2}{(1-\pi)\sigma^2 + 2\pi\mu^2}.
+$$
+
+In general, we can extend the prior result and show that $Cov(r^o_t, r^o_{t-j}) = -\mu^2 \pi^j$, $j \geq 1$. The magnitude of the lag-1 ACF depends on the choices of $\mu$, $\pi$, and $\sigma$ and can be substantial. Thus, when $\mu \neq 0$, the nonsynchronous trading induces negative autocorrelations in an observed security return series.
+
+The previous discussion can be generalized to the return series of a portfolio that consists of $N$ securities; see Campbell et al. (1997, Chapter 3). In the time series literature, effects of nonsynchronous trading on the return of a single security are equivalent to that of random temporal aggregation on a time series, with the trading probability $\pi$ governing the mechanism of aggregation.

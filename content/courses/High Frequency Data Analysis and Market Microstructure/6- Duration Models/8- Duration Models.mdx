@@ -1,0 +1,43 @@
+## 5.5 DURATION MODELS
+
+Duration models are concerned with time intervals between trades. Longer durations indicate lack of trading activities, which in turn signify a period of no new information. The dynamic behavior of durations thus contains useful information about intraday market activities. Using concepts similar to the ARCH models for volatility, Engle and Russell (1998) propose an autoregressive conditional duration (ACD) model to describe the evolution of time durations for (heavily traded) stocks. Zhang et al. (2001) extend the ACD model to account for nonlinearity and structural breaks in the data. In this section, we introduce some simple duration models.
+
+As mentioned before, intraday transactions exhibit some diurnal pattern. Therefore, we focus on the adjusted time duration $\Delta t^*_i = \Delta t_i/f(t_i)$, where $f(t_i)$ is a deterministic function consisting of the cyclical component of $\Delta t_i$. Obviously, $f(t_i)$ depends on the underlying asset and the systematic behavior of the market. In practice, there are many ways to estimate $f(t_i)$, but no single method dominates the others in terms of statistical properties. A common approach is to use smoothing spline. Here we use simple quadratic functions and indicator variables to take care of the deterministic component of daily trading activities.
+
+For the IBM data employed in the illustration of ADS models, we assume
+
+$$
+f(t_i) = \exp[d(t_i)], \quad d(t_i) = \beta_0 + \sum_{j=1}^7 \beta_j f_j(t_i),
+$$
+
+where
+
+$$
+\begin{aligned}
+f_1(t_i) &= -\left(\frac{t_i-43200}{14400}\right)^2, \quad f_2(t_i) = -\left(\frac{t_i-48300}{9300}\right)^2, \\
+f_3(t_i) &= \begin{cases}
+-\left(\frac{t_i-38700}{7500}\right)^2 & \text{if } t_i < 43200, \\
+0 & \text{otherwise},
+\end{cases} \\
+f_4(t_i) &= \begin{cases}
+-\left(\frac{t_i-48600}{9000}\right)^2 & \text{if } t_i \geq 43200, \\
+0 & \text{otherwise},
+\end{cases}
+\end{aligned}
+$$
+
+and $f_5(t_i)$ and $f_6(t_i)$ are indicator variables for the first and second 5 minutes of market opening [i.e., $f_5(\cdot) = 1$ if and only if $t_i$ is between 9:30 am and 9:35 am Eastern time], and $f_7(t_i)$ is the indicator for the last 30 minutes of daily trading [i.e., $f_7(t_i) = 1$ if and only if the trade occurred between 3:30 pm and 4:00 pm Eastern time]. Figure 5.7 shows the plot of $f_i(\cdot)$ for $i = 1, \ldots, 4$, where the time scale on the $x$ axis is in minutes. Note that $f_3(43200) = f_4(43200)$, where 43,200 corresponds to 12:00 noon.
+
+The coefficients $\beta_j$ of Eq. (5.32) are obtained by the least-squares method of the linear regression
+
+$$
+\ln(\Delta t_i) = \beta_0 + \sum_{j=1}^7 \beta_j f_j(t_i) + \epsilon_i.
+$$
+
+The fitted model is
+
+$$
+\ln(\widehat{\Delta t_i}) = 2.555 + 0.159f_1(t_i) + 0.270f_2(t_i) + 0.384f_3(t_i) + 0.061f_4(t_i) - 0.611f_5(t_i) - 0.157f_6(t_i) + 0.073f_7(t_i).
+$$
+
+Figure 5.8 shows the time plot of average durations in 5-minute time intervals over the 63 trading days before and after adjusting for the deterministic component. Figure 5.8(a) shows the average durations of $\Delta t_i$ and, as expected, exhibits a diurnal pattern. Figure 5.8(b) shows the average durations of $\Delta t^*_i$ (i.e., after the adjustment), and the diurnal pattern is largely removed.

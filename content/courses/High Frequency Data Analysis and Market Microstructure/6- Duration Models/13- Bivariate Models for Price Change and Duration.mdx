@@ -1,0 +1,105 @@
+# Bivariate Models for Price Change and Duration
+
+In this section, we introduce a model that considers jointly the process of price change and the associated duration. As mentioned before, many intraday transactions of a stock result in no price change. Those transactions are highly relevant to trading intensity, but they do not contain direct information on price movement. Therefore, to simplify the complexity involved in modeling price change, we focus on transactions that result in a price change and consider a price change and duration (PCD) model to describe the multivariate dynamics of price change and the associated time duration.
+
+We continue to use the same notation as before, but the definition is changed to transactions with a price change. Let $t_i$ be the calendar time of the $i$th price change of an asset. As before, $t_i$ is measured in seconds from midnight of a trading day. Let $P_{t_i}$ be the transaction price when the $i$th price change occurred and $\Delta t_i = t_i - t_{i-1}$ be the time duration between price changes. In addition, let $N_i$ be the number of trades in the time interval $(t_{i-1}, t_i)$ that result in no price change. This new variable is used to represent trading intensity during a period of no price change. Finally, let $D_i$ be the direction of the $i$th price change with $D_i = 1$ when price goes up and $D_i = -1$ when the price comes down, and let $S_i$ be the size of the $i$th price change measured in ticks. Under the new definitions, the price of a stock evolves over time by
+
+$$P_{t_i} = P_{t_{i-1}} + D_i S_i,$$
+
+and the transactions data consist of $\{\Delta t_i, N_i, D_i, S_i\}$ for the $i$th price change.
+
+The PCD model is concerned with the joint analysis of $(\Delta t_i, N_i, D_i, S_i)$.
+
+> Remark. Focusing on transactions associated with a price change can reduce the sample size dramatically. For example, consider the intraday data of IBM stock from November 1, 1990 to January 31, 1991. There were 60,265 intraday trades, but only 19,022 of them resulted in a price change. In addition, there is no diurnal pattern in time durations between price changes. □
+
+To illustrate the relationship among the price movements of all transactions and those of transactions associated with a price change, we consider the intraday tradings of IBM stock on November 21, 1990. There were 726 transactions on that day during normal trading hours, but only 195 trades resulted in a price change. Figure 5.16 shows the time plot of the price series for both cases. As expected, the price series are the same.
+
+The PCD model decomposes the joint distribution of $(\Delta t_i, N_i, D_i, S_i)$ given $\mathcal{F}_{i-1}$ as
+
+$$f(\Delta t_i, N_i, D_i, S_i | \mathcal{F}_{i-1}) = f(S_i | D_i, N_i, \Delta t_i, \mathcal{F}_{i-1}) f(D_i | N_i, \Delta t_i, \mathcal{F}_{i-1}) f(N_i | \Delta t_i, \mathcal{F}_{i-1}) f(\Delta t_i | \mathcal{F}_{i-1}).$$
+
+This partition enables us to specify suitable econometric models for the conditional distributions and, hence, to simplify the modeling task. There are many ways to specify models for the conditional distributions. A proper specification might depend on the asset under study. Here we employ the specifications used by McCulloch and Tsay (2000), who use generalized linear models for the discrete-valued variables and a time series model for the continuous variable $\ln(\Delta t_i)$.
+
+For the time duration between price changes, we use the model
+
+$$\ln(\Delta t_i) = \beta_0 + \beta_1 \ln(\Delta t_{i-1}) + \beta_2 S_{i-1} + \sigma \epsilon_i,$$
+
+where $\sigma$ is a positive number and $\{\epsilon_i\}$ is a sequence of iid $N(0,1)$ random variables.
+
+The conditional model for $N_i$ is further partitioned into two parts because empirical data suggest a concentration of $N_i$ at 0. The first part of the model for $N_i$ is the logit model
+
+$$p(N_i = 0 | \Delta t_i, \mathcal{F}_{i-1}) = \text{logit}[\alpha_0 + \alpha_1 \ln(\Delta t_i)],$$
+
+where $\text{logit}(x) = \exp(x)/[1+\exp(x)]$, whereas the second part of the model is
+
+$$N_i | (N_i > 0, \Delta t_i, \mathcal{F}_{i-1}) \sim 1 + g(\lambda_i), \quad \lambda_i = \frac{\exp[\gamma_0 + \gamma_1 \ln(\Delta t_i)]}{1 + \exp[\gamma_0 + \gamma_1 \ln(\Delta t_i)]},$$
+
+where $\sim$ means "is distributed as," and $g(\lambda)$ denotes a geometric distribution with parameter $\lambda$, which is in the interval $(0,1)$.
+
+The model for direction $D_i$ is
+
+$$D_i | (N_i, \Delta t_i, \mathcal{F}_{i-1}) = \text{sign}(\mu_i + \sigma_i \epsilon),$$
+
+where $\epsilon$ is a $N(0,1)$ random variable, and
+
+$$\mu_i = \omega_0 + \omega_1 D_{i-1} + \omega_2 \ln(\Delta t_i),$$
+
+$$\ln(\sigma_i) = \beta \left| \sum_{j=1}^4 D_{i-j} \right| = \beta |D_{i-1} + D_{i-2} + D_{i-3} + D_{i-4}|.$$
+
+In other words, $D_i$ is governed by the sign of a normal random variable with mean $\mu_i$ and variance $\sigma_i^2$. A special characteristic of the prior model is the function for $\ln(\sigma_i)$. For intraday transactions, a key feature is the price reversal between consecutive price changes. This feature is modeled by the dependence of $D_i$ on $D_{i-1}$ in the mean equation with a negative $\omega_1$ parameter. However, there exists an occasional local trend in the price movement. The previous variance equation allows for such a local trend by increasing the uncertainty in the direction of price movement when the past data showed evidence of a local trend. For a normal distribution with a fixed mean, increasing its variance makes a random draw have the same chance to be positive and negative. This in turn increases the chance for a sequence of all positive or all negative draws. Such a sequence produces a local trend in price movement.
+
+To allow for different dynamics between positive and negative price movements, we use different models for the size of a price change. Specifically, we have
+
+$$S_i | (D_i = -1, N_i, \Delta t_i, \mathcal{F}_{i-1}) \sim p(\lambda_{d,i}) + 1, \quad \text{with}$$
+
+$$\ln(\lambda_{d,i}) = \eta_{d,0} + \eta_{d,1} N_i + \eta_{d,2} \ln(\Delta t_i) + \eta_{d,3} S_{i-1}$$
+
+$$S_i | (D_i = 1, N_i, \Delta t_i, \mathcal{F}_{i-1}) \sim p(\lambda_{u,i}) + 1, \quad \text{with}$$
+
+$$\ln(\lambda_{u,i}) = \eta_{u,0} + \eta_{u,1} N_i + \eta_{u,2} \ln(\Delta t_i) + \eta_{u,3} S_{i-1},$$
+
+where $p(\lambda)$ denotes a Poisson distribution with parameter $\lambda$, and 1 is added to the size because the minimum size is 1 tick when there is a price change.
+
+The specified models in Eqs. (5.48)–(5.53) can be estimated jointly by either the maximum-likelihood method or the Markov chain Monte Carlo methods. Based on Eq. (5.47), the models consist of six conditional models that can be estimated separately.
+
+## Example 5.5
+
+Consider the intraday transactions of IBM stock on November 21, 1990. There are 194 price changes within normal trading hours. Figure 5.17 shows the histograms of $\ln(\Delta t_i), N_i, D_i$, and $S_i$. The data for $D_i$ are about equally distributed between "upward" and "downward" movements. Only a few transactions resulted in a price change of more than 1 tick; as a matter of fact, there were 7 changes with 2 ticks and 1 change with 3 ticks.
+
+Using Markov chain Monte Carlo (MCMC) methods (see Chapter 12), we obtained the following models for the data. The reported estimates and their standard deviations are the posterior means and standard deviations of MCMC draws with 9500 iterations.
+
+The model for the time duration between price changes is
+
+$$\ln(\Delta t_i) = 4.023 + 0.032 \ln(\Delta t_{i-1}) - 0.025 S_{i-1} + 1.403 \epsilon_i,$$
+
+where standard deviations of the coefficients are 0.415, 0.073, 0.384, and 0.073, respectively. The fitted model indicates that there was no dynamic dependence in the time duration.
+
+For the $N_i$ variable, we have
+
+$$\Pr(N_i > 0 | \Delta t_i, \mathcal{F}_{i-1}) = \text{logit}[-0.637 + 1.740 \ln(\Delta t_i)],$$
+
+where standard deviations of the estimates are 0.238 and 0.248, respectively. Thus, as expected, the number of trades with no price change in the time interval $(t_{i-1}, t_i)$ depends positively on the length of the interval.
+
+The magnitude of $N_i$ when it is positive is
+
+$$N_i | (N_i > 0, \Delta t_i, \mathcal{F}_{i-1}) \sim 1 + g(\lambda_i), \quad \lambda_i = \frac{\exp[0.178 - 0.910 \ln(\Delta t_i)]}{1 + \exp[0.178 - 0.910 \ln(\Delta t_i)]},$$
+
+where standard deviations of the estimates are 0.246 and 0.138, respectively. The negative and significant coefficient of $\ln(\Delta t_i)$ means that $N_i$ is positively related to the length of the duration $\Delta t_i$ because a large $\ln(\Delta t_i)$ implies a small $\lambda_i$, which in turn implies higher probabilities for larger $N_i$; see the geometric distribution in Eq. (5.27).
+
+The fitted model for $D_i$ is
+
+$$\mu_i = 0.049 - 0.840 D_{i-1} - 0.004 \ln(\Delta t_i),$$
+
+$$\ln(\sigma_i) = 0.244 |D_{i-1} + D_{i-2} + D_{i-3} + D_{i-4}|,$$
+
+where standard deviations of the parameters in the mean equation are 0.129, 0.132, and 0.082, respectively, whereas the standard error for the parameter in the variance equation is 0.182. The price reversal is clearly shown by the highly significant negative coefficient of $D_{i-1}$. The marginally significant parameter in the variance equation is exactly as expected.
+
+Finally, the fitted models for the size of a price change are
+
+$$\ln(\lambda_{d,i}) = 1.024 - 0.327 N_i + 0.412 \ln(\Delta t_i) - 4.474 S_{i-1},$$
+
+$$\ln(\lambda_{u,i}) = -3.683 - 1.542 N_i + 0.419 \ln(\Delta t_i) + 0.921 S_{i-1},$$
+
+where standard deviations of the parameters for the "down size" are 3.350, 0.319, 0.599, and 3.188, respectively, whereas those for the "up size" are 1.734, 0.976, 0.453, and 1.459. The interesting estimates of the prior two equations are the negative estimates of the coefficient of $N_i$. A large $N_i$ means there were more transactions in the time interval $(t_{i-1}, t_i)$ with no price change. This can be taken as evidence of no new information available in the time interval $(t_{i-1}, t_i)$. Consequently, the size for the price change at $t_i$ should be small. A small $\lambda_{u,i}$ or $\lambda_{d,i}$ for a Poisson distribution gives precisely that.
+
+In summary, granted that a sample of 194 observations in a given day may not contain sufficient information about the trading dynamics of IBM stock, but the fitted models appear to provide some sensible results. McCulloch and Tsay (2000) extend the PCD model to a hierarchical framework to handle all the data of the 63 trading days between November 1, 1990, and January 31, 1991. Many of the parameter estimates become significant in this extended sample, which has more than 19,000 observations. For example, the overall estimate of the coefficient of $\ln(\Delta t_{i-1})$ in the model for time duration ranges from 0.04 to 0.1, which is small, but significant.

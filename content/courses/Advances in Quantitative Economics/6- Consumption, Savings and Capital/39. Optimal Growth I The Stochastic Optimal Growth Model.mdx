@@ -130,8 +130,8 @@ In summary, the agent’s aim is to select a path $ c_0, c_1, c_2, \ldots $ for 
 
 In the present context
 
-- $ y_t $ is called the _state_ variable — it summarizes the “state of the world” at the start of each period.
-- $ c_t $ is called the _control_ variable — a value chosen by the agent each period after observing the state.
+- $ y*t $ is called the \_state* variable — it summarizes the “state of the world” at the start of each period.
+- $ c*t $ is called the \_control* variable — a value chosen by the agent each period after observing the state.
 
 ### The Policy Function Approach
 
@@ -246,7 +246,7 @@ The term $ \int v(f(y - c) z) \phi(dz) $ can be understood as the expected next 
 
 As shown in [EDTC](http://johnstachurski.net/edtc.html), theorem 10.1.11 and a range of other texts
 
-> _The value function_ $ v^* $ *satisfies the Bellman equation\*
+> _The value function_ $ v^\* $ satisfies the Bellman equation
 
 In other words, [(39.9)](#equation-fpb30) holds when $ v=v^\* $.
 
@@ -600,7 +600,7 @@ og = OptimalGrowthModel(u=np.log, f=fcd)
 Now let’s see what happens when we apply our Bellman operator to the exact
 solution $ v^\* $ in this case.
 
-In theory, since $ v^_ $ is a fixed point, the resulting function should again be $ v^_ $.
+In theory, since $ \hat{v} $ is a fixed point, the resulting function should again be $ \hat{v} $.
 
 In practice, we expect some small numerical error.
 

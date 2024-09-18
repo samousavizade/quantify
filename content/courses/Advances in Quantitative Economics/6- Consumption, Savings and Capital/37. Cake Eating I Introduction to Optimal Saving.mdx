@@ -387,11 +387,11 @@ and $ F $ is the set of feasible consumption paths.
 
 We know that differentiable functions have a zero gradient at a maximizer.
 
-So the optimal path $ c^_ := \{c^__t\}_{t=0}^\infty $ must satisfy
+So the optimal path $ \hat{c} := \{\hat{c}_t\}_{t=0}^\infty $ must satisfy
 $ U'(c^\*) = 0 $.
 
-> **Note**If you want to know exactly how the derivative $ U'(c^_) $ is
-> defined, given that the argument $ c^_ $ is a vector of infinite
+> **Note**If you want to know exactly how the derivative $ U'(\hat{c}) $ is
+> defined, given that the argument $ \hat{c} $ is a vector of infinite
 > length, you can start by learning about [Gateaux derivatives](https://en.wikipedia.org/wiki/Gateaux_derivative). However, such
 > knowledge is not assumed in what follows.
 
@@ -399,8 +399,8 @@ In other words, the rate of change in $ U $ must be zero for any
 infinitesimally small (and feasible) perturbation away from the optimal path.
 
 So consider a feasible perturbation that reduces consumption at time $ t $ to
-$ c^_\_t - h $
-and increases it in the next period to $ c^_\_{t+1} + h $.
+$ \hat{c}\_t - h $
+and increases it in the next period to $ \hat{c}\_{t+1} + h $.
 
 Consumption does not change in any other period.
 

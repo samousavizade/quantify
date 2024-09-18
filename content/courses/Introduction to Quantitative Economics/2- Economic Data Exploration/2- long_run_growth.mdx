@@ -45,13 +45,13 @@ data = pd.read_excel(data_url,
 data.head()
 ```
 
-| \*\*\*\* | **countrycode** | **country** | **year** | **gdppc** | **pop** |
-| -------- | --------------- | ----------- | -------- | --------- | ------- |
-| **0**    | AFG             | Afghanistan | 1820     | NaN       | 3280.0  |
-| **1**    | AFG             | Afghanistan | 1870     | NaN       | 4207.0  |
-| **2**    | AFG             | Afghanistan | 1913     | NaN       | 5730.0  |
-| **3**    | AFG             | Afghanistan | 1950     | 1156.0    | 8150.0  |
-| **4**    | AFG             | Afghanistan | 1951     | 1170.0    | 8284.0  |
+|       | **countrycode** | **country** | **year** | **gdppc** | **pop** |
+| ----- | --------------- | ----------- | -------- | --------- | ------- |
+| **0** | AFG             | Afghanistan | 1820     | NaN       | 3280.0  |
+| **1** | AFG             | Afghanistan | 1870     | NaN       | 4207.0  |
+| **2** | AFG             | Afghanistan | 1913     | NaN       | 5730.0  |
+| **3** | AFG             | Afghanistan | 1950     | 1156.0    | 8150.0  |
+| **4** | AFG             | Afghanistan | 1951     | 1170.0    | 8284.0  |
 
 We can observe that this dataset includes GDP per capita (`gdppc`) and population (`pop`) data for numerous countries and across various years. These variables provide crucial insights into the economic conditions of different nations over time. Now, let's explore the dataset further to determine how many countries are represented and identify which specific countries are available in this dataset.
 
@@ -75,7 +75,7 @@ country_years = pd.DataFrame(country_years,
 country_years.head()
 ```
 
-| \*\*\*\*                 | **min_year** | **max_year** |
+|                          | **min_year** | **max_year** |
 | ------------------------ | ------------ | ------------ |
 | **country**              |              |              |
 | **Afghanistan**          | 1820         | 2018         |

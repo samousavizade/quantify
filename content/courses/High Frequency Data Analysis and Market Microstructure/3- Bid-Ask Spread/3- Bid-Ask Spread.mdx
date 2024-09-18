@@ -1,0 +1,61 @@
+---
+title: Bid and Ask Spread
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+# Bid-Ask Spread
+
+In some stock exchanges (e.g., NYSE), market makers play an important role in facilitating trades. They provide market liquidity by standing ready to buy or sell whenever the public wishes to buy or sell. By market liquidity, we mean the ability to buy or sell significant quantities of a security quickly, anonymously, and with little price impact. In return for providing liquidity, market makers are granted monopoly rights by the exchange to post different prices for purchases and sales of a security. They buy at the bid price $P_b^t$ and sell at a higher ask price $P_a^t$. (For the public, $P_b^t$ is the sale price and $P_a^t$ is the purchase price.) The difference $P_a^t - P_b^t$ is call the bid–ask spread, which is the primary source of compensation for market makers. Typically, the bid–ask spread is small—namely, one or two cents.
+
+The existence of a bid–ask spread, although small in magnitude, has several important consequences in time series properties of asset returns. We briefly discuss the bid–ask bounce—namely, the bid–ask spread introduces negative lag-1 serial correlation in an asset return. Consider the simple model of Roll (1984). The observed market price $P_t$ of an asset is assumed to satisfy
+
+$$P_t = P_t^* + \frac{I_t S}{2},$$ (5.9)
+
+where $S = P_a - P_b$ is the bid–ask spread, $P_t^*$ is the time-$t$ fundamental value of the asset in a frictionless market, and $\{I_t\}$ is a sequence of independent binary random variables with equal probabilities (i.e., $I_t = 1$ with probability 0.5 and $= -1$ with probability 0.5). The $I_t$ can be interpreted as an order-type indicator, with 1 signifying buyer-initiated transaction and $-1$ seller-initiated transaction. Alternatively, the model can be written as
+
+$$
+P_t = P_t^* +
+\begin{cases}
++S/2 & \text{with probability } 0.5, \\
+-S/2 & \text{with probability } 0.5.
+\end{cases}
+$$
+
+If there is no change in $P_t^*$, then the observed process of price changes is
+
+$$\Delta P_t = (I_t - I_{t-1})S.$$ (5.10)
+
+Under the assumption of $I_t$ in Eq. (5.9), $E(I_t) = 0$ and $\text{Var}(I_t) = 1$, and we have
+
+$$E(\Delta P_t) = 0$$ and (5.11)
+
+$$\text{Var}(\Delta P_t) = S^2/2,$$ (5.12)
+
+$$\text{Cov}(\Delta P_t, \Delta P_{t-1}) = -S^2/4,$$ (5.13)
+
+$$\text{Cov}(\Delta P_t, \Delta P_{t-j}) = 0, \quad j > 1.$$ (5.14)
+
+Therefore, the auto-correlation function of $\Delta P_t$ is
+
+$$
+\rho_j(\Delta P_t) =
+\begin{cases}
+-0.5 & \text{if } j = 1, \\
+0 & \text{if } j > 1.
+\end{cases}
+$$
+
+The bid–ask spread thus introduces a negative lag-1 serial correlation in the series of observed price changes. This is referred to as the bid–ask bounce in the finance literature. Intuitively, the bounce can be seen as follows. Assume that the fundamental price $P_t^*$ is equal to $(P_a + P_b)/2$. Then $P_t$ assumes the value $P_a$ or $P_b$. If the previously observed price is $P_a$ (the higher value), then the current observed price is either unchanged or lower at $P_b$. Thus, $\Delta P_t$ is either 0 or $-S$. However, if the previous observed price is $P_b$ (the lower value), then $P_t$ is either 0 or $S$. The negative lag-1 correlation in $P_t$ becomes apparent. The bid–ask spread does not introduce any serial correlation beyond lag 1, however.
+
+A more realistic formulation is to assume that $P_t^*$ follows a random walk so that $P_t^* - P_{t-1}^* = \varepsilon_t$, which forms a sequence of independent and identically distributed random variables with mean zero and variance $\sigma^2$. In addition, $\{\varepsilon_t\}$ is independent of $\{I_t\}$. In this case, $\text{Var}(P_t) = \sigma^2 + S^2/2$, but $\text{Cov}(P_t, P_{t-j})$ remains unchanged. Therefore,
+
+$$\rho_1(P_t) = \frac{-S^2/4}{\sigma^2 + S^2/2} \leq 0.$$
+
+The magnitude of the lag-1 autocorrelation of $P_t$ is reduced, but the negative effect remains when $S = P_a - P_b > 0$. In finance, it might be of interest to study the components of the bid–ask spread. Interested readers are referred to Campbell et al. (1997) and the references therein.
+
+The effect of bid–ask spread continues to exist in portfolio returns and in multivariate financial time series. Consider the bivariate case. Denote the bivariate order-type indicator by $I_t = (I_{1t}, I_{2t})^\prime$, where $I_{1t}$ is for the first security and $I_{2t}$ for the second security. If $I_{1t}$ and $I_{2t}$ are contemporaneously positively correlated, then the bid–ask spreads can introduce negative lag-1 cross correlations.

@@ -608,7 +608,7 @@ described by the specified dynamics, with each worker’s outcomes being
 realizations of processes that are statistically independent of all other
 workers’ processes.
 
-Let $ \psi_t $ be the current _cross-sectional_ distribution over $ \{ 0, 1 \} $.
+Let $ \psi*t $ be the current \_cross-sectional* distribution over $ \{ 0, 1 \} $.
 
 The cross-sectional distribution records fractions of workers employed and unemployed at a given moment $ t $.
 
@@ -652,11 +652,11 @@ Notice that `ψ @ P` is the same as `ψ`.
 
 Such distributions are called **stationary** or **invariant**.
 
-Formally, a distribution $ \psi^_ $ on $ S $ is called **stationary** for $ P $ if $ \psi^_ P = \psi^\* $.
+Formally, a distribution $ \hat{\psi} $ on $ S $ is called **stationary** for $ P $ if $ \hat{\psi} P = \psi^\* $.
 
-Notice that, postmultiplying by $ P $, we have $ \psi^_ P^2 = \psi^_ P = \psi^\* $.
+Notice that, postmultiplying by $ P $, we have $ \hat{\psi} P^2 = \hat{\psi} P = \psi^\* $.
 
-Continuing in the same way leads to $ \psi^_ = \psi^_ P^t $ for all $ t \ge 0 $.
+Continuing in the same way leads to $ \hat{\psi} = \hat{\psi} P^t $ for all $ t \ge 0 $.
 
 This tells us an important fact: If the distribution of $ \psi_0 $ is a stationary distribution, then $ \psi_t $ will have this same distribution for all $ t \ge 0 $.
 
@@ -692,7 +692,7 @@ If $ \alpha \in (0,1) $ and $ \beta \in (0,1) $, then the transition matrix is e
 Let $ \psi^\* = (p, 1-p) $ be the stationary distribution, so that $ p $
 corresponds to unemployment (state 0).
 
-Using $ \psi^_ = \psi^_ P $ and a bit of algebra yields
+Using $ \hat{\psi} = \hat{\psi} P $ and a bit of algebra yields
 
 $$
 p = \frac{\beta}{\alpha + \beta}

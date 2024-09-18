@@ -280,9 +280,9 @@ $$
 Our aim is to learn about the evolution of $ k_t $ over time,
 given an initial stock $ k_0 $.
 
-A **steady state** for [(24.3)](#equation-solowc) is a value $ k^_ $
+A **steady state** for [(24.3)](#equation-solowc) is a value $ \hat{k} $
 at which capital is unchanging, meaning $ k'_t = 0 $ or, equivalently,
-$ s f(k^_) = \delta k^\* $.
+$ s f(\hat{k}) = \delta k^\* $.
 
 We assume
 $ f(k) = Ak^\alpha $, so $ k^* $ solves
@@ -440,8 +440,8 @@ k_star = ((s_grid * A) / delta)**(1/(1 - alpha))
 c_star = (1 - s_grid) * A * k_star ** alpha
 ```
 
-Let’s find the value of $ s $ that maximizes $ c^_ $ using [scipy.optimize.minimize_scalar](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize_scalar.html#scipy.optimize.minimize_scalar).
-We will use $ -c^_(s) $ since `minimize_scalar` finds the minimum value.
+Let’s find the value of $ s $ that maximizes $ \hat{c} $ using [scipy.optimize.minimize_scalar](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize_scalar.html#scipy.optimize.minimize_scalar).
+We will use $ -\hat{c}(s) $ since `minimize_scalar` finds the minimum value.
 
 ```python
 from scipy.optimize import minimize_scalar
@@ -491,7 +491,7 @@ plt.show()
 
 ![png](/static/courses/Introduction-to-Quantitative-Economics/solow_files/solow_34_0.png)
 
-One can also try to solve this mathematically by differentiating $ c^_(s) $ and solve for $ \frac{d}{ds}c^_(s)=0 $ using [sympy](https://www.sympy.org/en/index.html).
+One can also try to solve this mathematically by differentiating $ \hat{c}(s) $ and solve for $ \frac{d}{ds}\hat{c}(s)=0 $ using [sympy](https://www.sympy.org/en/index.html).
 
 ```python
 from sympy import solve, Symbol
@@ -524,7 +524,7 @@ random fluctuations in aggregate quantities.
 
 Among other things, this will
 eliminate the unrealistic prediction that per-capita output $ y_t = A
-k^\alpha_t $ converges to a constant $ y^_ := A (k^_)^\alpha $.
+k^\alpha_t $ converges to a constant $ \hat{y} := A (\hat{k})^\alpha $.
 
 We shift to discrete time for the following discussion.
 

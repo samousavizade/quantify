@@ -1,0 +1,69 @@
+## 5.5.1 The ACD Model
+
+The autoregressive conditional duration (ACD) model uses the idea of GARCH models to study the dynamic structure of the adjusted duration $\Delta t^*_i$ of Eq. (5.31). For ease in notation, we define $x_i = \Delta t^*_i$. Let $\psi_i = E(x_i|F_{i-1})$ be the conditional expectation of the adjusted duration between the $(i-1)$th and $i$th trades, where $F_{i-1}$ is the information set available at the $(i-1)$th trade. In other words, $\psi_i$ is the expected adjusted duration given $F_{i-1}$.
+
+The basic ACD model is defined as:
+
+$$x_i = \psi_i \epsilon_i,$$
+
+where $\{\epsilon_i\}$ is a sequence of independent and identically distributed nonnegative random variables such that $E(\epsilon_i) = 1$. In Engle and Russell (1998), $\epsilon_i$ follows a standard exponential or a standardized Weibull distribution, and $\psi_i$ assumes the form:
+
+$$\psi_i = \omega + \sum_{j=1}^r \gamma_j x_{i-j} + \sum_{j=1}^s \omega_j \psi_{i-j}.$$
+
+Such a model is referred to as an $ACD(r,s)$ model. When the distribution of $\epsilon_i$ is exponential, the resulting model is called an $EACD(r,s)$ model. Similarly, if $\epsilon_i$ follows a Weibull distribution, the model is a $WACD(r,s)$ model.
+
+Similar to GARCH models, the process $\eta_i = x_i - \psi_i$ is a martingale difference sequence [i.e., $E(\eta_i|F_{i-1}) = 0$], and the $ACD(r,s)$ model can be written as:
+
+$$x_i = \omega + \sum_{j=1}^{\max(r,s)} (\gamma_j + \omega_j) x_{i-j} - \sum_{j=1}^s \omega_j \eta_{i-j} + \eta_j,$$
+
+which is in the form of an ARMA process with non-Gaussian innovations. It is understood here that $\gamma_j = 0$ for $j > r$ and $\omega_j = 0$ for $j > s$. Such a representation can be used to obtain the basic conditions for weak stationarity of the ACD model.
+
+For instance, taking expectation on both sides of Eq. (5.35) and assuming weak stationarity, we have:
+
+$$E(x_i) = \frac{\omega}{1-\sum_{j=1}^{\max(r,s)} (\gamma_j + \omega_j)}.$$
+
+Therefore, we assume $\omega > 0$ and $1 > \sum_j (\gamma_j + \omega_j)$ because the expected duration is positive.
+
+The section then goes on to derive properties of the $EACD(1,1)$ model as an example application of the general representation.
+
+### EACD(1,1) Model
+
+An $EACD(1,1)$ model can be written as:
+
+$$x_i = \psi_i \epsilon_i,$$
+$$\psi_i = \omega + \gamma_1 x_{i-1} + \omega_1 \psi_{i-1},$$
+
+where $\epsilon_i$ follows the standard exponential distribution. Using the moments of a standard exponential distribution, we have $E(\epsilon_i) = 1$, $Var(\epsilon_i) = 1$, and $E(\epsilon_i^2) = Var(x_i) + [E(x_i)]^2 = 2$.
+
+Assuming that $x_i$ is weakly stationary (i.e., the first two moments of $x_i$ are time invariant), we derive the variance of $x_i$. First, taking the expectation of the equation for $\psi_i$, we have:
+
+$$E(\psi_i) = \omega + \gamma_1 E(x_{i-1}) + \omega_1 E(\psi_{i-1}).$$
+
+Under weak stationarity, $E(\psi_i) = E(\psi_{i-1})$ so that:
+
+$$\mu_x \equiv E(x_i) = E(\psi_i) = \frac{\omega}{1-\gamma_1-\omega_1}.$$
+
+Next, because $E(\epsilon_i^2) = 2$, we have:
+
+$$E(x_i^2) = E[E(\psi_i^2 \epsilon_i^2 | \mathcal{F}_{i-1})] = 2E(\psi_i^2).$$
+
+Taking the square of $\psi_i$ and the expectation and using weak stationarity, we get after some algebra:
+
+$$E(\psi_i^2) = \mu_x^2 \times \frac{1-(\gamma_1+\omega_1)^2}{1-2\gamma_1^2-\omega_1^2-2\gamma_1\omega_1}.$$
+
+Finally, using $Var(x_i) = E(x_i^2) - [E(x_i)]^2$ and $E(x_i^2) = 2E(\psi_i^2)$, we have:
+
+$$Var(x_i) = 2E(\psi_i^2) - \mu_x^2 = \mu_x^2 \times \frac{1-\omega_1^2-2\gamma_1\omega_1}{1-\omega_1^2-2\gamma_1\omega_1-2\gamma_1^2},$$
+
+where $\mu_x$ is defined earlier.
+
+This result shows that, to have time-invariant unconditional variance, the $EACD(1,1)$ model must satisfy $1 > 2\gamma_1^2 + \omega_1^2 + 2\gamma_1\omega_1$. The variance of a $WACD(1,1)$ model can be obtained by using the
+same techniques and the first two moments of a standardized Weibull distribution.
+
+In summary, this derivation illustrates how the general ARMA-like representation of the $ACD(r,s)$ model can be used to obtain properties like the mean and variance for specific models like the $EACD(1,1)$ case. Similar techniques can be applied to other ACD models.
+
+### ACD Models with a Generalized Gamma Distribution
+
+In the statistical literature, intensity function is often expressed in terms of hazard function. As shown in Appendix B, the hazard function of an EACD model is constant over time and that of a WACD model is a monotonous function. These hazard functions are rather restrictive in application as the intensity function of stock transactions might not be constant or monotone over time.
+
+To increase the flexibility of the associated hazard function, Zhang et al. (2001) employ a (standardized) generalized gamma distribution for ϵi. See Appendix A for some basic properties of a generalized gamma distribution. The resulting hazard function may assume various patterns, including U shape or inverted U shape. We refer to an ACD model with innovations that follow a generalized gamma distribution as a $GACD(r, s)$ model.

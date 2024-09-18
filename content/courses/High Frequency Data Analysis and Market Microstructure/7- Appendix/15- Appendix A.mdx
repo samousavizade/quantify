@@ -1,0 +1,157 @@
+# Appendix A: Review of some Probability Distribution
+
+## Exponential Distribution
+
+A random variable $X$ has an exponential distribution with parameter $\beta > 0$ if its probability density function (pdf) is given by
+
+$$
+f(x|\beta) =
+\begin{cases}
+\frac{1}{\beta} e^{-x/\beta} & \text{if } x \geq 0, \\
+0 & \text{otherwise.}
+\end{cases}
+$$
+
+Denoting such a distribution by $X \sim \exp(\beta)$, we have $E(X) = \beta$ and $\text{Var}(X) = \beta^2$. The cumulative distribution function (CDF) of $X$ is
+
+$$
+F(x|\beta) =
+\begin{cases}
+0 & \text{if } x < 0, \\
+1 - e^{-x/\beta} & \text{if } x \geq 0.
+\end{cases}
+$$
+
+When $\beta = 1$, $X$ is said to have a standard exponential distribution.
+
+## Gamma Function
+
+For $\kappa > 0$, the gamma function $\Gamma(\kappa)$ is defined by
+
+$$
+\Gamma(\kappa) = \int_0^\infty x^{\kappa-1}e^{-x} dx.
+$$
+
+The most important properties of the gamma function are:
+
+1. For any $\kappa > 1$, $\Gamma(\kappa) = (\kappa - 1)\Gamma(\kappa - 1)$.
+2. For any positive integer $m$, $\Gamma(m) = (m-1)!$.
+3. $\Gamma(\frac{1}{2}) = \sqrt{\pi}$.
+
+The integration
+
+$$
+\Gamma(y|\kappa) = \int_0^y x^{\kappa-1}e^{-x} dx, \quad y > 0
+$$
+
+is an incomplete gamma function. Its values have been tabulated in the literature. Computer programs are now available to evaluate the incomplete gamma function.
+
+## Gamma Distribution
+
+A random variable $X$ has a gamma distribution with parameter $\kappa$ and $\beta$ ($\kappa > 0$, $\beta > 0$) if its pdf is given by
+
+$$
+f(x|\kappa, \beta) =
+\begin{cases}
+\frac{1}{\beta^\kappa \Gamma(\kappa)} x^{\kappa-1}e^{-x/\beta} & \text{if } x \geq 0, \\
+0 & \text{otherwise.}
+\end{cases}
+$$
+
+By changing variable $y = x/\beta$, one can easily obtain the moments of $X$:
+
+$$
+E(X^m) = \int_0^\infty x^m f(x|\kappa, \beta) dx = \frac{1}{\beta^\kappa \Gamma(\kappa)} \int_0^\infty x^{\kappa+m-1}e^{-x/\beta} dx = \beta^m \frac{\Gamma(\kappa)}{\Gamma(\kappa)} \int_0^\infty y^{\kappa+m-1}e^{-y} dy = \beta^m \frac{\Gamma(\kappa + m)}{\Gamma(\kappa)}.
+$$
+
+In particular, the mean and variance of $X$ are $E(X) = \kappa\beta$ and $\text{Var}(X) = \kappa\beta^2$.
+
+When $\beta = 1$, the distribution is called a standard gamma distribution with parameter $\kappa$. We use the notation $G \sim \text{gamma}(\kappa)$ to denote that $G$ follows a standard gamma distribution with parameter $\kappa$. The moments of $G$ are
+
+$$
+E(G^m) = \frac{\Gamma(\kappa + m)}{\Gamma(\kappa)}, \quad m > 0.
+$$
+
+## Weibull Distribution
+
+A random variable $X$ has a Weibull distribution with parameters $\alpha$ and $\beta$ ($\alpha > 0$, $\beta > 0$) if its pdf is given by
+
+$$
+f(x|\alpha, \beta) =
+\begin{cases}
+\frac{\alpha}{\beta^\alpha} x^{\alpha-1}e^{-(x/\beta)^\alpha} & \text{if } x \geq 0, \\
+0 & \text{if } x < 0,
+\end{cases}
+$$
+
+where $\beta$ and $\alpha$ are the scale and shape parameters of the distribution. The mean and variance of $X$ are
+
+$$
+E(X) = \beta \Gamma\left(1 + \frac{1}{\alpha}\right), \quad \text{Var}(X) = \beta^2 \left[\Gamma\left(1 + \frac{2}{\alpha}\right) - \left(\Gamma\left(1 + \frac{1}{\alpha}\right)\right)^2\right],
+$$
+
+and the CDF of $X$ is
+
+$$
+F(x|\alpha, \beta) =
+\begin{cases}
+0 & \text{if } x < 0, \\
+1 - e^{-(x/\beta)^\alpha} & \text{if } x \geq 0.
+\end{cases}
+$$
+
+When $\alpha = 1$, the Weibull distribution reduces to an exponential distribution.
+
+Define $Y = X/[\beta\Gamma(1 + 1/\alpha)]$. We have $E(Y) = 1$ and the pdf of $Y$ is
+
+$$
+f(y|\alpha) =
+\begin{cases}
+\alpha \left(\Gamma\left(1 + \frac{1}{\alpha}\right)\right)^\alpha y^{\alpha-1} \exp\left(-\left(\Gamma\left(1 + \frac{1}{\alpha}\right)y\right)^\alpha\right) & \text{if } y \geq 0, \\
+0 & \text{otherwise,}
+\end{cases}
+$$
+
+where the scale parameter $\beta$ disappears due to standardization. The CDF of the standardized Weibull distribution is
+
+$$
+F(y|\alpha) =
+\begin{cases}
+0 & \text{if } y < 0, \\
+1 - \exp\left(-\left(\Gamma\left(1 + \frac{1}{\alpha}\right)y\right)^\alpha\right) & \text{if } y > 0,
+\end{cases}
+$$
+
+and we have $E(Y) = 1$ and $\text{Var}(Y) = \Gamma(1 + 2/\alpha)/[\Gamma(1 + 1/\alpha)]^2 - 1$. For a duration model with Weibull innovations, the pdf in Eq. (5.56) is used in the maximum-likelihood estimation.
+
+## Generalized Gamma Distribution
+
+A random variable $X$ has a generalized gamma distribution with parameter $\alpha$, $\beta$, $\kappa$ ($\alpha > 0$, $\beta > 0$, and $\kappa > 0$) if its pdf is given by
+
+$$
+f(x|\alpha, \beta, \kappa) =
+\begin{cases}
+\frac{\alpha x^{\kappa\alpha-1}}{\beta^{\kappa\alpha}\Gamma(\kappa)} \exp\left(-\left(\frac{x}{\beta}\right)^\alpha\right) & \text{if } x \geq 0, \\
+0 & \text{otherwise,}
+\end{cases}
+$$
+
+where $\beta$ is a scale parameter, and $\alpha$ and $\kappa$ are shape parameters. This distribution can be written as $G = (X/\beta)^\alpha$, where $G$ is a standard gamma random variable with parameter $\kappa$. The pdf of $X$ can be obtained from that of $G$ by the technique of changing variables. Similarly, the moments of $X$ can be obtained from that of $G$ in Eq. (5.55) by
+
+$$
+E(X^m) = E[(\beta G^{1/\alpha})^m] = \beta^m E(G^{m/\alpha}) = \beta^m \frac{\Gamma(\kappa + m/\alpha)}{\Gamma(\kappa)} = \beta^m \frac{\Gamma(\kappa + m/\alpha)}{\Gamma(\kappa)}.
+$$
+
+When $\kappa = 1$, the generalized gamma distribution reduces to that of a Weibull distribution. Thus, the exponential and Weibull distributions are special cases of the generalized gamma distribution.
+
+The expectation of a generalized gamma distribution is $E(X) = \beta\Gamma(\kappa + 1/\alpha) / \Gamma(\kappa)$. In duration models, we need a distribution with unit expectation. Therefore, defining a random variable $Y = \lambda X/\beta$, where $\lambda = \Gamma(\kappa) / \Gamma(\kappa + 1/\alpha)$, we have $E(Y) = 1$ and the pdf of $Y$ is
+
+$$
+f(y|\alpha, \kappa) =
+\begin{cases}
+\frac{\alpha y^{\kappa\alpha-1}}{\lambda^{\kappa\alpha}\Gamma(\kappa)} \exp\left(-\left(\frac{y}{\lambda}\right)^\alpha\right) & \text{if } y > 0, \\
+0 & \text{otherwise,}
+\end{cases}
+$$
+
+where again the scale parameter $\beta$ disappears and $\lambda = \Gamma(\kappa) / \Gamma(\kappa + 1/\alpha)$.

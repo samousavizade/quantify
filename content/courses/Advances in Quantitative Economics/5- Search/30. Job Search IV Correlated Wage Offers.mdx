@@ -77,7 +77,7 @@ The variable $ z $ enters as a state in the Bellman equation because its current
 
 There is a way that we can reduce dimensionality in this problem, which greatly accelerates computation.
 
-To start, let $ f^\* $ be the continuation value function, defined
+To start, let $ f^ $ be the continuation value function, defined
 by
 
 $$
@@ -97,20 +97,20 @@ $$
 f^*(z) = u(c) + \beta \, \mathbb E_z \max \left\{ \frac{u(w')}{1-\beta}, f^*(z') \right\}
 $$
 
-We’ll solve this functional equation for $ f^\* $ by introducing the
+We’ll solve this functional equation for $ f^ $ by introducing the
 operator
 
 $$
 Qf(z) = u(c) + \beta \, \mathbb E_z \max \left\{ \frac{u(w')}{1-\beta}, f(z') \right\}
 $$
 
-By construction, $ f^_ $ is a fixed point of $ Q $, in the sense that $ Q f^_ = f^\* $.
+By construction, $ \hat{f} $ is a fixed point of $ Q $, in the sense that $ Q \hat{f} = f^ $.
 
 Under mild assumptions, it can be shown that $ Q $ is a [contraction mapping](https://en.wikipedia.org/wiki/Contraction_mapping) over a suitable space of continuous functions on $ \mathbb R $.
 
-By Banach’s contraction mapping theorem, this means that $ f^\* $ is the unique fixed point and we can calculate it by iterating with $ Q $ from any reasonable initial condition.
+By Banach’s contraction mapping theorem, this means that $ f^ $ is the unique fixed point and we can calculate it by iterating with $ Q $ from any reasonable initial condition.
 
-Once we have $ f^\* $, we can solve the search problem by stopping when the reward for accepting exceeds the continuation value, or
+Once we have $ f^ $, we can solve the search problem by stopping when the reward for accepting exceeds the continuation value, or
 
 $$
 \frac{u(w)}{1-\beta} \geq f^*(z)

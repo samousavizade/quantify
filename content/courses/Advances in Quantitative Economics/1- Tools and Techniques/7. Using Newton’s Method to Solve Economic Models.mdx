@@ -101,10 +101,10 @@ Here
 In this example, we aim to calculate the unique strictly positive fixed point
 of $ g $, the capital evolution equation.
 
-In other words, we seek a $ k^_ > 0 $ such that $ g(k^_)=k^\* $.
+In other words, we seek a $ \hat{k} > 0 $ such that $ g(\hat{k})=k^\* $.
 
-- such a $ k^_ $ is termed a [steady state](https://en.wikipedia.org/wiki/Steady_state),
-  since $ k_t = k^_ $ implies $ k\_{t+1} = k^\* $.
+- such a $ \hat{k} $ is termed a [steady state](https://en.wikipedia.org/wiki/Steady_state),
+  since $ k_t = \hat{k} $ implies $ k\_{t+1} = k^\* $.
 
 Using manual calculations to solve $ g(k)=k $, you can verify that
 
@@ -530,7 +530,7 @@ $$
 e_i(p) = q^d_i(p) - q^s_i(p), \quad i = 0, 1
 $$
 
-An equilibrium price vector $ p^_ $ satisfies $ e_i(p^_) = 0 $.
+An equilibrium price vector $ \hat{p} $ satisfies $ e_i(\hat{p}) = 0 $.
 
 We set
 
@@ -688,7 +688,7 @@ We observe the black contour line of zero, which indicates when $ e_i(p)=0 $.
 
 For a price vector $ p $ such that $ e_i(p)=0 $ we know that good $ i $ is in equilibrium (demand equals supply).
 
-If these two contour lines intersect at some price vector $ p^_ $, then $ p^_ $ is an equilibrium price vector.
+If these two contour lines intersect at some price vector $ \hat{p} $, then $ \hat{p} $ is an equilibrium price vector.
 
 ```python
 fig, ax = plt.subplots(figsize=(10, 5.7))
@@ -983,7 +983,7 @@ k3_{0} &= (50, 50, 50)
 \end{aligned}
 $$
 
-- The calculation of the fixed point is equivalent to finding $ k^_ $ such that $ f(k^_) - k^\* = 0 $.
+- The calculation of the fixed point is equivalent to finding $ \hat{k} $ such that $ f(\hat{k}) - k^\* = 0 $.
 - If you are uncertain about your solution, you can begin with the solved example:...
 
 $$

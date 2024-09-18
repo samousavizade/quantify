@@ -550,8 +550,8 @@ both satisfied, then a maximum value of $ \alpha $ exists and that it is
 positive.
 
 The maximal value is called the _technological expansion rate_ and is denoted
-by $ \alpha_0 $. The associated intensity vector $ x_0 $ is the
-_optimal intensity vector_.
+by $ \alpha*0 $. The associated intensity vector $ x_0 $ is the
+\_optimal intensity vector*.
 
 **Definition:** The economic expansion problem (EEP) for
 $ (A,B) $ is to find a semi-positive $ n $-vector $ p>0 $
@@ -565,9 +565,9 @@ $$
 $$
 
 Assumptions I and II imply existence of a minimum value
-$ \beta_0>0 $ called the _economic expansion rate_.
+$ \beta*0>0 $ called the \_economic expansion rate*.
 
-The corresponding price vector $ p_0 $ is the _optimal price vector_.
+The corresponding price vector $ p*0 $ is the \_optimal price vector*.
 
 Because the criterion functions in the _technological expansion_ problem
 and the _economical expansion problem_ are both linearly homogeneous,
@@ -588,8 +588,8 @@ Therefore, von Neumann [[von Neumann, 1937](/courses/Introduction-to-Quantitativ
 
 **Theorem 1 (von Neumann):** If the economy $ (A,B) $ satisfies
 Assumptions I and II, then there exist
-$ \left(\gamma^{_}, x_0, p_0\right) $, where
-$ \gamma^{_}\in[\beta_0, \alpha_0]\subset\mathbb{R} $, $ x_0>0 $
+$ \left(\hat{\gamma}, x_0, p_0\right) $, where
+$ \hat{\gamma}\in[\beta_0, \alpha_0]\subset\mathbb{R} $, $ x_0>0 $
 is an $ m $-vector, $ p_0>0 $ is an $ n $-vector, and the
 following arbitrage true
 
@@ -601,16 +601,12 @@ x_0^T\left(B-\gamma^{* } A\right)p_0 &= 0
 \end{aligned}
 $$
 
-> **Note\***Proof (Sketch):_ Assumption I and II imply that there exist $ (\alpha_0,
+> **Note** Proof (Sketch): Assumption I and II imply that there exist $ (\alpha_0,
 > x_0) $ and $ (\beta_0, p_0) $ that solve the TEP and EEP, respectively. If
-> $ \gamma^_>\alpha_0 $, then by definition of $ \alpha_0 $, there cannot
+> $ \hat{\gamma} > \alpha_0 $, then by definition of $ \alpha_0 $, there cannot
 exist a semi-positive $ x $ that satisfies $ x^T B \geq \gamma^{* }
 x^T A $.  Similarly, if $ \gamma^*<\beta_0 $, there is no semi-positive
-$ p $ for which $ Bp \leq \gamma^{_ } Ap $. Let $ \gamma^{_
-> }\in[\beta_0, \alpha_0] $, then $ x_0^T B \geq \alpha_0 x_0^T A \geq
-> \gamma^{_ } x_0^T A $. Moreover, $ Bp_0\leq \beta_0 A p_0\leq \gamma^_ A
-> p_0 $. These two inequalities imply $ x_0\left(B - \gamma^{\* } A\right)p_0
-> = 0 $.
+$ p $ for which $ Bp \leq \hat{\gamma} Ap $. Let $ \hat{\gamma} \in[\beta_0, \alpha_0] $, then $ x_0^T B \geq \alpha_0 x_0^T A \geq \hat{\gamma} x_0^T A $. Moreover, $ Bp_0\leq \beta_0 A p_0\leq \hat{\gamma} A p_0 $. These two inequalities imply $ x_0\left(B - \gamma^{\*} A\right)p_0 > = 0 $.
 
 Here the constant $ \gamma^{\*} $ is both an expansion factor and an interest
 factor (not necessarily optimal).
@@ -619,9 +615,9 @@ We have already encountered and
 discussed the first two inequalities that represent feasibility and
 no-profit conditions.
 
-Moreover, the equality $ x_0^T\left(B-\gamma^{_ } A\right)p_0 = 0 $ concisely expresses the
+Moreover, the equality $ x*0^T\left(B-\hat{\gamma} A\right)p_0 = 0 $ concisely expresses the
 requirements that if any good grows at a rate larger than
-$ \gamma^{_} $ (i.e., if it is _oversupplied_), then its price
+$ \hat{\gamma} $ (i.e., if it is \_oversupplied*), then its price
 must be zero; and that if any activity provides negative profit, it must
 be unused.
 
@@ -665,7 +661,7 @@ use mixed strategies. Thus,
 - the column player selects the $ n $-vector $ p > \mathbf{0} $ subject to $ \iota_n^T p = 1 $.
 
 **Definition:** The $ m\times n $ matrix game $ C $ has the
-_solution_ $ (x^_, p^_, V(C)) $ in mixed strategies if
+_solution_ $ (\hat{x}, \hat{p}, V(C)) $ in mixed strategies if
 
 $$
 \begin{aligned}
@@ -740,7 +736,7 @@ $$
 V(-A) < 0\quad\quad \text{and}\quad\quad V(B)>0
 $$
 
-> **Note\***Proof (Outline)\*:
+> **Note** Proof (Outline):
 
 - $ \Rightarrow $ $ V(B)>0 $ implies
   $ x_0^T B \gg \mathbf{0} $, where $ x_0 $ is a maximizing
@@ -838,14 +834,14 @@ if $ \alpha $ is sufficiently large that
 $ \max_i\{[(B-\alpha A)\iota_n]\_i\} < 0 $, then TEP no longer has a
   solution.
 
-Accordingly, let **`UB`** be the $ \alpha^{_} $ that
-solves $ \max_i\{[(B-\alpha^{_} A)\iota_n]\_i\} = 0 $.
+Accordingly, let **`UB`** be the $ \hat{\alpha}} $ that
+solves $ \max_i\{[(B-\hat{\alpha}} A)\iota_n]\_i\} = 0 $.
 
 - Similarly to
   the upper bound, if $ \beta $ is so small that
   $ \min_j\{[\iota^T_m(B-\beta A)]\_j\}>0 $, then the EEP has no
-  solution and so we can define **`LB`** as the $ \beta^{_} $ that
-  solves $ \min_j\{[\iota^T_m(B-\beta^{_} A)]\_j\}=0 $.
+  solution and so we can define **`LB`** as the $ \hat{\beta} $ that
+  solves $ \min_j\{[\iota^T_m(B-\hat{\beta} A)]\_j\}=0 $.
 
 The _bounds_ method computes these trivial bounds for us
 
@@ -972,7 +968,7 @@ Naturally, when $ \gamma^\* $ is unique, it is immaterial which of the two metho
 Specifically, as will be demonstrated below, in
 the case of an irreducible $ (A,B) $ (like in Example 1), the maximal
 and minimal roots of $ V(M(\gamma)) $ necessarily coincide, implying
-a 'full duality' result, i.e. $ \alpha_0 = \beta_0 = \gamma^_ $ so that the expansion (and interest) rate $ \gamma^_ $ is unique.
+a 'full duality' result, i.e. $ \alpha_0 = \beta_0 = \hat{\gamma} $ so that the expansion (and interest) rate $ \hat{\gamma} $ is unique.
 
 ### Uniqueness and Irreducibility
 
@@ -1004,18 +1000,18 @@ print(f'The corresponding x from the primal = {x}')
 
 As we can observe, with a reducible $ (A,B) $, the roots found by the
 bisection algorithms may differ, so there might be multiple
-$ \gamma^_ $ that make the value of the game
-with $ M(\gamma^_) $ zero. (refer to the figure above).
+$ \hat{\gamma} $ that make the value of the game
+with $ M(\hat{\gamma}) $ zero. (refer to the figure above).
 
 Indeed, while the von Neumann theorem ensures existence of the
 equilibrium, Assumptions I and II are insufficient for uniqueness.
 Nonetheless, Kemeny et al. (1967) demonstrate that there are at most finitely
 many economic solutions, meaning that there are only finitely many
-$ \gamma^_ $ that satisfy $ V(M(\gamma^_)) = 0 $ and
-$ x_0^TBp_0 > 0 $ and that for each such $ \gamma^_\_i $, there
+$ \hat{\gamma} $ that satisfy $ V(M(\hat{\gamma})) = 0 $ and
+$ x_0^TBp_0 > 0 $ and that for each such $ \hat{\gamma}\_i $, there
 exists a self-contained part of the economy (a sub-economy) that in
 equilibrium can expand independently with the expansion
-coefficient $ \gamma^_\_i $.
+coefficient $ \hat{\gamma}\_i $.
 
 The following theorem (see Theorem 9.10. in Gale [[Gale, 1989](/courses/Introduction-to-Quantitative-Economics/References#id81)]) states that
 imposing irreducibility is sufficient for uniqueness of
@@ -1057,7 +1053,7 @@ that a non-negative matrix has a non-negative
 eigenvalue-eigenvector pair.
 
 Moreover, if $ A $ is irreducible, then
-the optimal intensity vector $ x_0 $ is positive and _unique_ up to
+the optimal intensity vector $ x*0 $ is positive and \_unique* up to
 multiplication by a positive scalar.
 
 Suppose that $ A $ is reducible with $ k $ irreducible subsets

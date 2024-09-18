@@ -1,0 +1,38 @@
+Nonlinear features are also commonly found in high-frequency data. As an illustration, we apply some nonlinearity tests discussed in Chapter 4 to the normalized innovations $\hat{\varepsilon}_i$ of the WACD(1,1) model for the IBM transaction durations in Example 5.4; see Eq. (5.43). Based on an AR(4) model, the test results are given in part (a) of Table 5.8. As expected from the model diagnostics of Example 5.4, the Ori-F test indicates no quadratic nonlinearity in the normalized innovations. However, the TAR-F test statistics suggest strong nonlinearity.
+
+Based on the test results in Table 5.8, we entertain a threshold duration model with two regimes for the IBM intraday durations. The threshold variable is $x_{t-1}$ (i.e., lag-1 adjusted duration). The estimated threshold value is 3.79. The fitted threshold WACD(1,1) model is $x_i = \psi_i \varepsilon_i$, where
+
+$$
+\psi_i =
+\begin{cases}
+0.020 + 0.257x_{i-1} + 0.847\psi_{i-1}, & \varepsilon_i \sim w(0.901) \text{ if } x_{i-1} \leq 3.79, \\
+1.808 + 0.027x_{i-1} + 0.501\psi_{i-1}, & \varepsilon_i \sim w(0.845) \text{ if } x_{i-1} > 3.79,
+\end{cases}
+$$
+
+where $w(\alpha)$ denotes a standardized Weibull distribution with parameter $\alpha$. The number of observations in the two regimes are 2503 and 1030, respectively. In Eq. (5.45), the standard errors of the parameters for the first regime are 0.043, 0.041, 0.024, and 0.014, whereas those for the second regime are 0.526, 0.020, 0.147, and 0.020, respectively.
+
+Consider the normalized innovations $\hat{\varepsilon}_i = x_i / \hat{\psi}_i$ of the threshold WACD(1,1) model in Eq. (5.45). We obtain $Q(12) = 9.8$ and $Q(24) = 23.9$ for $\hat{\varepsilon}_i$ and $Q(12) = 8.0$ and $Q(24) = 16.7$ for $\hat{\varepsilon}_i^2$. Thus, there are no significant serial correlations in the $\hat{\varepsilon}_i$ and $\hat{\varepsilon}_i^2$ series.
+
+Furthermore, applying the same nonlinearity tests as before to this newly normalized innovational series $\hat{\varepsilon}_i$, we detect no nonlinearity; see part (b) of Table 5.8.
+
+Consequently, the two-regime threshold WACD(1,1) model in Eq. (5.45) is adequate.
+
+If we classify the two regimes as heavy and thin trading periods, then the threshold model suggests that the trading dynamics measured by intraday transaction durations are different between heavy and thin trading periods for IBM stock even after the adjustment of diurnal pattern. This is not surprising as market activities are often driven by the arrival of news and other information.
+
+The estimated threshold WACD(1,1) model in Eq. (5.45) contains some insignificant parameters. We refine the model and obtain the result:
+
+$$
+\psi_i =
+\begin{cases}
+0.225x_{i-1} + 0.867\psi_{i-1}, & \varepsilon_i \sim w(0.902) \text{ if } x_{i-1} \leq 3.79, \\
+1.618 + 0.614\psi_{i-1}, & \varepsilon_i \sim w(0.846) \text{ if } x_{i-1} > 3.79.
+\end{cases}
+$$
+
+All the estimates of the refined model are highly significant. The Ljung–Box statistics of the standardized innovations $\hat{\varepsilon}_i = x_i / \hat{\psi}_i$ show $Q(10) = 5.91 (0.82)$ and $Q(20) = 16.04 (0.71)$ and those of $\hat{\varepsilon}_i^2$ give $Q(10) = 5.35 (0.87)$ and $Q(20) = 15.20 (0.76)$, where the number in parentheses is the p-value. Therefore, the refined model is adequate.
+
+[//]: # 'TODO TABLE'
+
+> Table 5.8 Nonlinearity Tests for IBM Transaction Durations from November 1 to November 7, 1990
+> Only intraday durations are used. The number in parentheses of TAR-F tests denotes time delay.

@@ -610,9 +610,9 @@ $$
 y^*_0 = \begin{bmatrix} y^*_{1,0} \cr 0 \end{bmatrix} \tag{64.19}
 $$
 
-the path of $ y^_\_t $ and therefore the paths of both components of
-$ y_t = Q y^_\_t $ will diverge in absolute value as
-$ t \rightarrow +\infty $. (We say that the paths _explode_)
+the path of $ \hat{y}\_t $ and therefore the paths of both components of
+$ y*t = Q \hat{y}\_t $ will diverge in absolute value as
+$ t \rightarrow +\infty $. (We say that the paths \_explode*)
 
 Equation [(64.19)](#equation-equation-11) also leads us to conclude that there is a unique setting
 for the initial vector $ y_0 $ for which both components of
@@ -994,7 +994,7 @@ $$
 F^* = Q_{21} Q_{11}^{-1} .
 $$
 
-Then from $ P*{t+1} = F^\* m*{t+1} $ and $ m*{t+1} = \rho m_t + \delta P_t $ we can deduce the recursion $ P*{t+1} = F^_ \rho m_t + F^_ \delta P_t $ and create the stacked system
+Then from $ P*{t+1} = F^* m*{t+1} $ and $ m*{t+1} = \rho m_t + \delta P_t $ we can deduce the recursion $ P\*{t+1} = \hat{F} \rho m_t + \hat{F} \delta P_t $ and create the stacked system
 
 $$
 \begin{bmatrix} m_{t+1} \cr P_{t+1} \end{bmatrix}  =    \begin{bmatrix} \rho & \delta \cr
@@ -1032,16 +1032,16 @@ computations.
 
 1. For the system with $ \delta\neq 0 $ so that there is feedback,
    we compute the stabilizing solution for $ p*t $ in the form
-   $ p_t = F^* m_t $ where $ F^* = Q*{21}Q\_{11}^{-1} $ as above.
+   $ p_t = F^* m_t $ where $ F^_ = Q_{21}Q\_{11}^{-1} $ as above.
 1. Recalling the system [(64.11)](#equation-equation-3), [(64.12)](#equation-equation-4), and [(64.13)](#equation-equation-5) above, we define
    $ x_t = \begin{bmatrix} m_t \cr P_t \end{bmatrix} $ and notice
    that it is Big $ P_t $ and not little $ p_t $ here. Then we form $ A $ and $ G $ as
-   $ A = \begin{bmatrix}\rho & \delta \cr F^_ \rho & F^_\delta \end{bmatrix} $
+   $ A = \begin{bmatrix}\rho & \delta \cr \hat{F} \rho & \hat{F}\delta \end{bmatrix} $
 and $ G = \begin{bmatrix} 1 & 0 \end{bmatrix} $ and we compute
 $ \begin{bmatrix} F_1 & F_2 \end{bmatrix} \equiv F $
    from equation [(64.13)](#equation-equation-5) above.
-1. We compute $ F_1 + F_2 F^_ $ and compare it
-   with $ F^_ $ and check for the anticipated equality.
+1. We compute $ F_1 + F_2 \hat{F} $ and compare it
+   with $ \hat{F} $ and check for the anticipated equality.
 
 ```python
 # set parameters
@@ -1076,7 +1076,7 @@ F_check
 
     array([0.92755597, 0.02375311])
 
-Compare $ F^_ $ with $ F_1 + F_2 F^_ $
+Compare $ \hat{F} $ with $ F_1 + F_2 \hat{F} $
 
 ```python
 F_check[0] + F_check[1] * F_star, F_star

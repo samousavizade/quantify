@@ -1,0 +1,128 @@
+---
+title: Ordered Probit Model
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+### Ordered Probit Model
+
+Let \( y^_ \) be the unobservable price change of the asset under study (i.e., \( y^_ = P^_\_t - P^_\_{t-1} \)), where \( P^_\_t \) is the virtual price of the asset at time \( t \). The ordered probit model assumes that \( y_i^_ \) is a continuous random variable and follows the model
+
+\[
+y_i^\* = x_i \beta + \varepsilon_i, \quad (5.15)
+\]
+
+where \( x*i \) is a \( p \)-dimensional row vector of explanatory variables available at time \( t*{i-1} \), \( \beta \) is a \( p \times 1 \) parameter vector, \( E(\varepsilon_i | x_i) = 0 \), \( \text{Var}(\varepsilon_i | x_i) = \sigma_i^2 \), and \( \text{Cov}(\varepsilon_i, \varepsilon_j) = 0 \) for \( i \neq j \). The conditional variance \( \sigma_i^2 \) is assumed to be a positive function of the explanatory variable \( w_i \), that is,
+
+\[
+\sigma_i^2 = g(w_i), \quad (5.16)
+\]
+
+Where \( g(\cdot) \) is a positive function. For financial transactions data, \( w*i \) may contain the time interval \( t_i - t*{i-1} \) and some conditional heteroscedastic variables. Typically, one also assumes that the conditional distribution of \( \varepsilon_i \) given \( x_i \) and \( w_i \) is Gaussian.
+
+Suppose that the observed price change \( y_i \) may assume \( k \) possible values. In theory, \( k \) can be infinity, but countable. In practice, \( k \) is finite and may involve combining several categories into a single value. For example, we have \( k = 7 \) in Table 5.1, where the first value “−3 ticks” means that the price change is −3 ticks or lower. We denote the \( k \) possible values as \( \{s_1, ..., s_k\} \). The ordered probit model postulates the relationship between \( y_i^_ \) and \( y_i^_ \) as
+
+\[
+y*i = s_j \quad \text{if} \quad \alpha*{j-1} < y_i^\* \leq \alpha_j, \quad j = 1, ..., k, \quad (5.17)
+\]
+
+Where $\alpha_j$ are real numbers satisfying $-\infty = \alpha_0 < \alpha_1 < \cdots < \alpha_{k-1} < \alpha_k = \infty$. Under the assumption of conditional Gaussian distribution, we have
+
+$$P(y_i = s_j | x_i, w_i) = P(\alpha_{j-1} < x_i \beta + \epsilon_i \leq \alpha_j | x_i, w_i)$$
+
+\[
+P(y*i = s_j | x_i, w_i) =
+\begin{cases}
+P(x_i \beta + \epsilon_i \leq \alpha_1 | x_i, w_i) & \text{if } j = 1,\\
+P(\alpha*{j-1} < x*i \beta + \epsilon_i \leq \alpha_j | x_i, w_i) & \text{if } j = 2, \ldots, k-1,\\
+P(\alpha*{k-1} < x_i \beta + \epsilon_i | x_i, w_i) & \text{if } j = k,
+\end{cases}
+\]
+
+$$x_i\beta = \beta_1 + \sum_{v=1}^{7} IBS_{i-v}$$
+
+# \[
+
+\begin{cases}
+\frac{\Phi(\alpha*1 - x_i\beta)}{\sigma_i(w_i)} & \text{if } j = 1,\\
+\frac{\Phi(\alpha_j - x_i\beta) - \Phi(\alpha*{j-1} - x*i\beta)}{\sigma_i(w_i)} & \text{if } j = 2, \ldots, k-1,\\
+1 - \frac{\Phi(\alpha*{k-1} - x_i\beta)}{\sigma_i(w_i)} & \text{if } j = k,
+\end{cases}
+\]
+
+Where $\Phi(x)$ is the cumulative distribution function of the standard normal random variable evaluated at $x$, and we write $\sigma_i(w_i)$ to denote that $\sigma^2_i$ is a positive function of $w_i$. From the definition, an ordered probit model is driven by an unobservable continuous random variable. The observed values, which have a natural ordering, can be regarded as categories representing the underlying process.
+
+The ordered probit model contains parameters $\beta$, $\alpha_i$ $(i = 1, . . . , k - 1)$, and those in the conditional variance function $\sigma^2_i(w_i)$ in Eq. (5.16). These parameters can be estimated by the maximum-likelihood or Markov chain Monte Carlo methods.
+
+Example 5.1. Hauseman et al. (1992) apply the ordered probit model to the 1988 transactions data of more than 100 stocks. Here we only report their result for IBM. There are 206,794 trades. The sample mean (standard deviation) of price change $y_i$, time duration $t_i$, and bid–ask spread are $-0.0010(0.753)$, $27.21(34.13)$, and $1.9470(1.4625)$, respectively. The bid–ask spread is measured in ticks. The model used has nine categories for price movement, and the functional specifications are
+
+$$x^*_i\beta = \sum_{v=1}^{3} t_{i-v} + \sum_{v=1}^{3} (\beta_{v+1} y_{i-v}) + \sum_{v=1}^{3} (\beta_{v+4} SP5_{i-v}) +$$
+
+$$+\sum_{v=1}^{3} (\beta_{v+10}[T_\lambda(V_{i-v}) \times IBS_{i-v}])$$
+
+$$\sigma^2_i(w_i) = 1.0 + \gamma_1 t^*_i + \gamma_2 AB_{i-1},$$
+
+where $T_\lambda(V) = (V^\lambda - 1)/\lambda$ is the Box–Cox (1964) transformation of $V$ with $\lambda \in [0, 1]$ and the explanatory variables are defined by the following:
+
+- $t^*_i = (t_i - t_{i-1})/100$ is a rescaled time duration between the $(i - 1)$th and $i$th trades with time measured in seconds.
+- $AB_{i-1}$ is the bid–ask spread prevailing at time $t_{i-1}$ in ticks.
+- $y_{i-v}$ $(v = 1, 2, 3)$ is the lagged value of price change at $t_{i-v}$ in ticks.
+- $V_{i-v}$ $(v = 1, 2, 3)$ is the lagged value of dollar volume at the $(i - v)$th transaction, defined as the price of the $(i - v)$th transaction in dollars times the number of shares traded (denominated in hundreds of shares). That is, the dollar volume is in hundreds of dollars.
+- $SP5_{i-v}$ $(v = 1, 2, 3)$ is the 5-minute continuously compounded returns of the Standard and Poor’s 500 index futures price for the contract maturing in the closest month beyond the month in which transaction $(i - v)$ occurred, where the return is computed with the futures price recorded 1 minute before the nearest round minute prior to $t_{i-v}$ and the price recorded 5 minutes before this.
+- $IBS_{i-v}$ $(v = 1, 2, 3)$ is an indicator variable defined by
+
+$$
+IBS_{i-v}=
+\begin{cases}
+1 & \text{if } P > (P^a + P^b)/2\\
+0 & \text{if } P = (P^a + P^b)/2\\
+-1 & \text{if } P < (P^a + P^b)/2
+\end{cases}
+$$
+
+where $P^a_j$ and $P^b_j$ are the ask and bid price at time $t_j$.
+
+The parameter estimates and their t ratios are given in Table 5.5. All the t ratios are large except one, indicating that the estimates are highly significant. Such high t ratios are not surprising as the sample size is large. For the heavily traded IBM stock, the estimation results suggest the following conclusions:
+
+1. The boundary partitions are not equally spaced but are almost symmetric with respect to zero.
+
+2. The transaction duration \( t_i \) affects both the conditional mean and conditional variance of \( y_i \) in Eqs. (5.19) and (5.20).
+
+3. The coefficients of lagged price changes are negative and highly significant, indicating price reversals.
+
+4. As expected, the bid–ask spread at time \( t\_{i-1} \) significantly affects the conditional variance.
+
+| Parameter                                   | Estimate | \( t \) |
+| ------------------------------------------- | -------- | ------- |
+| **Boundary Partitions of the Probit Model** |          |         |
+| \(\alpha_1\)                                | -4.67    | -145.7  |
+| \(\alpha_2\)                                | -4.16    | -157.8  |
+| \(\alpha_3\)                                | -3.11    | -171.6  |
+| \(\alpha_4\)                                | -1.34    | -155.5  |
+| \(\alpha_5\)                                | 1.33     | 154.9   |
+| \(\alpha_6\)                                | 3.13     | 167.8   |
+| \(\alpha_7\)                                | 4.21     | 152.2   |
+| \(\alpha_8\)                                | 4.73     | 138.9   |
+| **Equation Parameters of the Probit Model** |          |         |
+| \(\gamma_1\)                                | 0.40     | 15.6    |
+| \(\gamma_2\)                                | 0.52     | 71.1    |
+| \(\beta_1 : \Delta t_i^\*\)                 | -0.12    | -11.4   |
+| \(\beta*2 : y*{-1}\)                        | -1.01    | -135.6  |
+| \(\beta_3\)                                 | -0.53    | -85.0   |
+| \(\beta_4\)                                 | -0.21    | -47.2   |
+| \(\beta_5\)                                 | 1.12     | 54.2    |
+| \(\beta_6\)                                 | -0.26    | -12.1   |
+| \(\beta_7\)                                 | 0.01     | 0.26    |
+| \(\beta_8\)                                 | -1.14    | -63.6   |
+| \(\beta_9\)                                 | -0.37    | -21.6   |
+| \(\beta\_{10}\)                             | -0.17    | -10.3   |
+| \(\beta\_{11}\)                             | 0.12     | 47.4    |
+| \(\beta\_{12}\)                             | 0.05     | 18.6    |
+| \(\beta\_{13}\)                             | 0.02     | 7.7     |
+
+> Table 5.5 Parameter Estimates of Ordered Probit Model in Eqs. (5.19) and (5.20) for the 1988 Transaction Data of IBM, Where t Denotes the t Ratio
+> Reprinted with permission of Elsevier from Journal of Financial Economics (1992, Vol.31, p.345).\*

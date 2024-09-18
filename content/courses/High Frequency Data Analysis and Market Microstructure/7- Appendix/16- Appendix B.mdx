@@ -1,0 +1,27 @@
+## Appendix B: Hazard Function
+
+A useful concept in modeling duration is the hazard function implied by a distribution function. For a random variable $X$, the survival function is defined as
+
+$$S(x) \equiv P(X > x) = 1 - P(X \leq x) = 1 - \text{CDF}(x), \quad x > 0,$$
+
+which gives the probability that a subject, which follows the distribution of $X$, survives at the time $x$. The hazard function (or intensity function) of $X$ is then defined by
+
+$$h(x) = \frac{f(x)}{S(x)},$$
+
+where $f(\cdot)$ and $S(\cdot)$ are the pdf and survival function of $X$, respectively.
+
+### Example 5.6
+
+For the Weibull distribution with parameters $\alpha$ and $\beta$, the survival function and hazard function are
+
+$$S(x|\alpha, \beta) = \exp\left[-\left(\frac{x}{\beta}\right)^\alpha\right],$$
+
+$$h(x|\alpha, \beta) = \frac{\alpha}{\beta^\alpha} x^{\alpha-1}, \quad x > 0.$$
+
+In particular, when $\alpha = 1$, we have $h(x|\beta) = 1/\beta$. Therefore, for an exponential distribution, the hazard function is constant. For a Weibull distribution, the hazard is a monotone function. If $\alpha > 1$, then the hazard function is monotonously increasing. If $\alpha < 1$, the hazard function is monotonously decreasing. For the generalized gamma distribution, the survival function and, hence, the hazard function involve the incomplete gamma function. Yet the hazard function may exhibit various patterns, including U shape or inverted U shape. Thus, the generalized gamma distribution provides a flexible approach to modeling the duration of stock transactions.
+
+For the standardized Weibull distribution, the survival and hazard functions are
+
+$$S(y|\alpha) = \exp\left[-\left(\Gamma\left(1 + \frac{1}{\alpha}\right)y\right)^\alpha\right],$$
+
+$$h(y|\alpha) = \alpha\left[\Gamma\left(1 + \frac{1}{\alpha}\right)\right]^\alpha y^{\alpha-1}, \quad y > 0.$$

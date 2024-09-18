@@ -66,13 +66,13 @@ Let’s examine what we have available to work with
 realwage.head()  # Show first 5 rows
 ```
 
-| \*\*\*\* | **Unnamed: 0** | **Time**   | **Country** | **Series**                               | **Pay period** | **value** |
-| -------- | -------------- | ---------- | ----------- | ---------------------------------------- | -------------- | --------- |
-| **0**    | 0              | 2006-01-01 | Ireland     | In 2015 constant prices at 2015 USD PPPs | Annual         | 17,132.44 |
-| **1**    | 1              | 2007-01-01 | Ireland     | In 2015 constant prices at 2015 USD PPPs | Annual         | 18,100.92 |
-| **2**    | 2              | 2008-01-01 | Ireland     | In 2015 constant prices at 2015 USD PPPs | Annual         | 17,747.41 |
-| **3**    | 3              | 2009-01-01 | Ireland     | In 2015 constant prices at 2015 USD PPPs | Annual         | 18,580.14 |
-| **4**    | 4              | 2010-01-01 | Ireland     | In 2015 constant prices at 2015 USD PPPs | Annual         | 18,755.83 |
+|       | **Unnamed: 0** | **Time**   | **Country** | **Series**                               | **Pay period** | **value** |
+| ----- | -------------- | ---------- | ----------- | ---------------------------------------- | -------------- | --------- |
+| **0** | 0              | 2006-01-01 | Ireland     | In 2015 constant prices at 2015 USD PPPs | Annual         | 17,132.44 |
+| **1** | 1              | 2007-01-01 | Ireland     | In 2015 constant prices at 2015 USD PPPs | Annual         | 18,100.92 |
+| **2** | 2              | 2008-01-01 | Ireland     | In 2015 constant prices at 2015 USD PPPs | Annual         | 17,747.41 |
+| **3** | 3              | 2009-01-01 | Ireland     | In 2015 constant prices at 2015 USD PPPs | Annual         | 18,580.14 |
+| **4** | 4              | 2010-01-01 | Ireland     | In 2015 constant prices at 2015 USD PPPs | Annual         | 18,755.83 |
 
 The data is currently in long format,... which complicates analysis when multiple dimensions are present.
 
@@ -213,9 +213,9 @@ out)
 realwage.stack().head()
 ```
 
-| \*\*\*\*       | **Country** | **Australia**                            | **Belgium**                                        | **...**                                  | **United Kingdom** | **United States**                                  |
+|                | **Country** | **Australia**                            | **Belgium**                                        | **...**                                  | **United Kingdom** | **United States**                                  |
 | -------------- | ----------- | ---------------------------------------- | -------------------------------------------------- | ---------------------------------------- | ------------------ | -------------------------------------------------- | ---------------------------------------- | -------------------------------------------------- |
-| \*\*\*\*       | Series      | In 2015 constant prices at 2015 USD PPPs | In 2015 constant prices at 2015 USD exchange rates | In 2015 constant prices at 2015 USD PPPs | ...                | In 2015 constant prices at 2015 USD exchange rates | In 2015 constant prices at 2015 USD PPPs | In 2015 constant prices at 2015 USD exchange rates |
+|                | Series      | In 2015 constant prices at 2015 USD PPPs | In 2015 constant prices at 2015 USD exchange rates | In 2015 constant prices at 2015 USD PPPs | ...                | In 2015 constant prices at 2015 USD exchange rates | In 2015 constant prices at 2015 USD PPPs | In 2015 constant prices at 2015 USD exchange rates |
 | **Time**       | Pay period  |                                          |                                                    |                                          |                    |                                                    |                                          |                                                    |
 | **2006-01-01** | Annual      | 20,410.65                                | 23,826.64                                          | 21,042.28                                | ...                | 20,376.32                                          | 12,594.40                                | 12,594.40                                          |
 | **Hourly**     | 10.33       | 12.06                                    | 10.09                                              | ...                                      | 9.81               | 6.05                                               | 6.05                                     |
@@ -230,9 +230,9 @@ stack
 realwage.stack(level='Country').head()
 ```
 
-| \*\*\*\*       | **Series** | **In 2015 constant prices at 2015 USD PPPs** | **In 2015 constant prices at 2015 USD exchange rates** |
+|                | **Series** | **In 2015 constant prices at 2015 USD PPPs** | **In 2015 constant prices at 2015 USD exchange rates** |
 | -------------- | ---------- | -------------------------------------------- | ------------------------------------------------------ | --------- | ------ |
-| \*\*\*\*       | Pay period | Annual                                       | Hourly                                                 | Annual    | Hourly |
+|                | Pay period | Annual                                       | Hourly                                                 | Annual    | Hourly |
 | **Time**       | Country    |                                              |                                                        |           |        |
 | **2006-01-01** | Australia  | 20,410.65                                    | 10.33                                                  | 23,826.64 | 12.06  |
 | **Belgium**    | 21,042.28  | 10.09                                        | 20,228.74                                              | 9.70      |
@@ -305,13 +305,13 @@ worlddata = pd.read_csv(url2, sep=';')
 worlddata.head()
 ```
 
-| \*\*\*\* | **Country (en)** | **Country (de)** | **Country (local)**   | **...** | **Deathrate** | **Life expectancy** | **Url**                                           |
-| -------- | ---------------- | ---------------- | --------------------- | ------- | ------------- | ------------------- | ------------------------------------------------- |
-| **0**    | Afghanistan      | Afghanistan      | Afganistan/Afqanestan | ...     | 13.70         | 51.30               | https://www.laenderdaten.info/Asien/Afghanista... |
-| **1**    | Egypt            | Ägypten          | Misr                  | ...     | 4.70          | 72.70               | https://www.laenderdaten.info/Afrika/Aegypten/... |
-| **2**    | Åland Islands    | Ålandinseln      | Åland                 | ...     | 0.00          | 0.00                | https://www.laenderdaten.info/Europa/Aland/ind... |
-| **3**    | Albania          | Albanien         | Shqipëria             | ...     | 6.70          | 78.30               | https://www.laenderdaten.info/Europa/Albanien/... |
-| **4**    | Algeria          | Algerien         | Al-Jaza’ir/Algérie    | ...     | 4.30          | 76.80               | https://www.laenderdaten.info/Afrika/Algerien/... |
+|       | **Country (en)** | **Country (de)** | **Country (local)**   | **...** | **Deathrate** | **Life expectancy** | **Url**                                           |
+| ----- | ---------------- | ---------------- | --------------------- | ------- | ------------- | ------------------- | ------------------------------------------------- |
+| **0** | Afghanistan      | Afghanistan      | Afganistan/Afqanestan | ...     | 13.70         | 51.30               | https://www.laenderdaten.info/Asien/Afghanista... |
+| **1** | Egypt            | Ägypten          | Misr                  | ...     | 4.70          | 72.70               | https://www.laenderdaten.info/Afrika/Aegypten/... |
+| **2** | Åland Islands    | Ålandinseln      | Åland                 | ...     | 0.00          | 0.00                | https://www.laenderdaten.info/Europa/Aland/ind... |
+| **3** | Albania          | Albanien         | Shqipëria             | ...     | 6.70          | 78.30               | https://www.laenderdaten.info/Europa/Albanien/... |
+| **4** | Algeria          | Algerien         | Al-Jaza’ir/Algérie    | ...     | 4.30          | 76.80               | https://www.laenderdaten.info/Afrika/Algerien/... |
 
 Initially,... we will select only the country and continent variables from
 `worlddata` and rename the column to ‘Country’
@@ -322,13 +322,13 @@ worlddata = worlddata.rename(columns={'Country (en)': 'Country'})
 worlddata.head()
 ```
 
-| \*\*\*\* | **Country**   | **Continent** |
-| -------- | ------------- | ------------- |
-| **0**    | Afghanistan   | Asia          |
-| **1**    | Egypt         | Africa        |
-| **2**    | Åland Islands | Europe        |
-| **3**    | Albania       | Europe        |
-| **4**    | Algeria       | Africa        |
+|       | **Country**   | **Continent** |
+| ----- | ------------- | ------------- |
+| **0** | Afghanistan   | Asia          |
+| **1** | Egypt         | Africa        |
+| **2** | Åland Islands | Europe        |
+| **3** | Albania       | Europe        |
+| **4** | Algeria       | Africa        |
 
 We aim to merge our new dataframe, `worlddata`, with `realwage_f`.
 
@@ -386,7 +386,7 @@ merged = pd.merge(realwage_f.transpose(), worlddata,
 merged.head()
 ```
 
-| \*\*\*\*   | **2006-01-01 00:00:00** | **2007-01-01 00:00:00** | **2008-01-01 00:00:00** | **...** | **2016-01-01 00:00:00** | **Country** | **Continent** |
+|            | **2006-01-01 00:00:00** | **2007-01-01 00:00:00** | **2008-01-01 00:00:00** | **...** | **2016-01-01 00:00:00** | **Country** | **Continent** |
 | ---------- | ----------------------- | ----------------------- | ----------------------- | ------- | ----------------------- | ----------- | ------------- |
 | **17.00**  | 12.06                   | 12.46                   | 12.24                   | ...     | 12.98                   | Australia   | Australia     |
 | **23.00**  | 9.70                    | 9.82                    | 9.87                    | ...     | 9.76                    | Belgium     | Europe        |
@@ -404,11 +404,11 @@ continent column and filter the merged dataframe
 merged[merged['Continent'].isnull()]
 ```
 
-| \*\*\*\* | **2006-01-01 00:00:00** | **2007-01-01 00:00:00** | **2008-01-01 00:00:00** | **...** | **2016-01-01 00:00:00** | **Country**        | **Continent** |
-| -------- | ----------------------- | ----------------------- | ----------------------- | ------- | ----------------------- | ------------------ | ------------- |
-| **NaN**  | 3.42                    | 3.74                    | 3.87                    | ...     | 5.28                    | Korea              | NaN           |
-| **NaN**  | 0.23                    | 0.45                    | 0.39                    | ...     | 0.55                    | Russian Federation | NaN           |
-| **NaN**  | 1.50                    | 1.64                    | 1.71                    | ...     | 2.08                    | Slovak Republic    | NaN           |
+|         | **2006-01-01 00:00:00** | **2007-01-01 00:00:00** | **2008-01-01 00:00:00** | **...** | **2016-01-01 00:00:00** | **Country**        | **Continent** |
+| ------- | ----------------------- | ----------------------- | ----------------------- | ------- | ----------------------- | ------------------ | ------------- |
+| **NaN** | 3.42                    | 3.74                    | 3.87                    | ...     | 5.28                    | Korea              | NaN           |
+| **NaN** | 0.23                    | 0.45                    | 0.39                    | ...     | 0.55                    | Russian Federation | NaN           |
+| **NaN** | 1.50                    | 1.64                    | 1.71                    | ...     | 2.08                    | Slovak Republic    | NaN           |
 
 We have three missing values!
 
@@ -475,9 +475,9 @@ merged['Continent'] = merged['Continent'].fillna(merged['Country'].map(missing_c
 merged[merged['Country'] == 'Korea']
 ```
 
-| \*\*\*\* | **2006-01-01 00:00:00** | **2007-01-01 00:00:00** | **2008-01-01 00:00:00** | **...** | **2016-01-01 00:00:00** | **Country** | **Continent** |
-| -------- | ----------------------- | ----------------------- | ----------------------- | ------- | ----------------------- | ----------- | ------------- |
-| **NaN**  | 3.42                    | 3.74                    | 3.87                    | ...     | 5.28                    | Korea       | Asia          |
+|         | **2006-01-01 00:00:00** | **2007-01-01 00:00:00** | **2008-01-01 00:00:00** | **...** | **2016-01-01 00:00:00** | **Country** | **Continent** |
+| ------- | ----------------------- | ----------------------- | ----------------------- | ------- | ----------------------- | ----------- | ------------- |
+| **NaN** | 3.42                    | 3.74                    | 3.87                    | ...     | 5.28                    | Korea       | Asia          |
 
 We will also consolidate the Americas into a single continent - this will enhance our visualization later on.
 
@@ -505,14 +505,14 @@ merged = merged.set_index(['Continent', 'Country']).sort_index()
 merged.head()
 ```
 
-| \*\*\*\*       | \*\*\*\* | **2006-01-01** | **2007-01-01** | **2008-01-01** | **...** | **2014-01-01** | **2015-01-01** | **2016-01-01** |
-| -------------- | -------- | -------------- | -------------- | -------------- | ------- | -------------- | -------------- | -------------- |
-| **Continent**  | Country  |                |                |                |         |                |                |                |
-| **America**    | Brazil   | 0.87           | 0.92           | 0.96           | ...     | 1.21           | 1.21           | 1.24           |
-| **Canada**     | 6.89     | 6.96           | 7.24           | ...            | 8.22    | 8.35           | 8.48           |
-| **Chile**      | 1.42     | 1.45           | 1.44           | ...            | 1.76    | 1.81           | 1.91           |
-| **Colombia**   | 1.01     | 1.02           | 1.01           | ...            | 1.13    | 1.13           | 1.12           |
-| **Costa Rica** | NaN      | NaN            | NaN            | ...            | 2.41    | 2.56           | 2.63           |
+|                |         | **2006-01-01** | **2007-01-01** | **2008-01-01** | **...** | **2014-01-01** | **2015-01-01** | **2016-01-01** |
+| -------------- | ------- | -------------- | -------------- | -------------- | ------- | -------------- | -------------- | -------------- |
+| **Continent**  | Country |                |                |                |         |                |                |                |
+| **America**    | Brazil  | 0.87           | 0.92           | 0.96           | ...     | 1.21           | 1.21           | 1.24           |
+| **Canada**     | 6.89    | 6.96           | 7.24           | ...            | 8.22    | 8.35           | 8.48           |
+| **Chile**      | 1.42    | 1.45           | 1.44           | ...            | 1.76    | 1.81           | 1.91           |
+| **Colombia**   | 1.01    | 1.02           | 1.01           | ...            | 1.13    | 1.13           | 1.12           |
+| **Costa Rica** | NaN     | NaN            | NaN            | ...            | 2.41    | 2.56           | 2.63           |
 
 During the merging process, we lost our `DatetimeIndex`, as we merged columns that
 were not in datetime format

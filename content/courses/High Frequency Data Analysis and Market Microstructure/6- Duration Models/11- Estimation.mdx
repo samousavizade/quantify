@@ -1,0 +1,41 @@
+## 5.5.3 Estimation
+
+For an ACD($r,s$) model, let $i_o=\max(r,s)$ and $x_t=(x_1,\ldots,x_t)'$. The likelihood function of the durations $x_1,\ldots,x_T$ is
+
+$$f(x_T|\theta)=\left[\prod_{i=i_o+1}^T f(x_i|F_{i-1},\theta)\right]\times f(x_{i_o}|\theta),$$
+
+where $\theta$ denotes the vector of model parameters, and $T$ is the sample size. The marginal probability density function $f(x_{i_o}|\theta)$ of the previous equation is rather complicated for a general ACD model. Because its impact on the likelihood function is diminishing as the sample size $T$ increases, this marginal density is often ignored, resulting in use of the conditional-likelihood method.
+
+For a WACD model, we use the probability density function (pdf) of Eq. (5.56) and obtain the conditional log-likelihood function
+
+$$\ell(x|\theta,x_{i_o})=\sum_{i=i_0+1}^T \alpha\ln\left(\Gamma\left(1+\frac{1}{\alpha}\right)\right)+\ln\left(\frac{\alpha}{x_i}\right)+\alpha\ln\left(\frac{x_i}{\psi_i}\right)-\left(\Gamma\left(1+\frac{1}{\alpha}\right)\frac{x_i}{\psi_i}\right)^\alpha,$$
+
+where $\psi_i=\omega+\sum_{j=1}^r\gamma_jx_{i-j}+\sum_{j=1}^s\omega_j\psi_{i-j}$, $\theta=(\omega,\gamma_1,\ldots,\gamma_r,\omega_1,\ldots,\omega_s,\alpha)'$, and $x=(x_{i_o+1},\ldots,x_T)'$. When $\alpha=1$, the (conditional) log-likelihood function reduces to that of an EACD($r,s$) model.
+
+For a GACD($r,s$) model, the conditional log-likelihood function is
+
+$$\ell(x|\theta,x_{i_o})=\sum_{i=i_o+1}^T \ln\left(\frac{\alpha}{\Gamma(\kappa)}\right)+(\kappa\alpha-1)\ln(x_i)-\kappa\alpha\ln(\lambda\psi_i)-\left(\frac{x_i}{\lambda\psi_i}\right)^\alpha,$$
+
+where $\lambda=\Gamma(\kappa)/\Gamma(\kappa+1/\alpha)$ and the parameter vector $\theta$ now also includes $\kappa$. As expected, when $\kappa=1$, $\lambda=1/\Gamma(1+1/\alpha)$ and the log-likelihood function in Eq. (5.42) reduces to that of a WACD($r,s$) model in Eq. (5.41). This log-likelihood function can be rewritten in many ways to simplify the estimation.
+
+Under some regularity conditions, the conditional maximum-likelihood estimates are asymptotically normal; see Engle and Russell (1998) and the references therein. In practice, simulation can be used to obtain finite-sample reference distributions for the problem of interest once a duration model is specified.
+
+**Example 5.3.** (Simulated ACD(1,1) series, continued). Consider the simulated WACD(1,1) and GACD(1,1) series of Eq. (5.40). We apply the conditional-likelihood method and obtain the results in Table 5.7. The estimates appear to be reasonable. Let $\hat{\psi}_i$ be the 1-step-ahead prediction of $\psi_i$ and $\hat{\epsilon}_i=x_i/\hat{\psi}_i$ be the standardized series, which can be regarded as standardized residuals of the series. If the model is adequately specified, $\{\hat{\epsilon}_i\}$ should behave as a sequence of independent and identically distributed random variables. Figures 5.9(b) and 5.10(b) show the time plot of $\hat{\epsilon}_i$ for both models. The sample ACF of $\hat{\epsilon}_i$ for both fitted models are shown in Figures 5.12(b) and 5.13(b), respectively. It is evident that no significant serial correlations are found in the $\hat{\epsilon}_i$ series.
+
+**Example 5.4.** As an illustration of duration models, we consider the transaction durations of IBM stock on five consecutive trading days from November 1 to November 7, 1990. Focusing on positive transaction durations, we have 3534 observations. In addition, the data have been adjusted by removing the deterministic component in Eq. (5.32). That is, we employ 3534 positive adjusted durations as defined in Eq. (5.31). Figure 5.14(a) shows the time plot of the adjusted (positive) durations for the first five trading days of November 1990, and Figure 5.15(a) gives the sample ACF of the series. There exist some serial correlations in the adjusted durations.
+
+We fit a WACD(1,1) model to the data and obtain the model
+
+$$x_i=\psi_i\epsilon_i,\quad \psi_i=0.169+0.064x_{i-1}+0.885\psi_{i-1},$$
+
+where $\{\epsilon_i\}$ is a sequence of independent and identically distributed random variates that follow the standardized Weibull distribution with parameter $\hat{\alpha}=0.879(0.012)$, where 0.012 is the estimated standard error. Standard errors of the estimates in Eq. (5.43) are 0.039, 0.010, and 0.018, respectively. All $t$ ratios of the estimates are greater than 4.2, indicating that the estimates are significant at the 1% level. Figure 5.14(b) shows the time plot of $\hat{\epsilon}_i=x_i/\hat{\psi}_i$, and Figure 5.15(b) provides the sample ACF of $\hat{\epsilon}_i$. The Ljung–Box statistics show $Q(10)=4.96$ and $Q(20)=10.75$ for the $\hat{\epsilon}_i$ series. Clearly, the standardized innovations have no significant serial correlations. In fact, the sample autocorrelations of the squared series $\{\hat{\epsilon}_i^2\}$ are also small with $Q(10)=6.20$ and $Q(20)=11.16$, further confirming lack of serial dependence in the normalized innovations.
+
+In model (5.43), the estimated coefficients show $\hat{\gamma}_1+\hat{\omega}_1\approx 0.949$, indicating certain persistence in the adjusted durations. The expected adjusted duration is $0.169/(1-0.064-0.885)=3.31$ seconds, which is close to the sample mean 3.29 of the adjusted durations. The estimated $\alpha$ of the standardized Weibull distribution is 0.879, which is less than but close to 1. Thus, the conditional hazard function is monotonously decreasing at a slow rate.
+
+If a generalized gamma distribution function is used for the innovations, then the fitted GACD(1,1) model is
+
+$$x_i=\psi_i\epsilon_i,\quad \psi_i=0.141+0.063x_{i-1}+0.897\psi_{i-1},$$
+
+where $\{\epsilon_i\}$ follows a standardized, generalized gamma distribution in Eq. (5.57) with parameters $\kappa=4.248(1.046)$ and $\alpha=0.395(0.053)$, where the number in parentheses denotes estimated standard error. Standard errors of the three parameters in Eq. (5.44) are 0.041, 0.010, and 0.019, respectively. All of the estimates are statistically significant at the 1% level. Again, the normalized innovational process $\{\hat{\epsilon}_i\}$ and its squared series have no significant serial correlation, where $\hat{\epsilon}_i=x_i/\hat{\psi}_i$ based on model (5.44). Specifically, for the $\hat{\epsilon}_i$ process, we have $Q(10)=4.95$ and $Q(20)=10.28$. For the $\hat{\epsilon}_i^2$ series, we have $Q(10)=6.36$ and $Q(20)=10.89$. The expected duration of model (5.44) is 3.52, which is slightly greater than that of the WACD(1,1) model in Eq. (5.43). Similarly, the persistence parameter $\hat{\gamma}_1+\hat{\omega}_1$ of model (5.44) is also slightly higher at 0.96.
+
+**Remark.** Estimation of EACD models can be carried out by using programs for ARCH models with some minor modification; see Engle and Russell (1998). In this book, we use either the RATS program or some Fortran programs developed by the author to estimate the duration models. Limited experience indicates that it is harder to estimate a GACD model than an EACD or a WACD model. RATS programs used to estimate WACD and GACD models are given in Appendix C. $\square$
