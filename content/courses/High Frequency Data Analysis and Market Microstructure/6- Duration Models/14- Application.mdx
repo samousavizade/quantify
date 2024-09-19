@@ -1,6 +1,14 @@
-Here is section 5.8 converted to markdown format with LaTeX code for the mathematics:
+---
+title: Application
+draft: false
+summary: test
+---
 
-## 5.8 APPLICATION
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Application
 
 In this section we apply the ACD model to stock volatility modeling. Consider the daily range of the log price of Apple stock from January 4, 1999, to November 20, 2007. The data are obtained from Yahoo Finance and consist of 2235 observations. This series was analyzed in Tsay (2009). The range of daily log prices has been used in the literature as a robust alternative to volatility modeling; see Chapter 3 and Chou (2005) and the references therein. Apple stock had two-for-one splits on June 21, 2000, and February 28, 2005, during the sample period, but no adjustments are needed for the splits because we use daily range of log price. As mentioned before, stock prices in the U.S. markets switched from the tick size $\frac{1}{16}$ of a dollar to the decimal system on January 29, 2001. Such a change affected the bid–ask spread of stock prices. We shall employ intervention analysis to study the impact of such a policy change on the stock volatility.
 

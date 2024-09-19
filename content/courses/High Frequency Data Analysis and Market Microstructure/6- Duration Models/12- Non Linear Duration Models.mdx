@@ -1,3 +1,15 @@
+---
+title: Non Linear Duration Model
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## Non-Linear Duration Models
+
 Nonlinear features are also commonly found in high-frequency data. As an illustration, we apply some nonlinearity tests discussed in Chapter 4 to the normalized innovations $\hat{\varepsilon}_i$ of the WACD(1,1) model for the IBM transaction durations in Example 5.4; see Eq. (5.43). Based on an AR(4) model, the test results are given in part (a) of Table 5.8. As expected from the model diagnostics of Example 5.4, the Ori-F test indicates no quadratic nonlinearity in the normalized innovations. However, the TAR-F test statistics suggest strong nonlinearity.
 
 Based on the test results in Table 5.8, we entertain a threshold duration model with two regimes for the IBM intraday durations. The threshold variable is $x_{t-1}$ (i.e., lag-1 adjusted duration). The estimated threshold value is 3.79. The fitted threshold WACD(1,1) model is $x_i = \psi_i \varepsilon_i$, where

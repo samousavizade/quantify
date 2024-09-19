@@ -1,13 +1,20 @@
-const Video = ({ src, title }) => {
+import React from 'react';
+
+interface VideoProps {
+  src: string;
+  title: string;
+}
+
+const Video: React.FC<VideoProps> = ({ src, title }) => {
   return (
     <div
       style={{
         position: 'relative',
-        paddingBottom: '56.25%',
+        paddingBottom: '56.25%', // 16:9 aspect ratio
         height: 0,
         overflow: 'hidden',
         maxWidth: '100%',
-        background: '#000',
+        background: 'rgba(0,0,0,0)',
       }}
     >
       <iframe

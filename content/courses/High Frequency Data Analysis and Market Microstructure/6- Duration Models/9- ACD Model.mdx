@@ -1,4 +1,14 @@
-## 5.5.1 The ACD Model
+---
+title: ACD Model
+draft: false
+summary: test
+---
+
+import TOCInline from 'pliny/ui/TOCInline';
+
+<TOCInline toc={props.toc} asDisclosure />
+
+## The ACD Model
 
 The autoregressive conditional duration (ACD) model uses the idea of GARCH models to study the dynamic structure of the adjusted duration $\Delta t^*_i$ of Eq. (5.31). For ease in notation, we define $x_i = \Delta t^*_i$. Let $\psi_i = E(x_i|F_{i-1})$ be the conditional expectation of the adjusted duration between the $(i-1)$th and $i$th trades, where $F_{i-1}$ is the information set available at the $(i-1)$th trade. In other words, $\psi_i$ is the expected adjusted duration given $F_{i-1}$.
 

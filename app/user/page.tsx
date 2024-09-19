@@ -33,10 +33,6 @@ export default function User() {
             <h4 className="text-center space text-xl font-normal md:text-xl lg:text-2xl">
               {session?.user?.email}
             </h4>
-            <h6 className="text-left space text-xl font-normal">Account Created:</h6>
-            <h5 className="text-center space text-xl font-mono md:text-xl lg:text-xl">
-              {new Date(session?.user?.createdAt).toLocaleString()}
-            </h5>
           </div>
         </div>
       </div>

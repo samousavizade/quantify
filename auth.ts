@@ -40,6 +40,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // session.accessToken = token.accessToken
       // session.user.id = token.id
 
+      if (token.email === null) {
+        token.email = '';
+      }
       // @ts-ignore
       const result = await prisma.user.findUnique({
         where: {
@@ -66,9 +69,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: {},
       },
       authorize: async (credentials) => {
+        credentials.email;
+
         const user = await prisma.user.findUnique({
           where: {
-            email: credentials.email,
+            email: '',
           },
           select: {
             id: true,

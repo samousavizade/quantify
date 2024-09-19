@@ -45,14 +45,12 @@ $$
 
 $$x_i\beta = \beta_1 + \sum_{v=1}^{7} IBS_{i-v}$$
 
-# $$
-
+$$
 \begin{cases}
 \frac{\Phi(\alpha*1 - x_i\beta)}{\sigma_i(w_i)} & \text{if } j = 1,\\
 \frac{\Phi(\alpha_j - x_i\beta) - \Phi(\alpha*{j-1} - x*i\beta)}{\sigma_i(w_i)} & \text{if } j = 2, \ldots, k-1,\\
 1 - \frac{\Phi(\alpha*{k-1} - x_i\beta)}{\sigma_i(w_i)} & \text{if } j = k,
-\end{cases}
-
+\end{cases}s
 $$
 
 Where $\Phi(x)$ is the cumulative distribution function of the standard normal random variable evaluated at $x$, and we write $\sigma_i(w_i)$ to denote that $\sigma^2_i$ is a positive function of $w_i$. From the definition, an ordered probit model is driven by an unobservable continuous random variable. The observed values, which have a natural ordering, can be regarded as categories representing the underlying process.
@@ -76,7 +74,6 @@ where $T_\lambda(V) = (V^\lambda - 1)/\lambda$ is the Box–Cox (1964) transform
 - $SP5_{i-v}$ $(v = 1, 2, 3)$ is the 5-minute continuously compounded returns of the Standard and Poor’s 500 index futures price for the contract maturing in the closest month beyond the month in which transaction $(i - v)$ occurred, where the return is computed with the futures price recorded 1 minute before the nearest round minute prior to $t_{i-v}$ and the price recorded 5 minutes before this.
 - $IBS_{i-v}$ $(v = 1, 2, 3)$ is an indicator variable defined by
 
-
 $$
 
 IBS\_{i-v}=
@@ -85,6 +82,7 @@ IBS\_{i-v}=
 0 & \text{if } P = (P^a + P^b)/2\\
 -1 & \text{if } P < (P^a + P^b)/2
 \end{cases}
+
 
 $$
 
@@ -100,34 +98,36 @@ The parameter estimates and their t ratios are given in Table 5.5. All the t rat
 
 4. As expected, the bid–ask spread at time $ t\_{i-1} $ significantly affects the conditional variance.
 
-| Parameter                                   | Estimate | $ t $ |
-| ------------------------------------------- | -------- | ------- |
-| **Boundary Partitions of the Probit Model** |          |         |
-| $\alpha_1$                                | -4.67    | -145.7  |
-| $\alpha_2$                                | -4.16    | -157.8  |
-| $\alpha_3$                                | -3.11    | -171.6  |
-| $\alpha_4$                                | -1.34    | -155.5  |
-| $\alpha_5$                                | 1.33     | 154.9   |
-| $\alpha_6$                                | 3.13     | 167.8   |
-| $\alpha_7$                                | 4.21     | 152.2   |
-| $\alpha_8$                                | 4.73     | 138.9   |
-| **Equation Parameters of the Probit Model** |          |         |
-| $\gamma_1$                                | 0.40     | 15.6    |
-| $\gamma_2$                                | 0.52     | 71.1    |
-| $\beta_1 : \Delta t_i^*$                 | -0.12    | -11.4   |
-| $\beta*2 : y*{-1}$                        | -1.01    | -135.6  |
-| $\beta_3$                                 | -0.53    | -85.0   |
-| $\beta_4$                                 | -0.21    | -47.2   |
-| $\beta_5$                                 | 1.12     | 54.2    |
-| $\beta_6$                                 | -0.26    | -12.1   |
-| $\beta_7$                                 | 0.01     | 0.26    |
-| $\beta_8$                                 | -1.14    | -63.6   |
-| $\beta_9$                                 | -0.37    | -21.6   |
-| $\beta\_{10}$                             | -0.17    | -10.3   |
-| $\beta\_{11}$                             | 0.12     | 47.4    |
-| $\beta\_{12}$                             | 0.05     | 18.6    |
-| $\beta\_{13}$                             | 0.02     | 7.7     |
+| Parameter                                   | Estimate | $ t $  |
+| ------------------------------------------- | -------- | ------ |
+| **Boundary Partitions of the Probit Model** |          |        |
+| $\alpha_1$                                  | -4.67    | -145.7 |
+| $\alpha_2$                                  | -4.16    | -157.8 |
+| $\alpha_3$                                  | -3.11    | -171.6 |
+| $\alpha_4$                                  | -1.34    | -155.5 |
+| $\alpha_5$                                  | 1.33     | 154.9  |
+| $\alpha_6$                                  | 3.13     | 167.8  |
+| $\alpha_7$                                  | 4.21     | 152.2  |
+| $\alpha_8$                                  | 4.73     | 138.9  |
+| **Equation Parameters of the Probit Model** |          |        |
+| $\gamma_1$                                  | 0.40     | 15.6   |
+| $\gamma_2$                                  | 0.52     | 71.1   |
+| $\beta_1 : \Delta t_i^*$                    | -0.12    | -11.4  |
+| $\beta*2 : y*{-1}$                          | -1.01    | -135.6 |
+| $\beta_3$                                   | -0.53    | -85.0  |
+| $\beta_4$                                   | -0.21    | -47.2  |
+| $\beta_5$                                   | 1.12     | 54.2   |
+| $\beta_6$                                   | -0.26    | -12.1  |
+| $\beta_7$                                   | 0.01     | 0.26   |
+| $\beta_8$                                   | -1.14    | -63.6  |
+| $\beta_9$                                   | -0.37    | -21.6  |
+| $\beta\_{10}$                               | -0.17    | -10.3  |
+| $\beta\_{11}$                               | 0.12     | 47.4   |
+| $\beta\_{12}$                               | 0.05     | 18.6   |
+| $\beta\_{13}$                               | 0.02     | 7.7    |
 
 > Table 5.5 Parameter Estimates of Ordered Probit Model in Eqs. (5.19) and (5.20) for the 1988 Transaction Data of IBM, Where t Denotes the t Ratio
-> Reprinted with permission of Elsevier from Journal of Financial Economics (1992, Vol.31, p.345).*
+> Reprinted with permission of Elsevier from Journal of Financial Economics (1992, Vol.31, p.345).\*
+
+$$
 $$
