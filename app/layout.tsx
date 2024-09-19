@@ -12,12 +12,6 @@ import Head from 'next/head';
 import AnimatedQIcon from '@/components/QIcon';
 import * as React from 'react';
 
-// export const metadata = {
-//     title: 'Quantifiable',
-//     description: 'Quantifying the Future',
-//     metadataBase: new URL('https://dalelarroder.com'),
-// };
-
 // @ts-ignore
 export default async function RootLayout({ children }) {
   return (
