@@ -1,5 +1,3 @@
-'use server';
-
 import * as React from 'react';
 import ScrollProgressBar from '@/components/ScrollProgressBar';
 import MainLayout from '@/layouts/MainLayout';

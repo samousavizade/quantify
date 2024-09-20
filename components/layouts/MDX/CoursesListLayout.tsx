@@ -29,14 +29,9 @@ function filterCourses(
   selectedTags: string[]
 ) {
   return coursesData.filter((course: any) => {
-    const searchContent =
-      course.title + course.field + course.chapters?.join('') + course.tags?.join(' ');
+    const searchContent = course.title + course.field + course.tags?.join(' ');
     const matchesSearchValue = searchContent.toLowerCase().includes(searchValue.toLowerCase());
-
-    // If there are selected field, only include posts that match
     const matchesField = selectedField === '' || course.field === selectedField;
-
-    // If there are selected tags, only include posts that have all selected tags
     const matchesTags =
       selectedTags.length === 0 || selectedTags.every((tag) => course.tags?.includes(tag));
 
