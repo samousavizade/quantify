@@ -9,6 +9,7 @@ import {
   FaChartPie,
   FaCode,
   FaCommentDots,
+  FaCube,
   FaDatabase,
   FaFlask,
   FaLanguage,
@@ -240,6 +241,25 @@ const coursesMetaData = {
   },
 };
 
+const fieldToIcon = new Map(
+  Object.entries({
+    'Quantitative Finance': <FaChartLine />,
+    'Quantitative Economics': <FaCalculator />,
+    'Machine Learning': <FaRobot />,
+    Econometrics: <FaChartPie />,
+    'Recommender Systems': <FaShoppingBasket />,
+    Causality: <FaFlask />,
+    'Algorithm Design': <FaCode />,
+    'Data Structure': <FaDatabase />,
+    NLP: <FaLanguage />,
+    'Time Series': <FaArrowTrendUp />,
+    'Reinforcement Learning': <FaBrain />,
+    'Causal Inference': <FaProjectDiagram />,
+    'Market Microstructure': <FaCube />,
+    Other: <FaCommentDots />,
+  })
+);
+
 export default function CoursesListLayout() {
   const [searchValue, setSearchValue] = useState<string>('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -299,31 +319,12 @@ export default function CoursesListLayout() {
 
   const handleSearchValue = (searchValue: string) => {
     setPagination((prevPagination) => {
-      // New tags is newSelectedTags, don't use selectedTags that maybe didn't update.
       const filteredCourses = filterCourses(coursesData, searchValue, selectedField, selectedTags);
       return { ...prevPagination, filteredCourses: filteredCourses };
     });
   };
 
   const allFields = Array.from(new Set(coursesData.map((p: { field: string }) => p.field))).sort();
-
-  const fieldToIcon = new Map(
-    Object.entries({
-      'Quantitative Finance': <FaChartLine />,
-      'Quantitative Economics': <FaCalculator />,
-      'Machine Learning': <FaRobot />,
-      Econometrics: <FaChartPie />,
-      'Recommender Systems': <FaShoppingBasket />,
-      Causality: <FaFlask />,
-      'Algorithm Design': <FaCode />,
-      'Data Structure': <FaDatabase />,
-      NLP: <FaLanguage />,
-      'Time Series': <FaArrowTrendUp />,
-      'Reinforcement Learning': <FaBrain />,
-      'Causal Inference': <FaProjectDiagram />,
-      Other: <FaCommentDots />,
-    })
-  );
 
   return (
     <div>
