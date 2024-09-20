@@ -4,6 +4,7 @@ import AccessTimeFilledIcon from '@mui/icons-material/AccessTimeFilled';
 import ArchitectureIcon from '@mui/icons-material/Architecture';
 import Tag from '@/components/Tag';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 interface Course {
   imageSrc: string;
@@ -35,10 +36,12 @@ const CourseCard: React.FC<CourseCardProps> = ({ courses }) => {
             >
               <div className="xl:w-1/3 lg:w-1/3 md:w-1/3 sm:w-0">
                 <div className="relative w-full h-full">
-                  <img
+                  <Image
                     src={imageSrc}
                     alt={title}
-                    className="rounded-l-3xl absolute inset-0 w-full h-full object-cover"
+                    layout="fill" // Use layout fill for responsive images
+                    objectFit="cover" // Ensures the image covers the container
+                    className="rounded-l-3xl"
                   />
                 </div>
               </div>
@@ -46,7 +49,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ courses }) => {
               <div className="xl:w-2/3 lg:w-2/3 md:w-2/3 sm:w-full p-4 my-auto">
                 {/* Course Title */}
                 <Link
-                  prefetch={false}
+                  prefetch={true}
                   href={`/courses/${title.replaceAll(' ', '-')}`}
                   className={
                     'horizontal-underline mb-2 text-3xl font-normal active:horizontal-underline-active'

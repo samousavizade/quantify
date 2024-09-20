@@ -287,7 +287,6 @@ export default function CoursesListLayout() {
       setSelectedTags(newSelectedTags);
     }
     setPagination((prevPagination) => {
-      // New tags is newSelectedTags, don't use selectedTags that maybe didn't update.
       const filteredCourses = filterCourses(
         coursesData,
         searchValue,
