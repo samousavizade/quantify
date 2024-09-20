@@ -1,0 +1,8 @@
+{
+  "imports": {
+    "https://ghuc.cc/worker-tools/resolvable-promise/index.ts": "./raw.githubusercontent.com/worker-tools/resolvable-promise/master/index.ts",
+    "https://deno.land/": "./deno.land/",
+    "https://raw.githubusercontent.com/": "./raw.githubusercontent.com/",
+    "https://v1-7-0--edge-utils.netlify.app/": "./v1-7-0--edge-utils.netlify.app/"
+  }
+}
