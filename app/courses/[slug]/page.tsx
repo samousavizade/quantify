@@ -22,7 +22,7 @@ const groupBy = <T, K extends keyof any>(arr: T[], key: (i: T) => K): Record<K, 
     {} as Record<K, T[]>
   );
 
-export default async function CourseContent({ params }: CourseContentProps) {
+export default function CourseContent({ params }: CourseContentProps) {
   const requestedCourseName = params.slug.replaceAll('-', ' ');
   const filteredMDXFiles = allCourses.filter((c) => c.courseName === requestedCourseName);
   const sectionsMDXFiles = groupBy(filteredMDXFiles, (course) => course.courseSection);
