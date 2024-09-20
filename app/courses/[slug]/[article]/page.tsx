@@ -1,4 +1,4 @@
-'use server';
+'use client';
 
 import * as React from 'react';
 import ScrollProgressBar from '@/components/ScrollProgressBar';
