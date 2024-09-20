@@ -114,6 +114,6 @@
     ]
   },
   "resolutions": {
-    "strip-ansi": "7.0.1"
+    "strip-ansi": "6.0.1"
   }
 }
