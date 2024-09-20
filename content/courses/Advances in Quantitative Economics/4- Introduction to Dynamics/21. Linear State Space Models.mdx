@@ -354,7 +354,7 @@ The _indeterministic_ seasonal produces recurrent, but aperiodic, seasonal fluct
 
 #### Time Trends
 
-The model $ y_t = a t + b $ is known as a _linear time trend_.
+The model $ y*t = a t + b $ is known as a \_linear time trend*.
 
 We can represent this model in the linear state space form by taking
 
@@ -474,7 +474,7 @@ The first term on the right is a cumulative sum of martingale differences and is
 
 The second term is a linear function of time with a shift.
 
-Therefore, $ x\_{1t} $ is termed a _martingale with drift_.
+Therefore, $ x*{1t} $ is termed a \_martingale with drift*.
 
 ## Distributions and Moments
 
@@ -508,8 +508,8 @@ As with $ \mu_0 $, the matrix $ \Sigma_0 $ is a primitive given in [(21.1)](#equ
 
 In terms of terminology, we may sometimes refer to
 
-- $ \mu_t $ as the _unconditional mean_ of $ x_t $
-- $ \Sigma_t $ as the _unconditional variance-covariance matrix_ of $ x_t $
+- $ \mu*t $ as the \_unconditional mean* of $ x_t $
+- $ \Sigma*t $ as the \_unconditional variance-covariance matrix* of $ x_t $
 
 This is to differentiate $ \mu_t $ and $ \Sigma_t $ from related entities that use conditioning
 information, to be defined later.
@@ -971,7 +971,7 @@ When such a distribution exists, it is called a _stationary distribution_.
 
 ### Stationary Distributions
 
-In our context, a distribution $ \psi\_{\infty} $ is said to be _stationary_ for $ x_t $ if
+In our context, a distribution $ \psi*{\infty} $ is said to be \_stationary* for $ x_t $ if
 
 $$
 x_t \sim \psi_{\infty}
@@ -1037,7 +1037,7 @@ Moreover, in view of [(21.14)](#equation-eqnautocov), the autocovariance functio
 
 This motivates the following definition.
 
-A process $ \{x_t\} $ is said to be _covariance stationary_ if
+A process $ \{x*t\} $ is said to be \_covariance stationary* if
 
 - both $ \mu_t $ and $ \Sigma_t $ are constant in $ t $
 - $ \Sigma\_{t+j,t} $ depends on the time gap $ j $ but not on time $ t $
@@ -1145,11 +1145,11 @@ In conclusion, if
 then the $ \{x_t\} $ process is covariance stationary, with constant state
 component.
 
-> **Note**If the eigenvalues of $ A_1 $ are less than unity in modulus, then
+> **Note**If the eigenvalues of $ A*1 $ are less than unity in modulus, then
 > (a) starting from any initial value, the mean and variance-covariance
 > matrix both converge to their stationary values; and (b)
-> iterations on [(21.7)](#equation-eqsigmalaw-linear-models) converge to the fixed point of the _discrete
-> Lyapunov equation_ in the first line of [(21.16)](#equation-eqnsigmainf).
+> iterations on [(21.7)](#equation-eqsigmalaw-linear-models) converge to the fixed point of the \_discrete
+> Lyapunov equation* in the first line of [(21.16)](#equation-eqnsigmainf).
 
 ### Ergodicity
 
