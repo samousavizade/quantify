@@ -4,6 +4,7 @@ import AccessTimeFilledIcon from '@mui/icons-material/AccessTimeFilled';
 import ArchitectureIcon from '@mui/icons-material/Architecture';
 import Tag from '@/components/Tag';
 import { motion } from 'framer-motion';
+import Image from 'next/image'; // Importing Image from Next.js
 
 interface Course {
   imageSrc: string;
@@ -35,10 +36,12 @@ const CourseCard: React.FC<CourseCardProps> = ({ courses }) => {
             >
               <div className="xl:w-1/3 lg:w-1/3 md:w-1/3 sm:w-0">
                 <div className="relative w-full h-full">
-                  <img
+                  <Image
                     src={imageSrc}
                     alt={title}
-                    className="rounded-l-3xl absolute inset-0 w-full h-full object-cover"
+                    layout="fill" // Ensures the image fills the container
+                    objectFit="cover" // Ensures the image covers the container
+                    className="rounded-l-3xl"
                   />
                 </div>
               </div>
