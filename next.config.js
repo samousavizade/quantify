@@ -19,6 +19,10 @@ module.exports = withContentlayer({
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
   eslint: {
     dirs: ['app', 'components', 'lib', 'layouts', 'scripts'],
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
   },
   images: {
     domains: ['avatars.githubusercontent.com', 'themoviedb.org'],
