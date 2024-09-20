@@ -1,3 +1,5 @@
+'use server';
+
 import MainLayout from '@/layouts/MainLayout';
 import CoursesListLayout from '@/layouts/MDX/CoursesListLayout';
 
