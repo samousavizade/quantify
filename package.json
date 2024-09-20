@@ -50,6 +50,7 @@
     "next-themes": "0.2.1",
     "pliny": "0.1.4",
     "plotly.js": "^2.34.0",
+    "punycode": "^2.3.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-icons": "4.11.0",
@@ -113,6 +114,6 @@
     ]
   },
   "resolutions": {
-    "strip-ansi": "6.0.1"
+    "strip-ansi": "7.0.1"
   }
 }
