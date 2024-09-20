@@ -1,3 +1,5 @@
+'use client';
+
 import * as React from 'react';
 import ScrollProgressBar from '@/components/ScrollProgressBar';
 import MainLayout from '@/layouts/MainLayout';
@@ -54,7 +56,7 @@ export default async function CourseContent({ params }: CourseContentProps) {
                       <Link
                         href={`/courses/${params.slug}/${course.title.replaceAll(' ', '-')}`}
                         key={index * courseIndex}
-                        className="block text-xl text-black dark:text-white"
+                        className="block text-xl text-black dark:text-white horizontal-underline active:horizontal-underline-active"
                       >
                         Volume {courseIndex + 1} : {course.title}
                       </Link>
