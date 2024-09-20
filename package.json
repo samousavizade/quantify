@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "contentlayer dev & next dev",
-    "build": "contentlayer build && prisma generate && next build",
+    "build": "yarn install && contentlayer build && prisma generate && next build",
     "postbuild": "yarn rss",
     "rss": "cross-env NODE_OPTIONS='--experimental-json-modules' node ./scripts/generate-rss.mjs",
     "serve": "next start",
