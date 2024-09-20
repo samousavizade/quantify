@@ -1,4 +1,3 @@
-import PageTitle from '@/components/PageTitle';
 import PostNavigation from '@/components/PostNavigation';
 import { CoreContent } from '@/lib/utils/contentlayer';
 import type { Blog, Authors, Courses } from 'contentlayer/generated';
@@ -19,7 +18,9 @@ export default function PostLayout({ content, author, children, next, prev }: Pr
   return (
     <article>
       <header className="space-y-1 rounded-lg bg-primary-500 py-4 px-2 text-center sm:py-6 md:py-10">
-        <PageTitle>{title}</PageTitle>
+        <h1 className="p-3 text-2xl font-extrabold leading-9 tracking-tight dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-5xl md:leading-14">
+          {title}
+        </h1>
         <AuthorLayout content={author}>
           <dl>
             <dt className="sr-only">Published on</dt>

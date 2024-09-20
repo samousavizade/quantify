@@ -45,13 +45,13 @@ export default async function CourseContent({ params }: CourseContentProps) {
           return (
             <div key={sectionName} className="mb-4">
               <div
-                className={`cursor-pointer bg-primary-500 text-xl text-black dark:text-white p-4 rounded-t`}
+                className={`cursor-pointer bg-primary-500 text-xl text-black dark:text-white p-4 rounded-lg`}
               >
                 {sectionName}
               </div>
-              <div className={`overflow-hidden animate-slideDown`}>
+              <div className={`overflow-hidden`}>
                 {
-                  <div className="bg-transparent p-2 space-y-2 border border-t-0 border-primary-500 rounded-b">
+                  <div className="bg-transparent p-2 space-y-2 rounded-b">
                     {MDXFilesInSection.map((course, courseIndex) => (
                       <Link
                         href={`/courses/${params.slug}/${course.title.replaceAll(' ', '-')}`}

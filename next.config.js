@@ -25,7 +25,7 @@ module.exports = withContentlayer({
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ['avatars.githubusercontent.com', 'themoviedb.org'],
+    domains: ['avatars.githubusercontent.com', 'themoviedb.org', 'lh3.googleusercontent.com'],
   },
   swcMinify: true,
 });
