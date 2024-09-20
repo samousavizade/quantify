@@ -11,7 +11,14 @@ import { allCourses } from 'contentlayer/generated';
 import { LinkButton } from '@dlarroder/playground';
 import PageTitle from '@/components/PageTitle';
 
-const groupBy = <T, K extends keyof any>(arr: T[], key: (i: T) => K) =>
+interface CourseContentProps {
+  params: {
+    slug: string;
+  };
+}
+
+// Utility function to group courses by a key
+const groupBy = <T, K extends keyof any>(arr: T[], key: (i: T) => K): Record<K, T[]> =>
   arr.reduce(
     (groups, item) => {
       (groups[key(item)] ||= []).push(item);
@@ -20,13 +27,7 @@ const groupBy = <T, K extends keyof any>(arr: T[], key: (i: T) => K) =>
     {} as Record<K, T[]>
   );
 
-export default function CourseContent({
-  params,
-}: {
-  params: {
-    slug: string;
-  };
-}) {
+export default function CourseContent({ params }: CourseContentProps) {
   const requestedCourseName = params.slug.replaceAll('-', ' ');
 
   const filteredMDXFiles = allCourses.filter((c) => c.courseName === requestedCourseName);
@@ -36,6 +37,7 @@ export default function CourseContent({
 
   const handleChange = (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
     setExpanded(newExpanded ? panel : false);
+    console.log(event);
   };
 
   const sortedSectionNames = Object.keys(sectionsMDXFiles).sort((a, b) => {
@@ -48,7 +50,7 @@ export default function CourseContent({
     <>
       <ScrollProgressBar />
       <MainLayout>
-        <div className={'px-2 py-4'}>
+        <div className="px-2 py-4">
           <PageTitle>{requestedCourseName}</PageTitle>
         </div>
         {sortedSectionNames.map((sectionName, index) => {
@@ -57,22 +59,22 @@ export default function CourseContent({
             <div key={sectionName}>
               <Accordion
                 key={`${sectionName}-${index}`}
-                className={'bg-transparent'}
+                className="bg-transparent"
                 slotProps={{ transition: { unmountOnExit: true } }}
                 expanded={expanded === `${sectionName}-${index}`}
                 onChange={handleChange(`${sectionName}-${index}`)}
               >
                 <AccordionSummary
                   key={`${sectionName}-${index}`}
-                  className={'bg-primary-500 text-xl text-black dark:text-white'}
-                  expandIcon={<ExpandMoreIcon className={'text-black dark:text-white'} />}
+                  className="bg-primary-500 text-xl text-black dark:text-white"
+                  expandIcon={<ExpandMoreIcon className="text-black dark:text-white" />}
                   id={`${sectionName}-${index}`}
                   aria-controls={`${sectionName}-${index}`}
                 >
                   {sectionName}
                 </AccordionSummary>
                 <AccordionDetails
-                  className={'p-2 space-y-2'}
+                  className="p-2 space-y-2"
                   key={`${sectionName}-${index}`}
                   id={`${sectionName}-${index}`}
                 >
@@ -80,7 +82,7 @@ export default function CourseContent({
                     <LinkButton
                       href={`/courses/${params.slug}/${course.title.replaceAll(' ', '-')}`}
                       key={course.title}
-                      className={'block text-xl text-black dark:text-white'}
+                      className="block text-xl text-black dark:text-white"
                     >
                       Volume {courseIndex + 1} : {course.title}
                     </LinkButton>
