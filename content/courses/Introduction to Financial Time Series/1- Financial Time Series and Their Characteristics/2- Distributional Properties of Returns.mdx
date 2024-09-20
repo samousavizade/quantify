@@ -20,7 +20,9 @@ We briefly review some basic properties of statistical distributions and the mom
 
 The function $F_{X,Y}(x,y;\theta) = P(X \leq x, Y \leq y; \theta)$, where $x \in \mathbb{R}^p$, $y \in \mathbb{R}^q$, and the inequality $\leq$ is a component-by-component operation, is a joint distribution function of $X$ and $Y$ with parameter $\theta$. Behavior of $X$ and $Y$ is characterized by $F_{X,Y}(x,y;\theta)$. If the joint probability density function $f_{x,y}(x,y;\theta)$ of $X$ and $Y$ exists, then
 
-$$F_{X,Y}(x,y;\theta) = \int_{-\infty}^x \int_{-\infty}^y f_{x,y}(w,z;\theta) dz dw.$$
+$$
+F_{X,Y}(x,y;\theta) = \int_{-\infty}^x \int_{-\infty}^y f_{x,y}(w,z;\theta) dz dw.
+$$
 
 In this case, $X$ and $Y$ are continuous random vectors.
 
@@ -28,7 +30,9 @@ In this case, $X$ and $Y$ are continuous random vectors.
 
 The marginal distribution of $X$ is given by $F_X(x;\theta) = F_{X,Y}(x,\infty,\ldots,\infty;\theta)$. Thus, the marginal distribution of $X$ is obtained by integrating out $Y$. A similar definition applies to the marginal distribution of $Y$. If $k=1$, $X$ is a scalar random variable and the distribution function becomes $F_X(x) = P(X \leq x; \theta)$, which is known as the cumulative distribution function (CDF) of $X$. The CDF of a random variable is nondecreasing [i.e., $F_X(x_1) \leq F_X(x_2)$ if $x_1 \leq x_2$] and satisfies $F_X(-\infty) = 0$ and $F_X(\infty) = 1$. For a given probability $p$, the smallest real number $x_p$ such that $p \leq F_X(x_p)$ is called the 100$p$th quantile of the random variable $X$. More specifically,
 
-$$x_p = \inf_x \{x|p \leq F_X(x)\}.$$
+$$
+x_p = \inf_x \{x|p \leq F_X(x)\}.
+$$
 
 We use the CDF to compute the $p$ value of a test statistic in the book.
 
@@ -36,19 +40,27 @@ We use the CDF to compute the $p$ value of a test statistic in the book.
 
 The conditional distribution of $X$ given $Y \leq y$ is given by
 
-$$F_{X|Y\leq y}(x;\theta) = \frac{P(X \leq x, Y \leq y; \theta)}{P(Y \leq y; \theta)}.$$
+$$
+F_{X|Y\leq y}(x;\theta) = \frac{P(X \leq x, Y \leq y; \theta)}{P(Y \leq y; \theta)}.
+$$
 
 If the probability density functions involved exist, then the conditional density of $X$ given $Y = y$ is
 
-$$f_{x|y}(x;\theta) = \frac{f_{x,y}(x,y;\theta)}{f_y(y;\theta)},$$
+$$
+f_{x|y}(x;\theta) = \frac{f_{x,y}(x,y;\theta)}{f_y(y;\theta)},
+$$
 
 where the marginal density function $f_y(y;\theta)$ is obtained by
 
-$$f_y(y;\theta) = \int_{-\infty}^{\infty} f_{x,y}(x,y;\theta) dx.$$
+$$
+f_y(y;\theta) = \int_{-\infty}^{\infty} f_{x,y}(x,y;\theta) dx.
+$$
 
 From Eq. (1.8), the relation among joint, marginal, and conditional distributions is
 
-$$f_{x,y}(x,y;\theta) = f_{x|y}(x;\theta) \times f_y(y;\theta).$$
+$$
+f_{x,y}(x,y;\theta) = f_{x|y}(x;\theta) \times f_y(y;\theta).
+$$
 
 This identity is used extensively in time series analysis (e.g., in maximum-likelihood estimation). Finally, $X$ and $Y$ are independent random vectors if and only if $f_{x|y}(x;\theta) = f_x(x;\theta)$. In this case, $f_{x,y}(x,y;\theta) = f_x(x;\theta)f_y(y;\theta)$.
 
@@ -56,53 +68,75 @@ This identity is used extensively in time series analysis (e.g., in maximum-like
 
 The $l$th moment of a continuous random variable $X$ is defined as
 
-$$m'_l = E(X^l) = \int_{-\infty}^{\infty} x^l f(x) dx,$$
+$$
+m'_l = E(X^l) = \int_{-\infty}^{\infty} x^l f(x) dx,
+$$
 
 where $E$ stands for expectation and $f(x)$ is the probability density function of $X$. The first moment is called the mean or expectation of $X$. It measures the central location of the distribution. We denote the mean of $X$ by $\mu_x$. The $l$th central moment of $X$ is defined as
 
-$$m_l = E[(X-\mu_x)^l] = \int_{-\infty}^{\infty} (x-\mu_x)^l f(x) dx$$
+$$
+m_l = E[(X-\mu_x)^l] = \int_{-\infty}^{\infty} (x-\mu_x)^l f(x) dx
+$$
 
 provided that the integral exists. The second central moment, denoted by $\sigma^2_x$, measures the variability of $X$ and is called the variance of $X$. The positive square root, $\sigma_x$, of variance is the standard deviation of $X$. The first two moments of a random variable uniquely determine a normal distribution. For other distributions, higher order moments are also of interest. The third central moment measures the symmetry of $X$ with respect to its mean, whereas the fourth central moment measures the tail behavior of $X$. In statistics, skewness and kurtosis, which are normalized third and fourth central moments of $X$, are often used to summarize the extent of asymmetry and tail thickness. Specifically, the skewness and kurtosis of $X$ are defined as
 
-$$S(x) = E\left[\left(\frac{X-\mu_x}{\sigma_x}\right)^3\right],$$
+$$
+S(x) = E\left[\left(\frac{X-\mu_x}{\sigma_x}\right)^3\right],
+$$
 
-$$K(x) = E\left[\left(\frac{X-\mu_x}{\sigma_x}\right)^4\right].$$
+$$
+K(x) = E\left[\left(\frac{X-\mu_x}{\sigma_x}\right)^4\right].
+$$
 
 The quantity $K(x) - 3$ is called the excess kurtosis because $K(x) = 3$ for a normal distribution. Thus, the excess kurtosis of a normal random variable is zero. A distribution with positive excess kurtosis is said to have heavy tails, implying that the distribution puts more mass on the tails of its support than a normal distribution does. In practice, this means that a random sample from such a distribution tends to contain more extreme values. Such a distribution is said to be leptokurtic. On the other hand, a distribution with negative excess kurtosis has short tails (e.g., a uniform distribution over a finite interval). Such a distribution is said to be platykurtic.
 
 In application, skewness and kurtosis can be estimated by their sample counterparts. Let $\{x_1,\ldots,x_T\}$ be a random sample of $X$ with $T$ observations. The sample mean is
 
-$$\hat{\mu}_x = \frac{1}{T} \sum_{t=1}^T x_t,$$
+$$
+\hat{\mu}_x = \frac{1}{T} \sum_{t=1}^T x_t,
+$$
 
 the sample variance is
 
-$$\hat{\sigma}^2_x = \frac{1}{T-1} \sum_{t=1}^T (x_t - \hat{\mu}_x)^2,$$
+$$
+\hat{\sigma}^2_x = \frac{1}{T-1} \sum_{t=1}^T (x_t - \hat{\mu}_x)^2,
+$$
 
 the sample skewness is
 
-$$\hat{S}(x) = \frac{1}{(T-1)\hat{\sigma}^3_x} \sum_{t=1}^T (x_t - \hat{\mu}_x)^3,$$
+$$
+\hat{S}(x) = \frac{1}{(T-1)\hat{\sigma}^3_x} \sum_{t=1}^T (x_t - \hat{\mu}_x)^3,
+$$
 
 and the sample kurtosis is
 
-$$\hat{K}(x) = \frac{1}{(T-1)\hat{\sigma}^4_x} \sum_{t=1}^T (x_t - \hat{\mu}_x)^4.$$
+$$
+\hat{K}(x) = \frac{1}{(T-1)\hat{\sigma}^4_x} \sum_{t=1}^T (x_t - \hat{\mu}_x)^4.
+$$
 
 Under the normality assumption, $\hat{S}(x)$ and $\hat{K}(x) - 3$ are distributed asymptotically as normal with zero mean and variances $6/T$ and $24/T$, respectively; see Snedecor and Cochran (1980, p. 78). These asymptotic properties can be used to test the normality of asset returns.
 
 Given an asset return series $\{r_1,\ldots,r_T\}$, to test the skewness of the returns, we consider the null hypothesis $H_0: S(r) = 0$ versus the alternative hypothesis $H_a: S(r) \neq 0$. The $t$-ratio statistic of the sample skewness in Eq. (1.12) is
 
-$$t = \frac{\hat{S}(r)}{\sqrt{6/T}}.$$
+$$
+t = \frac{\hat{S}(r)}{\sqrt{6/T}}.
+$$
 
 The decision rule is as follows. Reject the null hypothesis at the $\alpha$ significance level, if $|t| > Z_{\alpha/2}$, where $Z_{\alpha/2}$ is the upper 100$(1-\alpha/2)$th quantile of the standard normal distribution. Alternatively, one can compute the $p$ value of the test statistic $t$ and reject $H_0$ if and only if the $p$ value is less than $\alpha$.
 
 Similarly, one can test the excess kurtosis of the return series using the hypotheses $H_0: K(r) - 3 = 0$ versus $H_a: K(r) - 3 \neq 0$. The test statistic is
 
-$$t = \frac{\hat{K}(r) - 3}{\sqrt{24/T}},$$
+$$
+t = \frac{\hat{K}(r) - 3}{\sqrt{24/T}},
+$$
 
 which is asymptotically a standard normal random variable. The decision rule is to reject $H_0$ if and only if the $p$ value of the test statistic is less than the significance level $\alpha$.
 
 Jarque and Bera (1987) (JB) combine the two prior tests and use the test statistic
 
-$$JB = \frac{\hat{S}^2(r)}{6/T} + \frac{[\hat{K}(r) - 3]^2}{24/T},$$
+$$
+JB = \frac{\hat{S}^2(r)}{6/T} + \frac{[\hat{K}(r) - 3]^2}{24/T},
+$$
 
 which is asymptotically distributed as a chi-squared random variable with 2 degrees of freedom, to test for the normality of $r_t$. One rejects $H_0$ of normality if the $p$ value of the JB statistic is less than the significance level.
 
@@ -110,19 +144,25 @@ which is asymptotically distributed as a chi-squared random variable with 2 degr
 
 The most general model for the log returns $\{r_{it}; i = 1,\ldots,N; t = 1,\ldots,T \}$ is its joint distribution function:
 
-$$F_r(r_{11},\ldots,r_{N1}; r_{12},\ldots,r_{N2}; \ldots; r_{1T},\ldots,r_{NT}; Y; \theta),$$
+$$
+F_r(r_{11},\ldots,r_{N1}; r_{12},\ldots,r_{N2}; \ldots; r_{1T},\ldots,r_{NT}; Y; \theta),
+$$
 
 where $Y$ is a state vector consisting of variables that summarize the environment in which asset returns are determined and $\theta$ is a vector of parameters that uniquely determines the distribution function $F_r(\cdot)$. The probability distribution $F_r(\cdot)$ governs the stochastic behavior of the returns $r_{it}$ and $Y$. In many financial studies, the state vector $Y$ is treated as given and the main concern is the conditional distribution of $\{r_{it}\}$ given $Y$. Empirical analysis of asset returns is then to estimate the unknown parameter $\theta$ and to draw statistical inference about the behavior of $\{r_{it}\}$ given some past log returns.
 
 The model in Eq. (1.14) is too general to be of practical value. However, it provides a general framework with respect to which an econometric model for asset returns $r_{it}$ can be put in a proper perspective. Some financial theories such as the capital asset pricing model (CAPM) of Sharpe (1964) focus on the joint distribution of $N$ returns at a single time index $t$ (i.e., the distribution of $\{r_{1t},\ldots,r_{Nt}\}$). Other theories emphasize the dynamic structure of individual asset returns (i.e., the distribution of $\{r_{i1},\ldots,r_{iT}\}$ for a given asset $i$). In this book, we focus on both. In the univariate analysis of Chapters 2–7, our main concern is the joint distribution of $\{r_{it}\}_{t=1}^T$ for asset $i$. To this end, it is useful to partition the joint distribution as
 
-$$F(r_{i1},\ldots,r_{iT}; \theta) = F(r_{i1})F(r_{i2}|r_{i1}) \cdots F(r_{iT}|r_{i,T-1},\ldots,r_{i1}) = F(r_{i1}) \prod_{t=2}^T F(r_{it}|r_{i,t-1},\ldots,r_{i1}),$$
+$$
+F(r_{i1},\ldots,r_{iT}; \theta) = F(r_{i1})F(r_{i2}|r_{i1}) \cdots F(r_{iT}|r_{i,T-1},\ldots,r_{i1}) = F(r_{i1}) \prod_{t=2}^T F(r_{it}|r_{i,t-1},\ldots,r_{i1}),
+$$
 
 where, for simplicity, the parameter $\theta$ is omitted. This partition highlights the temporal dependencies of the log return $r_{it}$. The main issue then is the specification of the conditional distribution $F(r_{it}|r_{i,t-1},\cdot)$, in particular, how the conditional distribution evolves over time. In finance, different distributional specifications lead to different theories. For instance, one version of the random-walk hypothesis is that the conditional distribution $F(r_{it}|r_{i,t-1},\ldots,r_{i1})$ is equal to the marginal distribution $F(r_{it})$. In this case, returns are temporally independent and, hence, not predictable.
 
 It is customary to treat asset returns as continuous random variables, especially for index returns or stock returns calculated at a low frequency, and use their probability density functions. In this case, using the identity in Eq. (1.9), we can write the partition in Eq. (1.15) as
 
-$$f(r_{i1},\ldots,r_{iT}; \theta) = f(r_{i1}; \theta) \prod_{t=2}^T f(r_{it}|r_{i,t-1},\ldots,r_{i1}; \theta).$$
+$$
+f(r_{i1},\ldots,r_{iT}; \theta) = f(r_{i1}; \theta) \prod_{t=2}^T f(r_{it}|r_{i,t-1},\ldots,r_{i1}; \theta).
+$$
 
 For high-frequency asset returns, discreteness becomes an issue. For example, stock prices change in multiples of a tick size on the New York Stock Exchange (NYSE). The tick size was $\frac{1}{8}$ of a dollar before July 1997 and was $\frac{1}{16}$ of a dollar from July 1997 to January 2001. Therefore, the tick-by-tick return of an individual stock listed on the NYSE is not continuous. We discuss high-frequency stock price changes and time durations between price changes later in Chapter 5.
 

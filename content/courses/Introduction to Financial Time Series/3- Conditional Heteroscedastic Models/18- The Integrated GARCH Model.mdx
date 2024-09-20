@@ -17,6 +17,7 @@ The integrated GARCH (IGARCH) model is a special case of the GARCH model where t
 Consider a GARCH(1,1) model:
 
 $$
+
 \begin{aligned}
 r_t &= \mu_t + a_t \\
 a_t &= \sigma_t \epsilon_t \\
@@ -27,12 +28,14 @@ $$
 where $\epsilon_t$ is a sequence of independent and identically distributed random variables with mean zero and variance 1. The IGARCH model occurs when $\alpha_1 + \beta_1 = 1$. In this case, we can rewrite the variance equation as:
 
 $$
+
 \sigma_t^2 = \alpha_0 + \beta_1 \sigma_{t-1}^2 + (1 - \beta_1) a_{t-1}^2
 $$
 
 or equivalently:
 
 $$
+
 \sigma_t^2 = \alpha_0 + (1 - \beta_1) a_{t-1}^2 + \beta_1 \sigma_{t-1}^2
 $$
 
@@ -45,6 +48,7 @@ The IGARCH model has several important properties:
 2. **Unconditional Variance**: The unconditional variance of $a_t$ is not finite for the IGARCH model. This can be seen by iterating the variance equation:
 
 $$
+
 \begin{aligned}
 \sigma_t^2 &= \alpha_0 + (1 - \beta_1) a_{t-1}^2 + \beta_1 \sigma_{t-1}^2 \\
 &= \alpha_0 + (1 - \beta_1) a_{t-1}^2 + \beta_1 [\alpha_0 + (1 - \beta_1) a_{t-2}^2 + \beta_1 \sigma_{t-2}^2] \\
@@ -59,6 +63,7 @@ As we continue this process, the coefficient of $\sigma_{t-k}^2$ approaches zero
 3. **Forecasting**: Despite the infinite unconditional variance, the IGARCH model still provides finite forecasts of future volatility. The $l$-step ahead forecast of volatility is given by:
 
 $$
+
 \sigma_t^2(l) = \alpha_0 l + \sigma_t^2(1)
 $$
 
@@ -71,6 +76,7 @@ where $\sigma_t^2(1)$ is the one-step ahead forecast at time $t$. This shows tha
 Estimation of the IGARCH model can be performed using maximum likelihood estimation, similar to the standard GARCH model. The log-likelihood function for the IGARCH(1,1) model is:
 
 $$
+
 l(\theta) = -\frac{1}{2} \sum_{t=1}^T \left[ \log(2\pi) + \log(\sigma_t^2) + \frac{a_t^2}{\sigma_t^2} \right]
 $$
 

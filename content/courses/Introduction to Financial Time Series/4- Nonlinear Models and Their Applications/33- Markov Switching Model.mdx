@@ -17,6 +17,7 @@ Markov switching models, also known as regime-switching models, are a class of n
 A simple Markov switching model for a time series $\{r_t\}$ can be written as:
 
 $$
+
 r_t = \mu_{s_t} + \phi_{s_t} r_{t-1} + \sigma_{s_t} \epsilon_t
 $$
 
@@ -29,6 +30,7 @@ where:
 The state $s_t$ is assumed to follow a Markov chain with a finite number of states, usually denoted as $s_t \in \{1, 2, ..., M\}$. The transition probabilities between states are given by:
 
 $$
+
 P(s_t = j | s_{t-1} = i) = p_{ij}
 $$
 
@@ -39,6 +41,7 @@ These transition probabilities are often collected in a transition matrix $P = (
 A common specification is the two-state Markov switching model, where $s_t \in \{1, 2\}$. In this case, the transition matrix is:
 
 $$
+
 P = \begin{pmatrix}
 p_{11} & 1 - p_{11} \\
 1 - p_{22} & p_{22}
@@ -54,6 +57,7 @@ Estimation of Markov switching models is typically done using maximum likelihood
 The log-likelihood function for a sample of $T$ observations can be written as:
 
 $$
+
 \ln L = \sum_{t=1}^T \ln \left( \sum_{s_t=1}^M f(r_t | s_t, r_{t-1}, \theta) P(s_t | r_{t-1}, \theta) \right)
 $$
 
@@ -66,12 +70,14 @@ Two important procedures in the analysis of Markov switching models are filterin
 1. Filtering: This involves computing the probabilities of being in each state at time $t$ given the information up to time $t$. These are called filtered probabilities:
 
 $$
+
 P(s_t = j | r_1, ..., r_t, \theta)
 $$
 
 2. Smoothing: This involves computing the probabilities of being in each state at time $t$ given all the information in the sample. These are called smoothed probabilities:
 
 $$
+
 P(s_t = j | r_1, ..., r_T, \theta)
 $$
 
@@ -94,6 +100,7 @@ Markov switching models have found numerous applications in finance, including:
 Consider a two-state Markov switching model for stock returns:
 
 $$
+
 r_t = \mu_{s_t} + \sigma_{s_t} \epsilon_t
 $$
 

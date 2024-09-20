@@ -19,6 +19,7 @@ Long-memory processes, also known as long-range dependent processes, are charact
 A time series $\{r_t\}$ is said to exhibit long memory if its autocorrelation function $\rho(\ell)$ decays more slowly than an exponential rate as the lag $\ell$ increases. Specifically, for a long-memory process:
 
 $$
+
 \rho(\ell) \sim C \ell^{-(2d-1)}, \quad \text{as } \ell \to \infty
 $$
 
@@ -31,6 +32,7 @@ where $0 < d < 0.5$ is the long-memory parameter and $C$ is a constant. This ind
 2. **Fractional Differencing**: A common approach to modeling long-memory processes involves fractional differencing. The process $\{r_t\}$ can be modeled as:
 
 $$
+
 (1 - B)^d r_t = a_t
 $$
 
@@ -39,6 +41,7 @@ where $B$ is the backshift operator and $\{a_t\}$ is a white noise process.
 3. **Spectral Density**: The spectral density of a long-memory process behaves as:
 
 $$
+
 f(\lambda) \sim |\lambda|^{-2d}, \quad \text{as } \lambda \to 0
 $$
 
@@ -57,6 +60,7 @@ The GPH estimator is a widely used method for estimating the fractional differen
 2. Regress $\log I(\lambda_j)$ on $\log(4\sin^2(\lambda_j/2))$:
 
 $$
+
 \log I(\lambda_j) = c - d \log(4\sin^2(\lambda_j/2)) + u_j
 $$
 

@@ -22,41 +22,57 @@ There are several definitions of asset returns that are commonly used:
 
 Let $P_t$ be the price of an asset at time index $t$. Holding the asset for one period from date $t-1$ to date $t$ would result in a simple gross return:
 
-$$1 + R_t = \frac{P_t}{P_{t-1}}$$
+$$
+1 + R_t = \frac{P_t}{P_{t-1}}
+$$
 
 or
 
-$$P_t = P_{t-1}(1 + R_t)$$
+$$
+P_t = P_{t-1}(1 + R_t)
+$$
 
 The corresponding one-period simple net return or simple return is:
 
-$$R_t = \frac{P_t}{P_{t-1}} - 1 = \frac{P_t - P_{t-1}}{P_{t-1}}$$
+$$
+R_t = \frac{P_t}{P_{t-1}} - 1 = \frac{P_t - P_{t-1}}{P_{t-1}}
+$$
 
 ### Multiperiod Simple Return
 
 Holding the asset for $k$ periods between dates $t-k$ and $t$ gives a $k$-period simple gross return:
 
-$$1 + R_t[k] = \frac{P_t}{P_{t-k}} = \frac{P_t}{P_{t-1}} \times \frac{P_{t-1}}{P_{t-2}} \times \cdots \times \frac{P_{t-k+1}}{P_{t-k}} = (1 + R_t)(1 + R_{t-1}) \cdots (1 + R_{t-k+1}) = \prod_{j=0}^{k-1} (1 + R_{t-j})$$
+$$
+1 + R_t[k] = \frac{P_t}{P_{t-k}} = \frac{P_t}{P_{t-1}} \times \frac{P_{t-1}}{P_{t-2}} \times \cdots \times \frac{P_{t-k+1}}{P_{t-k}} = (1 + R_t)(1 + R_{t-1}) \cdots (1 + R_{t-k+1}) = \prod_{j=0}^{k-1} (1 + R_{t-j})
+$$
 
 Thus, the $k$-period simple gross return is just the product of the $k$ one-period simple gross returns involved. This is called a compound return.
 
 The $k$-period simple net return is:
 
-$$R_t[k] = (P_t - P_{t-k})/P_{t-k}$$
+$$
+R_t[k] = (P_t - P_{t-k})/P_{t-k}
+$$
 
 If the asset was held for $k$ years, then the annualized (average) return is defined as:
 
-$$\text{Annualized } \{R_t[k]\} = \left[\prod_{j=0}^{k-1} (1 + R_{t-j})\right]^{1/k} - 1$$
+$$
+\text{Annualized } \{R_t[k]\} = \left[\prod_{j=0}^{k-1} (1 + R_{t-j})\right]^{1/k} - 1
+$$
 
 This is a geometric mean of the $k$ one-period simple gross returns involved and can be computed by:
 
-$$\text{Annualized } \{R_t[k]\} = \exp\left(\frac{1}{k} \sum_{j=0}^{k-1} \ln(1 + R_{t-j})\right) - 1$$
+$$
+\text{Annualized } \{R_t[k]\} = \exp\left(\frac{1}{k} \sum_{j=0}^{k-1} \ln(1 + R_{t-j})\right) - 1
+$$
 
 where $\exp(x)$ denotes the exponential function and $\ln(x)$ is the natural logarithm of the positive number $x$.
 
 Because it is easier to compute arithmetic average than geometric mean and the one-period returns tend to be small, one can use a first-order Taylor expansion to approximate the annualized return:
 
-$$\text{Annualized } \{R_t[k]\} \approx \frac{1}{k} \sum_{j=0}^{k-1} R_{t-j}$$
+$$
+\text{Annualized } \{R_t[k]\} \approx \frac{1}{k} \sum_{j=0}^{k-1} R_{t-j}
+$$
 
 However, accuracy of this approximation may not be sufficient in some applications.
 
@@ -68,13 +84,17 @@ In general, if the bank pays interest $m$ times a year, then the interest rate f
 
 In general, the net asset value $A$ of continuous compounding is:
 
-$$A = C \exp(r \times n)$$
+$$
+A = C \exp(r \times n)
+$$
 
 where $r$ is the interest rate per annum, $C$ is the initial capital, and $n$ is the number of years.
 
 From this, we have:
 
-$$C = A \exp(-r \times n)$$
+$$
+C = A \exp(-r \times n)
+$$
 
 which is referred to as the present value of an asset that is worth $A$ dollars $n$ years from now, assuming that the continuously compounded interest rate is $r$ per annum.
 
@@ -82,13 +102,17 @@ which is referred to as the present value of an asset that is worth $A$ dollars 
 
 The natural logarithm of the simple gross return of an asset is called the continuously compounded return or log return:
 
-$$r_t = \ln(1 + R_t) = \ln\left(\frac{P_t}{P_{t-1}}\right) = p_t - p_{t-1}$$
+$$
+r_t = \ln(1 + R_t) = \ln\left(\frac{P_t}{P_{t-1}}\right) = p_t - p_{t-1}
+$$
 
 where $p_t = \ln(P_t)$.
 
 Continuously compounded returns $r_t$ enjoy some advantages over the simple net returns $R_t$. For multiperiod returns:
 
-$$r_t[k] = \ln(1 + R_t[k]) = \ln[(1 + R_t)(1 + R_{t-1}) \cdots (1 + R_{t-k+1})] = \ln(1 + R_t) + \ln(1 + R_{t-1}) + \cdots + \ln(1 + R_{t-k+1}) = r_t + r_{t-1} + \cdots + r_{t-k+1}$$
+$$
+r_t[k] = \ln(1 + R_t[k]) = \ln[(1 + R_t)(1 + R_{t-1}) \cdots (1 + R_{t-k+1})] = \ln(1 + R_t) + \ln(1 + R_{t-1}) + \cdots + \ln(1 + R_{t-k+1}) = r_t + r_{t-1} + \cdots + r_{t-k+1}
+$$
 
 Thus, the continuously compounded multiperiod return is simply the sum of continuously compounded one-period returns involved.
 
@@ -96,13 +120,17 @@ Thus, the continuously compounded multiperiod return is simply the sum of contin
 
 The simple net return of a portfolio consisting of $N$ assets is a weighted average of the simple net returns of the assets involved, where the weight on each asset is the percentage of the portfolio's value invested in that asset. Let $p$ be a portfolio that places weight $w_i$ on asset $i$. Then the simple return of $p$ at time $t$ is:
 
-$$R_{p,t} = \sum_{i=1}^N w_i R_{it}$$
+$$
+R_{p,t} = \sum_{i=1}^N w_i R_{it}
+$$
 
 where $R_{it}$ is the simple return of asset $i$.
 
 The continuously compounded returns of a portfolio, however, do not have this convenient property. If the simple returns $R_{it}$ are all small in magnitude, then we have:
 
-$$r_{p,t} \approx \sum_{i=1}^N w_i r_{it}$$
+$$
+r_{p,t} \approx \sum_{i=1}^N w_i r_{it}
+$$
 
 where $r_{p,t}$ is the continuously compounded return of the portfolio at time $t$. This approximation is often used to study portfolio returns.
 
@@ -110,17 +138,25 @@ where $r_{p,t}$ is the continuously compounded return of the portfolio at time $
 
 If an asset pays dividends periodically, we must modify the definitions of asset returns. Let $D_t$ be the dividend payment of an asset between dates $t-1$ and $t$ and $P_t$ be the price of the asset at the end of period $t$. Thus, dividend is not included in $P_t$. Then the simple net return and continuously compounded return at time $t$ become:
 
-$$R_t = \frac{P_t + D_t}{P_{t-1}} - 1$$
+$$
+R_t = \frac{P_t + D_t}{P_{t-1}} - 1
+$$
 
-$$r_t = \ln(P_t + D_t) - \ln(P_{t-1})$$
+$$
+r_t = \ln(P_t + D_t) - \ln(P_{t-1})
+$$
 
 ### Excess Return
 
 Excess return of an asset at time $t$ is the difference between the asset's return and the return on some reference asset. The reference asset is often taken to be riskless such as a short-term U.S. Treasury bill return. The simple excess return and log excess return of an asset are then defined as:
 
-$$Z_t = R_t - R_{0t}$$
+$$
+Z_t = R_t - R_{0t}
+$$
 
-$$z_t = r_t - r_{0t}$$
+$$
+z_t = r_t - r_{0t}
+$$
 
 where $R_{0t}$ and $r_{0t}$ are the simple and log returns of the reference asset, respectively.
 

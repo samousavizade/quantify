@@ -26,6 +26,7 @@ With the availability of intraday transaction data, researchers have proposed us
 Let $r_{t,i}$ denote the $i$th intraday return on day $t$, where $i = 1, \ldots, m$. The realized volatility (RV) for day $t$ is defined as:
 
 $$
+
 RV_t = \sum_{i=1}^m r_{t,i}^2
 $$
 
@@ -49,12 +50,14 @@ To address these issues, various modifications to the basic realized volatility 
 Barndorff-Nielsen et al. (2008) proposed the realized kernel estimator to deal with microstructure noise:
 
 $$
+
 RK_t = \sum_{h=-H}^H k\left(\frac{h}{H+1}\right) \gamma_h
 $$
 
 where $k(\cdot)$ is a kernel function, $H$ is the bandwidth, and $\gamma_h$ is the $h$th realized autocovariance:
 
 $$
+
 \gamma_h = \sum_{i=|h|+1}^m r_{t,i} r_{t,i-|h|}
 $$
 
@@ -65,6 +68,7 @@ The realized kernel provides a consistent estimator of integrated volatility in 
 Zhang et al. (2005) proposed the two-scale realized volatility (TSRV) estimator:
 
 $$
+
 TSRV_t = \frac{1}{K} \sum_{k=1}^K RV_t^{(k)} - \frac{n}{n_K} RV_t^{(all)}
 $$
 
@@ -79,6 +83,7 @@ Once we have obtained realized volatility estimates, we can model and forecast t
 1. Heterogeneous Autoregressive (HAR) model (Corsi, 2009):
 
 $$
+
 RV_t = \beta_0 + \beta_d RV_{t-1} + \beta_w RV_{t-5:t-1} + \beta_m RV_{t-22:t-1} + \epsilon_t
 $$
 
@@ -87,6 +92,7 @@ where $RV_{t-5:t-1}$ and $RV_{t-22:t-1}$ are the average realized volatilities o
 2. ARFIMA models:
 
 $$
+
 (1 - L)^d \phi(L) \log RV_t = \theta(L) \epsilon_t
 $$
 
@@ -95,6 +101,7 @@ where $L$ is the lag operator, $d$ is the fractional differencing parameter, and
 3. Realized GARCH models (Hansen et al., 2012):
 
 $$
+
 \begin{aligned}
 r_t &= \sigma_t \epsilon_t \\
 \log \sigma_t^2 &= \omega + \beta \log \sigma_{t-1}^2 + \gamma \log RV_{t-1} \\
@@ -117,24 +124,28 @@ Let $O_t$, $H_t$, $L_t$, and $C_t$ denote the open, high, low, and close prices 
 1. Parkinson (1980) estimator:
 
 $$
+
 \hat{\sigma}_t^2 = \frac{1}{4 \log 2} (\log H_t - \log L_t)^2
 $$
 
 2. Garman-Klass (1980) estimator:
 
 $$
+
 \hat{\sigma}_t^2 = 0.511 (\log H_t - \log L_t)^2 - 0.019 [\log C_t (\log H_t + \log L_t) - 2 \log H_t \log L_t] - 0.383 (\log C_t - \log O_t)^2
 $$
 
 3. Rogers-Satchell (1991) estimator:
 
 $$
+
 \hat{\sigma}_t^2 = \log H_t (\log H_t - \log O_t) + \log L_t (\log L_t - \log O_t)
 $$
 
 4. Yang-Zhang (2000) estimator:
 
 $$
+
 \hat{\sigma}_t^2 = \hat{\sigma}_o^2 + k \hat{\sigma}_c^2 + (1-k) \hat{\sigma}_{rs}^2
 $$
 
@@ -149,6 +160,7 @@ Range-based volatility estimates can be used in various volatility models:
 1. Range-GARCH (Brandt and Jones, 2006):
 
 $$
+
 \begin{aligned}
 \log R_t &= \mu + \sigma_t \epsilon_t \\
 \log \sigma_t^2 &= \omega + \alpha \log R_{t-1} + \beta \log \sigma_{t-1}^2
@@ -160,6 +172,7 @@ where $R_t = \log H_t - \log L_t$ is the log range.
 2. Conditional Autoregressive Range (CARR) model (Chou, 2005):
 
 $$
+
 R_t = \psi_t \epsilon_t, \quad \psi_t = \omega + \alpha R_{t-1} + \beta \psi_{t-1}
 $$
 
@@ -168,6 +181,7 @@ where $R_t$ is the range and $\psi_t$ is the conditional mean of the range.
 3. Range-based HAR model:
 
 $$
+
 R_t = \beta_0 + \beta_d R_{t-1} + \beta_w R_{t-5:t-1} + \beta_m R_{t-22:t-1} + \epsilon_t
 $$
 

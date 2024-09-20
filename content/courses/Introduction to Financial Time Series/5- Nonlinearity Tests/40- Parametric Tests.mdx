@@ -18,13 +18,17 @@ The regression error specification test (RESET) of Ramsey (1969) is a general te
 
 1. Fit a linear AR(p) model to $r_t$:
 
-$$r_t = \phi_0 + \phi_1 r_{t-1} + \cdots + \phi_p r_{t-p} + e_t$$
+$$
+r_t = \phi_0 + \phi_1 r_{t-1} + \cdots + \phi_p r_{t-p} + e_t
+$$
 
 and obtain the fitted values $\hat{r}_t$.
 
 2. Estimate the augmented regression:
 
-$$r_t = \phi_0 + \phi_1 r_{t-1} + \cdots + \phi_p r_{t-p} + \beta_1 \hat{r}_t^2 + \beta_2 \hat{r}_t^3 + \cdots + \beta_m \hat{r}_t^{m+1} + u_t$$
+$$
+r_t = \phi_0 + \phi_1 r_{t-1} + \cdots + \phi_p r_{t-p} + \beta_1 \hat{r}_t^2 + \beta_2 \hat{r}_t^3 + \cdots + \beta_m \hat{r}_t^{m+1} + u_t
+$$
 
 3. Test the null hypothesis $H_0: \beta_1 = \beta_2 = \cdots = \beta_m = 0$ using an F-test or likelihood ratio test.
 
@@ -42,13 +46,17 @@ Tsay (1989) proposed a test for threshold nonlinearity based on arranged autoreg
 
 4. Perform the following regression using the sorted data:
 
-$$\hat{e}_t = \beta_0 + \beta_1 r_{t-1} + \cdots + \beta_p r_{t-p} + u_t$$
+$$
+\hat{e}_t = \beta_0 + \beta_1 r_{t-1} + \cdots + \beta_p r_{t-p} + u_t
+$$
 
 5. Compute the predictive residuals $\hat{u}_t$ recursively.
 
 6. Calculate the test statistic:
 
-$$F = \frac{(SSR_0 - SSR_1) / p}{SSR_1 / (T - 2p - 1)}$$
+$$
+F = \frac{(SSR_0 - SSR_1) / p}{SSR_1 / (T - 2p - 1)}
+$$
 
 where $SSR_0 = \sum_{t=p+1}^T \hat{e}_t^2$, $SSR_1 = \sum_{t=p+1}^T \hat{u}_t^2$, and T is the sample size.
 
@@ -62,7 +70,9 @@ Teräsvirta (1994) proposed a test for smooth transition nonlinearity based on a
 
 2. Regress the residuals $\hat{e}_t$ on $r_{t-1}, \ldots, r_{t-p}$ and $r_{t-d}, r_{t-d}^2, r_{t-d}^3$ for some delay d:
 
-$$\hat{e}_t = \beta_0 + \beta_1 r_{t-1} + \cdots + \beta_p r_{t-p} + \beta_{p+1} r_{t-d} + \beta_{p+2} r_{t-d}^2 + \beta_{p+3} r_{t-d}^3 + u_t$$
+$$
+\hat{e}_t = \beta_0 + \beta_1 r_{t-1} + \cdots + \beta_p r_{t-p} + \beta_{p+1} r_{t-d} + \beta_{p+2} r_{t-d}^2 + \beta_{p+3} r_{t-d}^3 + u_t
+$$
 
 3. Test the null hypothesis $H_0: \beta_{p+1} = \beta_{p+2} = \beta_{p+3} = 0$ using an F-test.
 
@@ -72,7 +82,9 @@ If the null hypothesis is rejected, it suggests the presence of smooth transitio
 
 Maravall (1983) proposed a test for bilinear nonlinearity based on the following augmented regression:
 
-$$r_t = \phi_0 + \phi_1 r_{t-1} + \cdots + \phi_p r_{t-p} + \beta_1 r_{t-i} \hat{e}_{t-j} + \beta_2 r_{t-k} \hat{e}_{t-l} + u_t$$
+$$
+r_t = \phi_0 + \phi_1 r_{t-1} + \cdots + \phi_p r_{t-p} + \beta_1 r_{t-i} \hat{e}_{t-j} + \beta_2 r_{t-k} \hat{e}_{t-l} + u_t
+$$
 
 where $\hat{e}_t$ are the residuals from an AR(p) fit. The null hypothesis of linearity is $H_0: \beta_1 = \beta_2 = 0$, which can be tested using an F-test or likelihood ratio test.
 
@@ -84,7 +96,9 @@ Engle (1982) proposed the Lagrange Multiplier (LM) test for autoregressive condi
 
 2. Regress $\hat{e}_t^2$ on a constant and $\hat{e}_{t-1}^2, \ldots, \hat{e}_{t-q}^2$:
 
-$$\hat{e}_t^2 = \alpha_0 + \alpha_1 \hat{e}_{t-1}^2 + \cdots + \alpha_q \hat{e}_{t-q}^2 + u_t$$
+$$
+\hat{e}_t^2 = \alpha_0 + \alpha_1 \hat{e}_{t-1}^2 + \cdots + \alpha_q \hat{e}_{t-q}^2 + u_t
+$$
 
 3. Calculate the test statistic $LM = TR^2$, where T is the sample size and $R^2$ is the coefficient of determination from the regression in step 2.
 
@@ -94,7 +108,9 @@ Under the null hypothesis of no ARCH effects, LM follows asymptotically a chi-sq
 
 Brock, Dechert, and Scheinkman (1987) proposed a test for nonlinear serial dependence based on the correlation integral. The test statistic is:
 
-$$W_{m,T}(\epsilon) = \sqrt{T} \frac{C_{m,T}(\epsilon) - C_{1,T}(\epsilon)^m}{\sigma_{m,T}(\epsilon)}$$
+$$
+W_{m,T}(\epsilon) = \sqrt{T} \frac{C_{m,T}(\epsilon) - C_{1,T}(\epsilon)^m}{\sigma_{m,T}(\epsilon)}
+$$
 
 where:
 
@@ -119,7 +135,9 @@ Lee, White, and Granger (1993) proposed a test for neglected nonlinearity based 
 
 4. Regress $\hat{e}_t$ on $h_1(\mathbf{x}_t), \ldots, h_q(\mathbf{x}_t)$:
 
-$$\hat{e}_t = \beta_0 + \beta_1 h_1(\mathbf{x}_t) + \cdots + \beta_q h_q(\mathbf{x}_t) + u_t$$
+$$
+\hat{e}_t = \beta_0 + \beta_1 h_1(\mathbf{x}_t) + \cdots + \beta_q h_q(\mathbf{x}_t) + u_t
+$$
 
 5. Test the null hypothesis $H_0: \beta_1 = \cdots = \beta_q = 0$ using an F-test or likelihood ratio test.
 

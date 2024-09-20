@@ -13,12 +13,14 @@ import TOCInline from 'pliny/ui/TOCInline';
 The conditional heteroscedastic ARMA (CHARMA) model of Tsay (1987) generalizes the ARCH model by allowing the conditional variance to depend on both past innovations and past observed values. Specifically, a CHARMA(p,q) model assumes that
 
 $$
+
 r_t = \mu_t + a_t, \quad a_t = \sigma_t \epsilon_t
 $$
 
 where $\mu_t$ is the conditional mean of $r_t$ given $\mathcal{F}_{t-1}$, $\{\epsilon_t\}$ is a sequence of independent and identically distributed random variables with mean zero and variance 1, and the conditional variance $\sigma_t^2$ is
 
 $$
+
 \sigma_t^2 = \alpha_0 + \sum_{i=1}^p \alpha_i a_{t-i}^2 + \sum_{j=1}^q \beta_j r_{t-j}^2
 $$
 
@@ -43,6 +45,7 @@ However, the CHARMA model also has some drawbacks:
 To overcome the difficulty of parameter constraints, one can use
 
 $$
+
 \sigma_t^2 = \alpha_0 + \sum_{i=1}^p \alpha_i |a_{t-i}| + \sum_{j=1}^q \beta_j |r_{t-j}|
 $$
 
@@ -53,6 +56,7 @@ This specification ensures that $\sigma_t^2 > 0$ for all t provided that $\alpha
 The CHARMA model can be estimated by the method of maximum likelihood. Assuming that $\epsilon_t$ follows a standard normal distribution, the conditional log likelihood function of the model is
 
 $$
+
 \ell(\Theta) = -\frac{1}{2} \sum_{t=1}^T [\log(2\pi) + \log(\sigma_t^2) + \frac{a_t^2}{\sigma_t^2}]
 $$
 
@@ -65,6 +69,7 @@ Alternatively, one can use a two-stage method to estimate the model. In the firs
 The adequacy of a fitted CHARMA model can be checked by examining the standardized residuals
 
 $$
+
 \hat{\epsilon}_t = \frac{\hat{a}_t}{\hat{\sigma}_t}
 $$
 
@@ -75,6 +80,7 @@ where $\hat{a}_t$ is the residual series and $\hat{\sigma}_t$ is the fitted cond
 For an estimated CHARMA model, the 1-step ahead forecast of volatility at the forecast origin h is
 
 $$
+
 \hat{\sigma}_h^2(1) = \hat{\alpha}_0 + \sum_{i=1}^p \hat{\alpha}_i a_{h+1-i}^2 + \sum_{j=1}^q \hat{\beta}_j r_{h+1-j}^2
 $$
 
@@ -85,6 +91,7 @@ where $\hat{\alpha}_i$ and $\hat{\beta}_j$ are the parameter estimates. Multi-st
 The CHARMA model can be extended to include the effects of explanatory variables on volatility. Let $x_t$ be a vector of explanatory variables. A CHARMA-X model is
 
 $$
+
 \sigma_t^2 = \alpha_0 + \sum_{i=1}^p \alpha_i a_{t-i}^2 + \sum_{j=1}^q \beta_j r_{t-j}^2 + \gamma' x_t
 $$
 
@@ -97,10 +104,12 @@ The inclusion of explanatory variables can improve the model's forecasting perfo
 Consider modeling the daily returns of a stock using a CHARMA(1,1) model with trading volume as an explanatory variable:
 
 $$
+
 r_t = \mu + a_t, \quad a_t = \sigma_t \epsilon_t
 $$
 
 $$
+
 \sigma_t^2 = \alpha_0 + \alpha_1 a_{t-1}^2 + \beta_1 r_{t-1}^2 + \gamma \log(V_t)
 $$
 
@@ -109,6 +118,7 @@ where $V_t$ is the trading volume. The log transformation is often applied to vo
 After estimating this model, one might find:
 
 $$
+
 \hat{\sigma}_t^2 = 0.00001 + 0.05 a_{t-1}^2 + 0.85 r_{t-1}^2 + 0.000002 \log(V_t)
 $$
 

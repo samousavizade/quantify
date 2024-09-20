@@ -17,6 +17,7 @@ Neural networks are flexible nonlinear models that have been widely used in many
 A simple feedforward neural network with one hidden layer for time series forecasting can be represented as:
 
 $$
+
 y_t = G\left(\beta_0 + \sum_{j=1}^q \beta_j F\left(\alpha_{0j} + \sum_{i=1}^p \alpha_{ij} x_{t-i}\right)\right) + \epsilon_t
 $$
 
@@ -38,15 +39,21 @@ Common choices for activation functions include:
 
 1. Logistic (sigmoid) function:
 
-$$F(x) = \frac{1}{1 + e^{-x}}$$
+$$
+F(x) = \frac{1}{1 + e^{-x}}
+$$
 
 2. Hyperbolic tangent function:
 
-$$F(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}$$
+$$
+F(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}
+$$
 
 3. Rectified Linear Unit (ReLU):
 
-$$F(x) = \max(0, x)$$
+$$
+F(x) = \max(0, x)
+$$
 
 For financial time series forecasting, the output activation function $G(\cdot)$ is often chosen to be the identity function, i.e., $G(x) = x$.
 
@@ -55,6 +62,7 @@ For financial time series forecasting, the output activation function $G(\cdot)$
 The goal of training a neural network is to find the optimal weights $\alpha_{ij}$ and $\beta_j$ that minimize a loss function, typically the mean squared error (MSE):
 
 $$
+
 \text{MSE} = \frac{1}{T} \sum_{t=1}^T (y_t - \hat{y}_t)^2
 $$
 
@@ -70,6 +78,7 @@ The most common training algorithm is backpropagation, which uses gradient desce
 The weight update rule is typically:
 
 $$
+
 w_{new} = w_{old} - \eta \frac{\partial E}{\partial w}
 $$
 
@@ -83,7 +92,9 @@ Neural networks, especially those with many hidden nodes, are prone to overfitti
 
 2. Weight decay: Add a penalty term to the loss function to discourage large weights:
 
-$$L = \text{MSE} + \lambda \sum_{ij} w_{ij}^2$$
+$$
+L = \text{MSE} + \lambda \sum_{ij} w_{ij}^2
+$$
 
 where $\lambda$ is the regularization parameter.
 
@@ -112,6 +123,7 @@ For financial time series forecasting, neural networks can be used in various wa
 The general form of a neural network for time series forecasting can be written as:
 
 $$
+
 y_{t+h} = f(y_t, y_{t-1}, ..., y_{t-p+1}, x_t, x_{t-1}, ..., x_{t-q+1}) + \epsilon_{t+h}
 $$
 
@@ -136,6 +148,7 @@ The network structure could be:
 The model can be represented as:
 
 $$
+
 r_t = \beta_0 + \sum_{j=1}^{10} \beta_j \tanh\left(\alpha_{0j} + \alpha_{1j}r_{t-1} + \alpha_{2j}r_{t-2} + \alpha_{3j}r_{t-3} + \alpha_{4j}MA_{t-1} + \alpha_{5j}RSI_{t-1}\right) + \epsilon_t
 $$
 

@@ -17,6 +17,7 @@ The functional coefficient autoregressive (FAR) model, introduced by Chen and Ts
 A FAR model of order $p$ is defined as:
 
 $$
+
 r_t = f_0(u_t) + \sum_{i=1}^p f_i(u_t)r_{t-i} + a_t
 $$
 
@@ -56,6 +57,7 @@ Estimation of the FAR model typically involves the following steps:
 A common approach to estimating the functional coefficients is local polynomial regression. For a given point $u$, we approximate $f_i(u_t)$ in a neighborhood of $u$ using a Taylor expansion:
 
 $$
+
 f_i(u_t) \approx f_i(u) + f'_i(u)(u_t - u) + \frac{1}{2}f''_i(u)(u_t - u)^2 + \cdots + \frac{1}{q!}f^{(q)}_i(u)(u_t - u)^q
 $$
 
@@ -64,6 +66,7 @@ where $q$ is the order of the local polynomial.
 The estimation then proceeds by solving the weighted least squares problem:
 
 $$
+
 \min_{\beta_{ij}} \sum_{t=p+1}^T \left(r_t - \sum_{i=0}^p \sum_{j=0}^q \beta_{ij}(u_t - u)^j r_{t-i}\right)^2 K_h(u_t - u)
 $$
 
@@ -79,6 +82,7 @@ The estimate of $f_i(u)$ is then given by $\hat{f}_i(u) = \hat{\beta}_{i0}$.
 The choice of bandwidth $h$ is crucial in the estimation of FAR models. A common approach is to use cross-validation. The leave-one-out cross-validation criterion is defined as:
 
 $$
+
 CV(h) = \frac{1}{T-p} \sum_{t=p+1}^T (r_t - \hat{r}_{t,-t}(h))^2
 $$
 
@@ -87,6 +91,7 @@ where $\hat{r}_{t,-t}(h)$ is the fitted value for $r_t$ obtained by leaving out 
 The optimal bandwidth is then chosen as:
 
 $$
+
 h_{opt} = \arg\min_h CV(h)
 $$
 
@@ -99,6 +104,7 @@ Inference for FAR models is typically based on bootstrap methods due to the comp
 Consider modeling the daily log returns of the exchange rate between the US Dollar and the Japanese Yen. Let $r_t$ be the log return at time $t$. We might specify a FAR(2) model as:
 
 $$
+
 r_t = f_0(r_{t-1}) + f_1(r_{t-1})r_{t-1} + f_2(r_{t-1})r_{t-2} + a_t
 $$
 

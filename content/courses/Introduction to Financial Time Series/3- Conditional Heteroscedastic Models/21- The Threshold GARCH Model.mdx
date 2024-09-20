@@ -17,12 +17,14 @@ The threshold GARCH (TGARCH) model is another volatility model that can capture 
 The TGARCH(m,s) model is defined as:
 
 $$
+
 \sigma_t^2 = \alpha_0 + \sum_{i=1}^m (\alpha_i + \gamma_i N_{t-i}) a_{t-i}^2 + \sum_{j=1}^s \beta_j \sigma_{t-j}^2
 $$
 
 where $N_{t-i}$ is an indicator function defined as:
 
 $$
+
 N_{t-i} = \begin{cases}
 1 & \text{if } a_{t-i} < 0 \\
 0 & \text{if } a_{t-i} \geq 0
@@ -53,6 +55,7 @@ If $\gamma_i > 0$, then negative shocks have a larger impact on volatility than 
 2. The TGARCH(1,1) model, which is commonly used in practice, is given by:
 
 $$
+
 \sigma_t^2 = \alpha_0 + (\alpha_1 + \gamma_1 N_{t-1}) a_{t-1}^2 + \beta_1 \sigma_{t-1}^2
 $$
 
@@ -61,12 +64,14 @@ $$
 1. **Stationarity**: The TGARCH model is covariance stationary if:
 
 $$
+
 \sum_{i=1}^m (\alpha_i + \frac{1}{2}\gamma_i) + \sum_{j=1}^s \beta_j < 1
 $$
 
 2. **Unconditional Variance**: For a TGARCH(1,1) model, the unconditional variance is:
 
 $$
+
 E(\sigma_t^2) = \frac{\alpha_0}{1 - (\alpha_1 + \frac{1}{2}\gamma_1) - \beta_1}
 $$
 
@@ -77,6 +82,7 @@ $$
 The TGARCH model can be estimated using maximum likelihood estimation (MLE). Assuming the innovations follow a normal distribution, the log-likelihood function for a sample of T observations is:
 
 $$
+
 L(\theta) = -\frac{1}{2} \sum_{t=1}^T \left( \log(2\pi) + \log(\sigma_t^2) + \frac{a_t^2}{\sigma_t^2} \right)
 $$
 
@@ -87,12 +93,14 @@ where $\theta$ represents the vector of model parameters. The MLE estimates are 
 For a TGARCH(1,1) model, the one-step-ahead forecast of volatility at time $t$ is:
 
 $$
+
 \sigma_{t+1|t}^2 = \alpha_0 + (\alpha_1 + \gamma_1 N_t) a_t^2 + \beta_1 \sigma_t^2
 $$
 
 Multi-step forecasts can be computed recursively, similar to the GARCH model, but taking into account the expected value of the indicator function:
 
 $$
+
 E[N_{t+k}] = P(a_{t+k} < 0) = 0.5
 $$
 
@@ -115,6 +123,7 @@ Both TGARCH and EGARCH models can capture asymmetric effects in volatility, but 
 Consider modeling the daily returns of a stock index using a TGARCH(1,1) model. After estimation, suppose we obtain the following model:
 
 $$
+
 \sigma_t^2 = 0.00001 + (0.02 + 0.05N_{t-1})a_{t-1}^2 + 0.93\sigma_{t-1}^2
 $$
 

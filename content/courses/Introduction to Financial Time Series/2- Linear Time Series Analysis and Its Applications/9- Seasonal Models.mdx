@@ -21,6 +21,7 @@ Seasonal differencing is a technique used to remove seasonal patterns from a tim
 For a time series $\{r_t\}$ with a seasonal period $s$, the seasonal difference of order $s$ is defined as:
 
 $$
+
 \nabla_s r_t = r_t - r_{t-s}
 $$
 
@@ -31,6 +32,7 @@ This operation removes the seasonal component by subtracting the value from the 
 Consider monthly data with a seasonal period of $s = 12$. The seasonal difference is:
 
 $$
+
 \nabla_{12} r_t = r_t - r_{t-12}
 $$
 
@@ -51,6 +53,7 @@ Multiplicative seasonal models combine non-seasonal ARMA components with seasona
 A multiplicative seasonal ARMA model, denoted as SARMA$(p,d,q) \times (P,D,Q)_s$, is defined by:
 
 $$
+
 \Phi(B^s) \phi(B) (1 - B)^d (1 - B^s)^D r_t = \Theta(B^s) \theta(B) a_t
 $$
 
@@ -67,6 +70,7 @@ where:
 Consider monthly sales data with $s = 12$. A SARIMA$(0,1,1) \times (0,1,1)_{12}$ model can be expressed as:
 
 $$
+
 (1 - B)(1 - B^{12}) r_t = (1 - \theta_1 B)(1 - \Theta_1 B^{12}) a_t
 $$
 

@@ -15,6 +15,7 @@ The GARCH-in-mean (GARCH-M) model is an extension of the GARCH model that allows
 The general form of a GARCH(p,q)-M model is:
 
 $$
+
 \begin{aligned}
 r_t &= \mu_t + a_t \\
 \mu_t &= \mu + \lambda g(\sigma_t^2) \\
@@ -34,6 +35,7 @@ The parameter $\lambda$ measures the risk premium. A positive $\lambda$ indicate
 For example, a GARCH(1,1)-M model with $g(\sigma_t^2) = \sigma_t^2$ can be written as:
 
 $$
+
 \begin{aligned}
 r_t &= \mu + \lambda \sigma_t^2 + a_t \\
 a_t &= \sigma_t \epsilon_t \\
@@ -45,7 +47,9 @@ $$
 
 1. **Mean Equation**: The conditional mean of $r_t$ is now time-varying and depends on the conditional variance:
 
-$$E(r_t | F_{t-1}) = \mu_t = \mu + \lambda g(\sigma_t^2)$$
+$$
+E(r_t | F_{t-1}) = \mu_t = \mu + \lambda g(\sigma_t^2)
+$$
 
 2. **Volatility Feedback**: The GARCH-M model allows for a feedback effect from the conditional variance to the conditional mean. This captures the notion that periods of high volatility may lead to higher expected returns.
 
@@ -60,6 +64,7 @@ $$E(r_t | F_{t-1}) = \mu_t = \mu + \lambda g(\sigma_t^2)$$
 The GARCH-M model can be estimated using maximum likelihood estimation (MLE). Assuming $\epsilon_t$ follows a standard normal distribution, the log-likelihood function for a sample of T observations is:
 
 $$
+
 \log L = -\frac{T}{2}\log(2\pi) - \frac{1}{2}\sum_{t=1}^T \left[\log(\sigma_t^2) + \frac{(r_t - \mu - \lambda g(\sigma_t^2))^2}{\sigma_t^2}\right]
 $$
 
@@ -82,6 +87,7 @@ The GARCH-M model is particularly useful in finance for several reasons:
 Consider a GARCH(1,1)-M model applied to daily stock returns:
 
 $$
+
 \begin{aligned}
 r_t &= 0.0005 + 0.05\sigma_t^2 + a_t \\
 a_t &= \sigma_t \epsilon_t \\

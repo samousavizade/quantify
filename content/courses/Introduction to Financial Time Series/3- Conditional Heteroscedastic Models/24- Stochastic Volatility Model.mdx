@@ -13,6 +13,7 @@ import TOCInline from 'pliny/ui/TOCInline';
 Stochastic volatility (SV) models provide an alternative approach to modeling time-varying volatility. Unlike GARCH-type models where the conditional variance is a deterministic function of past observations, SV models treat volatility as an unobserved component following some latent stochastic process. The basic SV model can be expressed as:
 
 $$
+
 \begin{aligned}
 r_t &= \sigma_t \epsilon_t \\
 \ln(\sigma_t^2) &= \alpha + \beta \ln(\sigma_{t-1}^2) + \eta_t
@@ -44,12 +45,14 @@ Among these, MCMC methods have gained popularity due to their flexibility and ab
 To understand the properties of the SV model, we can examine its moments and autocorrelation structure. Let $h_t = \ln(\sigma_t^2)$ denote the log-volatility. Then:
 
 $$
+
 h_t = \alpha + \beta h_{t-1} + \eta_t
 $$
 
 For stationarity, we require $|\beta| < 1$. Under this condition, the unconditional mean and variance of $h_t$ are:
 
 $$
+
 \begin{aligned}
 E[h_t] &= \frac{\alpha}{1-\beta} \\
 \text{Var}(h_t) &= \frac{\sigma_\eta^2}{1-\beta^2}
@@ -59,12 +62,14 @@ $$
 The autocorrelation function of $h_t$ is given by:
 
 $$
+
 \text{Corr}(h_t, h_{t-k}) = \beta^k
 $$
 
 For the returns $r_t$, we have:
 
 $$
+
 \begin{aligned}
 E[r_t] &= 0 \\
 \text{Var}(r_t) &= E[\sigma_t^2] = \exp\left(E[h_t] + \frac{1}{2}\text{Var}(h_t)\right) = \exp\left(\frac{\alpha}{1-\beta} + \frac{\sigma_\eta^2}{2(1-\beta^2)}\right)
@@ -74,6 +79,7 @@ $$
 The kurtosis of $r_t$ is:
 
 $$
+
 \text{Kurt}(r_t) = 3\exp\left(\frac{\sigma_\eta^2}{1-\beta^2}\right)
 $$
 
@@ -82,6 +88,7 @@ which is always greater than 3, indicating that the SV model captures the heavy-
 The autocorrelation function of $r_t$ is zero at all lags, but the squared returns $r_t^2$ exhibit autocorrelation. The theoretical ACF of $r_t^2$ is:
 
 $$
+
 \text{Corr}(r_t^2, r_{t-k}^2) = \frac{\exp(\beta^k \sigma_\eta^2 / (1-\beta^2)) - 1}{\exp(\sigma_\eta^2 / (1-\beta^2)) - 1}
 $$
 

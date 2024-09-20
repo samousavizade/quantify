@@ -13,6 +13,7 @@ import TOCInline from 'pliny/ui/TOCInline';
 Bilinear models are simple nonlinear time series models that extend the linear ARMA models by including interactions between past observations and past innovations. The general form of a bilinear model is:
 
 $$
+
 r_t = \mu + \sum_{i=1}^p \phi_i r_{t-i} + \sum_{j=1}^q \theta_j a_{t-j} + \sum_{i=1}^m \sum_{j=1}^n \beta_{ij} r_{t-i} a_{t-j} + a_t
 $$
 
@@ -21,6 +22,7 @@ where $\{a_t\}$ is a sequence of independent and identically distributed (iid) r
 A simple bilinear model is the BL(1,0,1,1) model:
 
 $$
+
 r_t = \phi_1 r_{t-1} + \beta_{11} r_{t-1} a_{t-1} + a_t
 $$
 
@@ -31,6 +33,7 @@ This model says that the current value $r_t$ depends not only linearly on $r_{t-
 1. **Stationarity**: The stationarity conditions for bilinear models are more complex than those for linear models. For the BL(1,0,1,1) model, a sufficient condition for stationarity is:
 
 $$
+
 \phi_1^2 + \beta_{11}^2 \sigma_a^2 < 1
 $$
 
@@ -39,10 +42,12 @@ This condition ensures that the impact of past values diminishes over time.
 2. **Moments**: The moments of bilinear models can be derived, but the calculations are often complicated. For the BL(1,0,1,1) model, assuming $a_t$ is normally distributed:
 
 $$
+
 E[r_t] = 0
 $$
 
 $$
+
 Var(r_t) = \frac{\sigma_a^2}{1 - \phi_1^2 - \beta_{11}^2 \sigma_a^2}
 $$
 
@@ -57,12 +62,14 @@ Estimation of bilinear models is more challenging than for linear models due to 
 1. **Conditional Least Squares**: This method minimizes the sum of squared one-step ahead prediction errors:
 
 $$
+
 \sum_{t=2}^T (r_t - E[r_t | r_{t-1}, r_{t-2}, ...])^2
 $$
 
 For the BL(1,0,1,1) model, this involves minimizing:
 
 $$
+
 \sum_{t=2}^T (r_t - \phi_1 r_{t-1} - \beta_{11} r_{t-1} a_{t-1})^2
 $$
 
@@ -77,6 +84,7 @@ where $a_{t-1}$ is replaced by its estimate from the previous iteration.
 Forecasting with bilinear models is more complex than with linear models due to the interaction terms. For the BL(1,0,1,1) model, the one-step ahead forecast at time $h$ is:
 
 $$
+
 \hat{r}_{h+1} = E[r_{h+1} | r_h, r_{h-1}, ...] = \phi_1 r_h + \beta_{11} r_h a_h
 $$
 

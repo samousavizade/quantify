@@ -13,6 +13,7 @@ import TOCInline from 'pliny/ui/TOCInline';
 The kurtosis of a GARCH model can be derived analytically under certain conditions. Here we focus on the GARCH(1,1) model:
 
 $$
+
 r_t = \mu + a_t, \quad a_t = \sigma_t \epsilon_t, \quad \sigma_t^2 = \alpha_0 + \alpha_1 a_{t-1}^2 + \beta_1 \sigma_{t-1}^2
 $$
 
@@ -29,12 +30,14 @@ The last equality holds because $\epsilon_t$ follows a standard normal distribut
 To obtain $E(\sigma_t^4)$, we square both sides of the volatility equation:
 
 $$
+
 \sigma_t^4 = (\alpha_0 + \alpha_1 a_{t-1}^2 + \beta_1 \sigma_{t-1}^2)^2
 $$
 
 Expanding the right-hand side and taking expectations, we have:
 
 $$
+
 \begin{aligned}
 E(\sigma_t^4) &= \alpha_0^2 + 2\alpha_0\alpha_1 E(a_{t-1}^2) + 2\alpha_0\beta_1 E(\sigma_{t-1}^2) + \alpha_1^2 E(a_{t-1}^4) \\
 &\quad + 2\alpha_1\beta_1 E(a_{t-1}^2\sigma_{t-1}^2) + \beta_1^2 E(\sigma_{t-1}^4)
@@ -44,12 +47,14 @@ $$
 Under stationarity, we have $E(\sigma_t^4) = E(\sigma_{t-1}^4)$. Also, $E(a_{t-1}^2) = E(\sigma_{t-1}^2) = \frac{\alpha_0}{1-\alpha_1-\beta_1}$ and $E(a_{t-1}^4) = 3E(\sigma_{t-1}^4)$. For the cross-product term, we have:
 
 $$
+
 E(a_{t-1}^2\sigma_{t-1}^2) = E[\sigma_{t-1}^2 E(a_{t-1}^2|\mathcal{F}_{t-2})] = E(\sigma_{t-1}^4)
 $$
 
 Substituting these results into the equation for $E(\sigma_t^4)$, we obtain:
 
 $$
+
 \begin{aligned}
 E(\sigma_t^4) &= \alpha_0^2 + \frac{2\alpha_0^2(\alpha_1+\beta_1)}{1-\alpha_1-\beta_1} + 3\alpha_1^2 E(\sigma_t^4) + 2\alpha_1\beta_1 E(\sigma_t^4) + \beta_1^2 E(\sigma_t^4) \\
 &= \alpha_0^2 + \frac{2\alpha_0^2(\alpha_1+\beta_1)}{1-\alpha_1-\beta_1} + (\alpha_1^2 + 2\alpha_1\beta_1 + \beta_1^2)E(\sigma_t^4)
@@ -59,24 +64,28 @@ $$
 Solving for $E(\sigma_t^4)$, we get:
 
 $$
+
 E(\sigma_t^4) = \frac{\alpha_0^2(1-\alpha_1-\beta_1+2\alpha_1\beta_1+\beta_1^2)}{(1-\alpha_1-\beta_1)(1-\alpha_1^2-2\alpha_1\beta_1-\beta_1^2)}
 $$
 
 Now we can compute $E(a_t^4)$:
 
 $$
+
 E(a_t^4) = 3E(\sigma_t^4) = \frac{3\alpha_0^2(1-\alpha_1-\beta_1+2\alpha_1\beta_1+\beta_1^2)}{(1-\alpha_1-\beta_1)(1-\alpha_1^2-2\alpha_1\beta_1-\beta_1^2)}
 $$
 
 The kurtosis of $a_t$ is defined as:
 
 $$
+
 K(a_t) = \frac{E(a_t^4)}{[E(a_t^2)]^2}
 $$
 
 Substituting the expressions for $E(a_t^4)$ and $E(a_t^2)$, we obtain:
 
 $$
+
 K(a_t) = \frac{3(1-\alpha_1-\beta_1+2\alpha_1\beta_1+\beta_1^2)}{(1-\alpha_1-\beta_1)(1-\alpha_1^2-2\alpha_1\beta_1-\beta_1^2)}
 $$
 
@@ -85,6 +94,7 @@ This result shows that the kurtosis of a GARCH(1,1) model is always greater than
 For the kurtosis to exist, we need:
 
 $$
+
 1 - \alpha_1^2 - 2\alpha_1\beta_1 - \beta_1^2 > 0
 $$
 
@@ -94,6 +104,7 @@ Example:
 Consider a GARCH(1,1) model with $\alpha_0 = 0.1$, $\alpha_1 = 0.1$, and $\beta_1 = 0.8$. The kurtosis of this model is:
 
 $$
+
 K(a_t) = \frac{3(1-0.1-0.8+2(0.1)(0.8)+0.8^2)}{(1-0.1-0.8)(1-0.1^2-2(0.1)(0.8)-0.8^2)} = 9.11
 $$
 

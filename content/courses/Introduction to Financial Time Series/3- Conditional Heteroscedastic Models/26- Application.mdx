@@ -25,27 +25,37 @@ The statistics confirm some well-known stylized facts of asset returns:
 
 We consider four volatility models for each return series: (a) GARCH(1,1), (b) EGARCH(1,1), (c) GJR-GARCH(1,1), and (d) APARCH(1,1). The mean equation of each model is simply
 
-$$r_t = \mu + a_t,$$
+$$
+r_t = \mu + a_t,
+$$
 
 where $r_t$ is the excess return at time $t$, $\mu$ is the unconditional mean, and $a_t$ is the shock at time $t$. We assume that the standardized shock $\epsilon_t = a_t/\sigma_t$ follows a standardized Student-$t$ distribution with $\nu$ degrees of freedom. The four volatility equations are:
 
 1. GARCH(1,1):
 
-$$\sigma_t^2 = \alpha_0 + \alpha_1 a_{t-1}^2 + \beta_1 \sigma_{t-1}^2$$
+$$
+\sigma_t^2 = \alpha_0 + \alpha_1 a_{t-1}^2 + \beta_1 \sigma_{t-1}^2
+$$
 
 2. EGARCH(1,1):
 
-$$\ln(\sigma_t^2) = \alpha_0 + \alpha_1 \left|\frac{a_{t-1}}{\sigma_{t-1}}\right| + \gamma_1 \frac{a_{t-1}}{\sigma_{t-1}} + \beta_1 \ln(\sigma_{t-1}^2)$$
+$$
+\ln(\sigma_t^2) = \alpha_0 + \alpha_1 \left|\frac{a_{t-1}}{\sigma_{t-1}}\right| + \gamma_1 \frac{a_{t-1}}{\sigma_{t-1}} + \beta_1 \ln(\sigma_{t-1}^2)
+$$
 
 3. GJR-GARCH(1,1):
 
-$$\sigma_t^2 = \alpha_0 + \alpha_1 a_{t-1}^2 + \gamma_1 S_{t-1}^- a_{t-1}^2 + \beta_1 \sigma_{t-1}^2$$
+$$
+\sigma_t^2 = \alpha_0 + \alpha_1 a_{t-1}^2 + \gamma_1 S_{t-1}^- a_{t-1}^2 + \beta_1 \sigma_{t-1}^2
+$$
 
 where $S_t^- = 1$ if $a_t < 0$ and $S_t^- = 0$ if $a_t \geq 0$.
 
 4. APARCH(1,1):
 
-$$\sigma_t^\delta = \alpha_0 + \alpha_1(|a_{t-1}| - \gamma_1 a_{t-1})^\delta + \beta_1 \sigma_{t-1}^\delta$$
+$$
+\sigma_t^\delta = \alpha_0 + \alpha_1(|a_{t-1}| - \gamma_1 a_{t-1})^\delta + \beta_1 \sigma_{t-1}^\delta
+$$
 
 ### Model Comparison
 
@@ -57,8 +67,13 @@ To compare the performance of different models, we use three criteria:
 
 The AIC and SIC are defined as:
 
-$$\text{AIC} = -2 \ln(L) + 2k$$
-$$\text{SIC} = -2 \ln(L) + k \ln(T)$$
+$$
+\text{AIC} = -2 \ln(L) + 2k
+$$
+
+$$
+\text{SIC} = -2 \ln(L) + k \ln(T)
+$$
 
 where $L$ is the maximized likelihood value, $k$ is the number of parameters, and $T$ is the sample size.
 

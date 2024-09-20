@@ -19,6 +19,7 @@ When working with time series data, the assumptions of homoscedasticity (constan
 For instance, consider the linear regression model:
 
 $$
+
 y_t = X_t \beta + u_t
 $$
 
@@ -35,6 +36,7 @@ To address these issues, heteroscedasticity and autocorrelation consistent (HAC)
 The Newey-West estimator adjusts for both heteroscedasticity and autocorrelation up to a specified lag $q$. It is given by:
 
 $$
+
 \hat{\Sigma}_{NW} = \hat{\sigma}^2 \left( X'X \right)^{-1} + \sum_{k=1}^{q} \left( 1 - \frac{k}{q+1} \right) \left( X'W_kX + X'W_k'X \right)
 $$
 

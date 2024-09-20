@@ -17,6 +17,7 @@ Random coefficient autoregressive (RCA) models provide another approach to model
 A simple RCA(1) model for a return series $r_t$ can be written as:
 
 $$
+
 r_t = (\phi + b_t)r_{t-1} + a_t
 $$
 
@@ -30,6 +31,7 @@ where:
 The model can be generalized to higher orders. For example, an RCA(p) model would be:
 
 $$
+
 r_t = \sum_{i=1}^p (\phi_i + b_{it})r_{t-i} + a_t
 $$
 
@@ -42,6 +44,7 @@ The RCA model has some interesting properties that make it suitable for modeling
 1. **Time-varying conditional variance**: The conditional variance of $r_t$ given past information is not constant, but varies over time. For the RCA(1) model:
 
 $$
+
 \text{Var}(r_t | r_{t-1}, r_{t-2}, \ldots) = \sigma_a^2 + \sigma_b^2 r_{t-1}^2
 $$
 
@@ -50,6 +53,7 @@ This property allows the model to capture volatility clustering, as large values
 2. **Unconditional stationarity**: Under certain conditions, the RCA model can be unconditionally stationary. For the RCA(1) model, the condition for weak stationarity is:
 
 $$
+
 \phi^2 + \sigma_b^2 < 1
 $$
 
@@ -64,6 +68,7 @@ Estimation of RCA models can be challenging due to their nonlinear nature. Sever
 1. **Quasi-Maximum Likelihood Estimation (QMLE)**: This approach involves maximizing a quasi-likelihood function based on the assumption of conditional normality. The log-likelihood function for an RCA(1) model can be written as:
 
 $$
+
 \ell(\theta) = -\frac{1}{2} \sum_{t=1}^T \left[ \log(2\pi) + \log(h_t) + \frac{(r_t - \phi r_{t-1})^2}{h_t} \right]
 $$
 
@@ -80,6 +85,7 @@ Several extensions and variations of the basic RCA model have been proposed in t
 1. **Asymmetric RCA**: To capture leverage effects, the model can be modified to allow for asymmetric responses to positive and negative shocks:
 
 $$
+
 r_t = (\phi + b_t^+ I_{t-1}^+ + b_t^- I_{t-1}^-)r_{t-1} + a_t
 $$
 
@@ -88,6 +94,7 @@ where $I_{t-1}^+$ and $I_{t-1}^-$ are indicator functions for positive and negat
 2. **RCA-GARCH**: This model combines the RCA structure with GARCH-type volatility:
 
 $$
+
 \begin{aligned}
 r_t &= (\phi + b_t)r_{t-1} + a_t \\
 a_t &= \sigma_t \epsilon_t \\

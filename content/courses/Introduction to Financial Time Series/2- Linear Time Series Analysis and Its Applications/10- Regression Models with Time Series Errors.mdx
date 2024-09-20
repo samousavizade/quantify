@@ -17,6 +17,7 @@ Regression models with time series errors are essential tools in econometrics, p
 Consider the linear regression model:
 
 $$
+
 y_t = \beta_0 + \beta_1 x_{1t} + \beta_2 x_{2t} + \cdots + \beta_k x_{kt} + u_t
 $$
 
@@ -29,6 +30,7 @@ In time series data, $u_t$ often exhibits serial correlation, meaning that it is
 Assume that the error term $u_t$ follows an ARMA(p,q) process:
 
 $$
+
 u_t = \phi_1 u_{t-1} + \phi_2 u_{t-2} + \cdots + \phi_p u_{t-p} + a_t - \theta_1 a_{t-1} - \theta_2 a_{t-2} - \cdots - \theta_q a_{t-q}
 $$
 
@@ -47,14 +49,17 @@ To address serial correlation in the error terms, generalized least squares (GLS
 1. **Transform the Model**: Apply a transformation to remove autocorrelation from $u_t$. For an AR(1) process:
 
 $$
+
 y'_t = y_t - \rho y_{t-1}
 $$
 
 $$
+
 x'_{it} = x_{it} - \rho x_{i,t-1}
 $$
 
 $$
+
 u'_t = u_t - \rho u_{t-1}
 $$
 
@@ -63,6 +68,7 @@ where $\rho$ is an estimate of the autocorrelation coefficient.
 2. **Apply OLS**: Use OLS on the transformed model:
 
 $$
+
 y'_t = \beta_0 (1-\rho) + \beta_1 x'_{1t} + \cdots + \beta_k x'_{kt} + u'_t
 $$
 
@@ -90,12 +96,14 @@ Serial correlation in regression models has several implications:
 Consider modeling GDP growth ($y_t$) as a function of investment ($x_{1t}$), consumption ($x_{2t}$), and government spending ($x_{3t}$):
 
 $$
+
 y_t = \beta_0 + \beta_1 x_{1t} + \beta_2 x_{2t} + \beta_3 x_{3t} + u_t
 $$
 
 Suppose $u_t$ follows an AR(1) process:
 
 $$
+
 u_t = \phi_1 u_{t-1} + a_t
 $$
 
@@ -106,10 +114,12 @@ To estimate this model:
 2. **Transform Data**: Apply transformation using estimated $\phi_1$:
 
 $$
+
 y'_t = y_t - \hat{\phi}_1 y_{t-1}
 $$
 
 $$
+
 x'_{it} = x_{it} - \hat{\phi}_1 x_{i,t-1}
 $$
 

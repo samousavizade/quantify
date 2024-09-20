@@ -13,6 +13,7 @@ import TOCInline from 'pliny/ui/TOCInline';
 Forecasting using nonlinear models is more complicated than that of linear models because the conditional expectation of a nonlinear function of a random variable is not equal to the function of the conditional expectation of the random variable. For instance, consider the simple threshold autoregressive model
 
 $$
+
 r_t = \begin{cases}
 \phi_{10} + \phi_{11} r_{t-1} + a_t & \text{if } r_{t-1} \leq r_0 \\
 \phi_{20} + \phi_{21} r_{t-1} + a_t & \text{if } r_{t-1} > r_0
@@ -22,6 +23,7 @@ $$
 where $\{a_t\}$ is a sequence of independent and identically distributed random variables with mean zero and variance $\sigma_a^2$. Let $h$ be the forecast origin and $F_h$ be the information set available at time $h$. The 1-step ahead forecast of $r_{h+1}$ is
 
 $$
+
 \hat{r}_h(1) = E(r_{h+1} | F_h) = \begin{cases}
 \phi_{10} + \phi_{11} r_h & \text{if } r_h \leq r_0 \\
 \phi_{20} + \phi_{21} r_h & \text{if } r_h > r_0
@@ -31,6 +33,7 @@ $$
 This forecast is easy to compute. However, for the 2-step ahead forecast, we have
 
 $$
+
 \begin{align*}
 \hat{r}_h(2) &= E(r_{h+2} | F_h) \\
 &= E[E(r_{h+2} | F_{h+1}) | F_h] \\
@@ -88,6 +91,7 @@ where the subscripts 1 and 2 denote the two forecasting methods under considerat
 For 1-step ahead forecasts, we can also use the Diebold and Mariano (1995) test to compare the forecasting performance of two models. Let $d_t = g(e_{1t}) - g(e_{2t})$, where $g(\cdot)$ is a particular loss function such as the squared error loss $g(e) = e^2$ or the absolute error loss $g(e) = |e|$, and $e_{it}$ is the 1-step ahead forecast error of model $i$ at time $t$. The null hypothesis of equal forecast accuracy is $E(d_t) = 0$. Let $\bar{d} = \frac{1}{s} \sum_{t=n+1}^{n+s} d_t$ be the sample mean of $d_t$. Under some regularity conditions, Diebold and Mariano show that
 
 $$
+
 \sqrt{s} \frac{\bar{d}}{\hat{\sigma}_d} \xrightarrow{d} N(0,1)
 $$
 

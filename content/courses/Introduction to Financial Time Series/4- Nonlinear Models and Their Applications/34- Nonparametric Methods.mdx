@@ -17,6 +17,7 @@ Nonparametric methods provide flexible approaches to modeling nonlinear time ser
 Kernel regression is a nonparametric technique that estimates the conditional expectation of a time series without assuming a specific functional form. For a stationary time series $\{r_t\}$, the kernel regression model can be written as:
 
 $$
+
 r_t = m(r_{t-1}, \ldots, r_{t-d}) + \epsilon_t
 $$
 
@@ -25,12 +26,14 @@ where $m(\cdot)$ is an unknown smooth function and $\epsilon_t$ is a white noise
 The kernel estimator of $m(\cdot)$ is given by:
 
 $$
+
 \hat{m}(x) = \frac{\sum_{t=d+1}^T r_t K_h(x - X_t)}{\sum_{t=d+1}^T K_h(x - X_t)}
 $$
 
 where $X_t = (r_{t-1}, \ldots, r_{t-d})'$, $K_h(\cdot)$ is a kernel function with bandwidth $h$, and $T$ is the sample size. A common choice for the kernel function is the Gaussian kernel:
 
 $$
+
 K_h(u) = \frac{1}{(2\pi)^{d/2}h^d} \exp\left(-\frac{u'u}{2h^2}\right)
 $$
 
@@ -41,6 +44,7 @@ The bandwidth $h$ controls the smoothness of the estimated function. A larger ba
 Local polynomial regression is an extension of kernel regression that fits a polynomial function locally around each point. This method can reduce bias at the boundaries of the data and provide better estimates of derivatives. The local polynomial estimator of order $p$ is obtained by minimizing:
 
 $$
+
 \sum_{t=d+1}^T \left(r_t - \beta_0 - \beta_1(r_{t-1} - x_1) - \cdots - \beta_d(r_{t-d} - x_d)\right)^2 K_h(X_t - x)
 $$
 
@@ -51,6 +55,7 @@ with respect to $\beta_0, \beta_1, \ldots, \beta_d$. The estimate of $m(x)$ is g
 Smoothing splines provide another nonparametric approach to estimating the function $m(\cdot)$. For simplicity, consider the case where $d=1$. The smoothing spline estimator is obtained by minimizing:
 
 $$
+
 \sum_{t=2}^T (r_t - m(r_{t-1}))^2 + \lambda \int (m''(u))^2 du
 $$
 
@@ -61,6 +66,7 @@ where $\lambda > 0$ is a smoothing parameter. The first term measures the goodne
 Additive models extend the idea of nonparametric regression to multiple predictors while maintaining interpretability. The additive model has the form:
 
 $$
+
 r_t = \alpha + f_1(r_{t-1}) + f_2(r_{t-2}) + \cdots + f_d(r_{t-d}) + \epsilon_t
 $$
 
@@ -82,6 +88,7 @@ The backfitting algorithm is commonly used to estimate additive models:
 Functional coefficient models allow the coefficients of a linear model to vary smoothly with another variable. The model can be written as:
 
 $$
+
 r_t = \beta_0(u_t) + \beta_1(u_t)r_{t-1} + \cdots + \beta_d(u_t)r_{t-d} + \epsilon_t
 $$
 
@@ -92,6 +99,7 @@ where $u_t$ is a state variable that can be a function of past values of $r_t$ o
 Nonparametric autoregressive (NAR) models extend the idea of kernel regression to time series data. The NAR model of order $d$ can be written as:
 
 $$
+
 r_t = m(r_{t-1}, \ldots, r_{t-d}) + \sigma(r_{t-1}, \ldots, r_{t-d})\epsilon_t
 $$
 
@@ -102,6 +110,7 @@ where $m(\cdot)$ is the conditional mean function and $\sigma(\cdot)$ is the con
 Estimation of nonparametric models often involves choosing smoothing parameters, such as the bandwidth in kernel regression or the penalty parameter in smoothing splines. Cross-validation is a common approach for selecting these parameters. For example, the leave-one-out cross-validation criterion for kernel regression is:
 
 $$
+
 CV(h) = \frac{1}{T-d} \sum_{t=d+1}^T (r_t - \hat{m}_{-t}(X_t))^2
 $$
 
@@ -110,6 +119,7 @@ where $\hat{m}_{-t}(X_t)$ is the kernel estimator computed without the $t$-th ob
 Inference in nonparametric models can be challenging due to the lack of parametric assumptions. Bootstrap methods are often used to construct confidence intervals and perform hypothesis tests. For example, to test the null hypothesis that $m(\cdot)$ is a linear function, one can use a test statistic based on the difference between the nonparametric and linear estimates:
 
 $$
+
 T = \sum_{t=d+1}^T (\hat{m}(X_t) - \hat{m}_L(X_t))^2
 $$
 

@@ -17,6 +17,7 @@ The smooth transition autoregressive (STAR) model is a nonlinear time series mod
 A general STAR model of order $p$ can be written as:
 
 $$
+
 r_t = \left(\phi_{0,1} + \sum_{i=1}^p \phi_{i,1} r_{t-i}\right)(1 - G(s_t; \gamma, c)) + \left(\phi_{0,2} + \sum_{i=1}^p \phi_{i,2} r_{t-i}\right)G(s_t; \gamma, c) + \epsilon_t
 $$
 
@@ -39,12 +40,14 @@ Two common choices for the transition function are:
 1. Logistic STAR (LSTAR) model:
 
 $$
+
 G(s_t; \gamma, c) = \frac{1}{1 + \exp(-\gamma(s_t - c))}
 $$
 
 2. Exponential STAR (ESTAR) model:
 
 $$
+
 G(s_t; \gamma, c) = 1 - \exp(-\gamma(s_t - c)^2)
 $$
 
@@ -73,6 +76,7 @@ Estimation of STAR models is typically done using nonlinear least squares or max
 The likelihood function for a STAR model, assuming Gaussian errors, is given by:
 
 $$
+
 L(\theta) = \prod_{t=1}^T \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(r_t - \mu_t(\theta))^2}{2\sigma^2}\right)
 $$
 
@@ -83,6 +87,7 @@ where $\theta$ represents all the parameters of the model, and $\mu_t(\theta)$ i
 Before estimating a STAR model, it's important to test for the presence of nonlinearity. A common approach is to use a Taylor series expansion of the transition function around $\gamma = 0$. This leads to an auxiliary regression of the form:
 
 $$
+
 r_t = \beta_0 + \sum_{i=1}^p \beta_i r_{t-i} + \sum_{i=1}^p \beta_{i+p} r_{t-i} s_t + \sum_{i=1}^p \beta_{i+2p} r_{t-i} s_t^2 + \sum_{i=1}^p \beta_{i+3p} r_{t-i} s_t^3 + \epsilon_t
 $$
 
@@ -97,6 +102,7 @@ Choosing between LSTAR and ESTAR models can be based on the auxiliary regression
 Forecasting with STAR models is more complex than with linear models due to the nonlinearity. One-step-ahead forecasts can be computed as:
 
 $$
+
 \hat{r}_{T+1|T} = E[r_{T+1}|F_T] = \left(\phi_{0,1} + \sum_{i=1}^p \phi_{i,1} r_{T+1-i}\right)(1 - E[G(s_{T+1}; \gamma, c)|F_T]) + \left(\phi_{0,2} + \sum_{i=1}^p \phi_{i,2} r_{T+1-i}\right)E[G(s_{T+1}; \gamma, c)|F_T]
 $$
 
@@ -119,10 +125,12 @@ STAR models have found various applications in finance, including:
 Consider a LSTAR(2) model for monthly stock returns:
 
 $$
+
 r_t = (0.02 + 0.3r_{t-1} - 0.1r_{t-2})(1 - G(r_{t-1}; 5, 0)) + (-0.01 + 0.1r_{t-1} + 0.2r_{t-2})G(r_{t-1}; 5, 0) + \epsilon_t
 $$
 
 $$
+
 G(r_{t-1}; 5, 0) = \frac{1}{1 + \exp(-5r_{t-1})}
 $$
 

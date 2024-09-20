@@ -17,16 +17,19 @@ The exponential GARCH (EGARCH) model was proposed by Nelson (1991) to overcome s
 Let $r_t$ be the return series of an asset. An EGARCH(1,1) model can be written as:
 
 $$
+
 r_t = \mu_t + a_t, \quad a_t = \sigma_t \epsilon_t
 $$
 
 $$
+
 \ln(\sigma_t^2) = \alpha_0 + \alpha_1 g(z_{t-1}) + \beta_1 \ln(\sigma_{t-1}^2)
 $$
 
 where $\{\epsilon_t\}$ is a sequence of independent and identically distributed random variables with zero mean and unit variance, $\mu_t$ is the conditional mean of $r_t$, and
 
 $$
+
 g(z_t) = \theta z_t + \gamma [|z_t| - E(|z_t|)]
 $$
 
@@ -55,6 +58,7 @@ The EGARCH model has several interesting properties:
 The EGARCH model can be estimated using the maximum likelihood method. Assuming that $\epsilon_t$ follows a standard normal distribution, the log-likelihood function for a sample of $T$ observations is:
 
 $$
+
 \ln L = -\frac{T}{2} \ln(2\pi) - \frac{1}{2} \sum_{t=1}^T [\ln(\sigma_t^2) + z_t^2]
 $$
 
@@ -65,6 +69,7 @@ where $z_t = (r_t - \mu_t) / \sigma_t$. The parameters can be estimated by maxim
 The EGARCH(1,1) model can be generalized to higher orders. An EGARCH(p,q) model is given by:
 
 $$
+
 \ln(\sigma_t^2) = \alpha_0 + \sum_{i=1}^q \alpha_i g(z_{t-i}) + \sum_{j=1}^p \beta_j \ln(\sigma_{t-j}^2)
 $$
 
@@ -75,10 +80,12 @@ where $g(z_t)$ is defined as before. This generalization allows for more flexibl
 To illustrate the application of the EGARCH model, consider the daily returns of the S&P 500 index from January 2, 1990, to December 31, 2000. We fit an EGARCH(1,1) model to the data:
 
 $$
+
 r_t = \mu + a_t, \quad a_t = \sigma_t \epsilon_t
 $$
 
 $$
+
 \ln(\sigma_t^2) = \alpha_0 + \alpha_1 g(z_{t-1}) + \beta_1 \ln(\sigma_{t-1}^2)
 $$
 
@@ -87,6 +94,7 @@ where $g(z_t) = \theta z_t + \gamma [|z_t| - E(|z_t|)]$.
 The estimated model (with standard errors in parentheses) is:
 
 $$
+
 \begin{aligned}
 r_t &= 0.00052 + a_t \\
 &(0.00013) \\

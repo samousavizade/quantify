@@ -18,10 +18,12 @@ To model the volatility of asset returns, we need to specify two equations:
 Let $r_t$ be the return of an asset at time $t$. The general structure of a volatility model is:
 
 $$
+
 r_t = \mu_t + a_t
 $$
 
 $$
+
 a_t = \sigma_t \epsilon_t
 $$
 
@@ -38,6 +40,7 @@ The choice of the mean equation depends on the serial dependence structure of th
 The conditional variance equation $\sigma_t^2$ is the key component in volatility modeling. Different specifications of $\sigma_t^2$ give rise to different volatility models. The general idea is to make $\sigma_t^2$ a function of past information:
 
 $$
+
 \sigma_t^2 = g(a_{t-1}, a_{t-2}, \ldots, \sigma_{t-1}^2, \sigma_{t-2}^2, \ldots)
 $$
 
@@ -61,14 +64,17 @@ Each of these models has its own way of capturing the dynamics of volatility.
 To illustrate the structure, let's consider a simple GARCH(1,1) model:
 
 $$
+
 r_t = \mu + a_t
 $$
 
 $$
+
 a_t = \sigma_t \epsilon_t
 $$
 
 $$
+
 \sigma_t^2 = \omega + \alpha a_{t-1}^2 + \beta \sigma_{t-1}^2
 $$
 

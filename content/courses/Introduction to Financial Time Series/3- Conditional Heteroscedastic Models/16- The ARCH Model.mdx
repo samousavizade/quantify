@@ -18,6 +18,7 @@ The autoregressive conditional heteroscedastic (ARCH) model was introduced by En
 Specifically, an ARCH(m) model assumes that
 
 $$
+
 a_t = \sigma_t \epsilon_t, \quad \sigma_t^2 = \alpha_0 + \alpha_1 a_{t-1}^2 + \cdots + \alpha_m a_{t-m}^2
 $$
 
@@ -35,6 +36,7 @@ where $F_{t-1}$ denotes the information set available at time $t-1$. These prope
 To derive some properties of ARCH models, we focus on the simple ARCH(1) model:
 
 $$
+
 a_t = \sigma_t \epsilon_t, \quad \sigma_t^2 = \alpha_0 + \alpha_1 a_{t-1}^2
 $$
 
@@ -45,12 +47,14 @@ where $\alpha_0 > 0$ and $\alpha_1 \geq 0$.
 Taking expectations on both sides of the variance equation, we have:
 
 $$
+
 E(\sigma_t^2) = \alpha_0 + \alpha_1 E(a_{t-1}^2)
 $$
 
 For a weakly stationary $a_t$ series, we have $E(a_t^2) = E(a_{t-1}^2) = E(\sigma_t^2)$. Therefore,
 
 $$
+
 E(a_t^2) = \frac{\alpha_0}{1 - \alpha_1}
 $$
 
@@ -62,24 +66,28 @@ provided that $\alpha_1 < 1$. This result shows that:
 To obtain the kurtosis of $a_t$, we assume that $\epsilon_t$ follows a standard normal distribution. Then:
 
 $$
+
 E(a_t^4) = E[\sigma_t^4 \epsilon_t^4] = 3E(\sigma_t^4)
 $$
 
 Using the variance equation, we have:
 
 $$
+
 E(\sigma_t^4) = E[(\alpha_0 + \alpha_1 a_{t-1}^2)^2] = \alpha_0^2 + 2\alpha_0\alpha_1 E(a_{t-1}^2) + \alpha_1^2 E(a_{t-1}^4)
 $$
 
 Substituting $E(a_t^2) = \alpha_0 / (1 - \alpha_1)$ into the prior equation and solving for $E(a_t^4)$, we obtain:
 
 $$
+
 E(a_t^4) = \frac{3\alpha_0^2(1 + \alpha_1)}{(1 - \alpha_1)(1 - 3\alpha_1^2)}
 $$
 
 provided that $3\alpha_1^2 < 1$ or $\alpha_1 < 1/\sqrt{3} \approx 0.577$. The kurtosis of $a_t$ is then:
 
 $$
+
 K(a_t) = \frac{E(a_t^4)}{[E(a_t^2)]^2} = \frac{3(1 - \alpha_1^2)}{1 - 3\alpha_1^2} > 3
 $$
 
@@ -90,6 +98,7 @@ This result shows that the ARCH(1) model has a heavier tail than the normal dist
 The autocorrelation function (ACF) of $a_t$ is zero, but the ACF of $a_t^2$ is not. To see this, consider:
 
 $$
+
 \begin{aligned}
 Cov(a_t^2, a_{t-k}^2) &= E(a_t^2 a_{t-k}^2) - [E(a_t^2)]^2 \\
 &= E[\sigma_t^2 \epsilon_t^2 a_{t-k}^2] - [E(a_t^2)]^2 \\
@@ -100,6 +109,7 @@ $$
 For $k = 1$, we have:
 
 $$
+
 \begin{aligned}
 E[\sigma_t^2 a_{t-1}^2] &= E[(\alpha_0 + \alpha_1 a_{t-1}^2)a_{t-1}^2] \\
 &= \alpha_0 E(a_{t-1}^2) + \alpha_1 E(a_{t-1}^4) \\
@@ -110,12 +120,14 @@ $$
 Therefore, the lag-1 autocorrelation of $a_t^2$ is:
 
 $$
+
 \rho_1 = Corr(a_t^2, a_{t-1}^2) = \alpha_1
 $$
 
 For $k > 1$, we can show that:
 
 $$
+
 \rho_k = \alpha_1^k
 $$
 
@@ -150,6 +162,7 @@ Building an ARCH model for a return series consists of four steps:
 Consider the simple return series $\{r_t\}$ of an asset. We begin by testing for serial correlations in $r_t$. This can be done by examining the autocorrelation function (ACF) and the Ljung-Box statistics of $r_t$. If serial correlations are found to be statistically significant, then an appropriate time series model (e.g., an ARMA model) is built for the conditional mean of $r_t$. Denote the mean equation by:
 
 $$
+
 r_t = \mu_t + a_t
 $$
 
@@ -164,12 +177,14 @@ After obtaining the mean equation, we calculate the residual series $\hat{a}_t =
 2. **Lagrange Multiplier Test**: This test is equivalent to the usual F statistic for testing $\alpha_i = 0$ $(i = 1, ..., m)$ in the linear regression:
 
 $$
+
 \hat{a}_t^2 = \alpha_0 + \alpha_1 \hat{a}_{t-1}^2 + ... + \alpha_m \hat{a}_{t-m}^2 + e_t
 $$
 
 where $e_t$ denotes the error term and $m$ is a prespecified positive integer. Under the null hypothesis that there is no ARCH effect, we have $\alpha_i = 0$ for all $i > 0$. The test statistic is:
 
 $$
+
 (T - m) R^2 \sim \chi^2(m)
 $$
 
@@ -180,6 +195,7 @@ where $T$ is the sample size, $R^2$ is the coefficient of determination of the r
 If ARCH effects are found to be statistically significant, then a volatility model is specified. The general form of an ARCH(m) model is:
 
 $$
+
 \begin{aligned}
 r_t &= \mu_t + a_t \\
 a_t &= \sigma_t \epsilon_t \\
@@ -192,6 +208,7 @@ where $\{\epsilon_t\}$ is a sequence of iid random variables with mean zero and 
 Maximum likelihood estimation is commonly used to estimate ARCH models. Assuming that $\epsilon_t$ follows a standard normal distribution, the conditional log-likelihood function of the model given the initial values $a_0, ..., a_{1-m}$ is:
 
 $$
+
 l(\Theta) = -\frac{1}{2} \sum_{t=1}^T \left[ \log(2\pi) + \log(\sigma_t^2) + \frac{a_t^2}{\sigma_t^2} \right]
 $$
 
@@ -202,6 +219,7 @@ where $\Theta$ denotes the parameter vector of the model.
 After estimating the parameters of an ARCH model, the fitted model is checked for possible misspecification. In particular, the standardized residuals:
 
 $$
+
 \hat{\epsilon}_t = \frac{\hat{a}_t}{\hat{\sigma}_t}
 $$
 

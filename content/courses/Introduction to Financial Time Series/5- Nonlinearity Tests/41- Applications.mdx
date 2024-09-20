@@ -19,6 +19,7 @@ Consider again the quarterly growth rate of U.S. real GNP from the second quarte
 First, we fit an AR(3) model to the data and obtain:
 
 $$
+
 r_t = 0.0047 + 0.3480r_{t-1} + 0.1793r_{t-2} - 0.1423r_{t-3} + a_t, \quad \hat{\sigma}_a = 0.00974
 $$
 
@@ -41,6 +42,7 @@ To further investigate the nonlinearity, we apply the neural network test of Lee
 As another illustration, we consider the daily returns of Microsoft stock from February 27, 1990, to May 31, 2002. There are 3100 observations. Let $r_t$ be the log return in percentages. We first build a linear model for the data. The sample mean of $r_t$ is 0.181, and the sample standard deviation is 2.695. The Ljung-Box statistics of $r_t$ give $Q(10) = 18.2$ and $Q(20) = 32.5$ with $p$-values 0.05 and 0.04, respectively. These statistics show some serial correlations in the return series. Using AIC, we select an AR(5) model for the data. The fitted model is:
 
 $$
+
 \begin{aligned}
 r_t = & 0.1814 + 0.0448r_{t-1} - 0.0228r_{t-2} - 0.0008r_{t-3} \\
 & - 0.0077r_{t-4} - 0.0469r_{t-5} + a_t, \quad \hat{\sigma}_a = 2.687

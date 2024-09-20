@@ -22,7 +22,9 @@ For the squared series $r_t^2$, the first five sample autocorrelations are 0.199
 
 We begin with fitting a simple AR(1) model to the data:
 
-$$r_t = 0.00626 + 0.104r_{t-1} + a_t, \quad \hat{\sigma}_a = 0.0711$$
+$$
+r_t = 0.00626 + 0.104r_{t-1} + a_t, \quad \hat{\sigma}_a = 0.0711
+$$
 
 where standard errors of the estimates are 0.00226 and 0.0316, respectively. The Ljung-Box statistics of the residuals give $Q(10) = 5.8$ and $Q(20) = 18.4$ with p-values 0.83 and 0.56, respectively. Thus, the AR(1) model is adequate in modeling the linear dependence in the mean equation. However, the model fails to describe the nonlinear dependence in the conditional variance.
 

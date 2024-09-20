@@ -16,11 +16,15 @@ A general nonlinear state-space model consists of two equations:
 
 1. The measurement equation:
 
-$$y_t = h(x_t, \epsilon_t)$$
+$$
+y_t = h(x_t, \epsilon_t)
+$$
 
 2. The state transition equation:
 
-$$x_t = f(x_{t-1}, \eta_t)$$
+$$
+x_t = f(x_{t-1}, \eta_t)
+$$
 
 where:
 
@@ -67,13 +71,28 @@ where $s_t$ is a discrete state variable indicating the regime, and $x_t$ is an 
    The EKF approximates the nonlinear functions $h(\cdot)$ and $f(\cdot)$ using first-order Taylor series expansions. The algorithm then proceeds similarly to the standard Kalman filter:
 
 Prediction step:
-$$\hat{x}_{t|t-1} = f(\hat{x}_{t-1|t-1}, 0)$$
-$$P_{t|t-1} = F_t P_{t-1|t-1} F_t' + Q_t$$
+
+$$
+\hat{x}_{t|t-1} = f(\hat{x}_{t-1|t-1}, 0)
+$$
+
+$$
+P_{t|t-1} = F_t P_{t-1|t-1} F_t' + Q_t
+$$
 
 Update step:
-$$K_t = P_{t|t-1}H_t'(H_t P_{t|t-1} H_t' + R_t)^{-1}$$
-$$\hat{x}_{t|t} = \hat{x}_{t|t-1} + K_t(y_t - h(\hat{x}_{t|t-1}, 0))$$
-$$P_{t|t} = (I - K_t H_t)P_{t|t-1}$$
+
+$$
+K_t = P_{t|t-1}H_t'(H_t P_{t|t-1} H_t' + R_t)^{-1}
+$$
+
+$$
+\hat{x}_{t|t} = \hat{x}_{t|t-1} + K_t(y_t - h(\hat{x}_{t|t-1}, 0))
+$$
+
+$$
+P_{t|t} = (I - K_t H_t)P_{t|t-1}
+$$
 
 where $F_t = \frac{\partial f}{\partial x}|_{\hat{x}_{t-1|t-1}}$ and $H_t = \frac{\partial h}{\partial x}|_{\hat{x}_{t|t-1}}$ are Jacobian matrices.
 

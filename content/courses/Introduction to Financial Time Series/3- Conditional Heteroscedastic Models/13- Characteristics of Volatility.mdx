@@ -23,6 +23,7 @@ Before discussing volatility models, it is important to understand some key char
 One of the most prominent features of financial return series is volatility clustering. This phenomenon was first noted by Mandelbrot (1963), who observed that "large changes tend to be followed by large changes, of either sign, and small changes tend to be followed by small changes." Mathematically, we can express this as:
 
 $$
+
 \text{Corr}(|r_t|, |r_{t+k}|) > 0
 $$
 
@@ -33,6 +34,7 @@ for $k > 0$, where $r_t$ represents the return at time $t$. This positive correl
 Financial returns often exhibit leptokurtosis, meaning they have heavier tails than a normal distribution. This can be quantified using the kurtosis:
 
 $$
+
 \text{Kurt}(r_t) = \frac{E[(r_t - \mu)^4]}{[E[(r_t - \mu)^2]]^2} > 3
 $$
 
@@ -43,6 +45,7 @@ where $\mu$ is the mean of $r_t$. For a normal distribution, the kurtosis is 3. 
 The leverage effect refers to the asymmetric relationship between returns and volatility. Typically, negative returns are associated with larger increases in future volatility compared to positive returns of the same magnitude. This can be expressed as:
 
 $$
+
 \text{Corr}(r_t, \sigma_{t+k}^2) < 0
 $$
 
@@ -53,6 +56,7 @@ for $k > 0$, where $\sigma_t^2$ is the volatility at time $t$.
 Volatility often exhibits long memory, meaning that the autocorrelation of absolute or squared returns decays slowly. This can be modeled using a hyperbolic decay function:
 
 $$
+
 \text{Corr}(|r_t|, |r_{t+k}|) \sim k^{2d-1}
 $$
 
@@ -63,6 +67,7 @@ as $k \to \infty$, where $0 < d < 0.5$ is the long memory parameter.
 In multivariate settings, volatilities of different assets or markets tend to move together. This can be captured by positive correlations between volatility processes of different assets:
 
 $$
+
 \text{Corr}(\sigma_{i,t}^2, \sigma_{j,t}^2) > 0
 $$
 
@@ -73,6 +78,7 @@ where $\sigma_{i,t}^2$ and $\sigma_{j,t}^2$ are the volatilities of assets $i$ a
 While volatility can persist for extended periods, it tends to revert to a long-term average level. This can be modeled using a mean-reverting process:
 
 $$
+
 d\sigma_t^2 = \kappa(\theta - \sigma_t^2)dt + \gamma dW_t
 $$
 
@@ -83,6 +89,7 @@ where $\theta$ is the long-term mean volatility, $\kappa$ is the speed of mean r
 There is evidence of a positive relationship between expected returns and volatility, often referred to as the volatility feedback effect. This can be expressed as:
 
 $$
+
 E[r_t | \mathcal{F}_{t-1}] = \alpha + \beta \sigma_t^2
 $$
 
@@ -93,6 +100,7 @@ where $\mathcal{F}_{t-1}$ is the information set available at time $t-1$, and $\
 Empirical studies have shown a positive correlation between trading volume and volatility:
 
 $$
+
 \text{Corr}(\sigma_t^2, V_t) > 0
 $$
 
@@ -103,6 +111,7 @@ where $V_t$ is the trading volume at time $t$.
 Volatility tends to be lower during non-trading periods (e.g., overnight, weekends, holidays) compared to active trading periods. This can be modeled by incorporating different volatility regimes:
 
 $$
+
 \sigma_t^2 = \begin{cases}
 \sigma_{1,t}^2 & \text{during trading hours} \\
 \sigma_{2,t}^2 & \text{during non-trading hours}
@@ -116,6 +125,7 @@ where typically $E[\sigma_{1,t}^2] > E[\sigma_{2,t}^2]$.
 Volatility is often influenced by macroeconomic factors and news announcements. This relationship can be modeled as:
 
 $$
+
 \sigma_t^2 = f(X_t) + \epsilon_t
 $$
 

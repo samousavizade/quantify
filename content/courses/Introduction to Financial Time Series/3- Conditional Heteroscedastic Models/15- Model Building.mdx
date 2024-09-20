@@ -27,6 +27,7 @@ Building a volatility model for asset returns consists of four steps:
 Let $\{r_t\}$ be the return series of interest. We begin by testing for serial correlations in $r_t$. This can be done by examining the autocorrelation function (ACF) and the Ljung-Box statistics of $r_t$. If serial correlations are found to be statistically significant, then an appropriate time series model (e.g., an ARMA model) is built for the conditional mean of $r_t$. Denote the mean equation by
 
 $$
+
 r_t = \mu_t + a_t
 $$
 
@@ -45,12 +46,14 @@ The first approach applies the Ljung-Box statistics to the squared residual seri
 The second approach uses the Lagrange multiplier test of Engle (1982). This test is equivalent to the usual F statistic for testing $\alpha_i = 0$ $(i = 1, ..., m)$ in the linear regression
 
 $$
+
 \hat{a}_t^2 = \alpha_0 + \alpha_1 \hat{a}_{t-1}^2 + ... + \alpha_m \hat{a}_{t-m}^2 + e_t
 $$
 
 where $e_t$ denotes the error term and $m$ is a prespecified positive integer. Under the null hypothesis that there is no ARCH effect, we have $\alpha_i = 0$ for all $i > 0$. The test statistic is
 
 $$
+
 (T - m) R^2 \sim \chi^2(m)
 $$
 
@@ -61,6 +64,7 @@ where $T$ is the sample size, $R^2$ is the coefficient of determination of the r
 If ARCH effects are found to be statistically significant, then a volatility model is specified. The general form of a volatility model is
 
 $$
+
 a_t = \sigma_t \epsilon_t
 $$
 
@@ -71,6 +75,7 @@ where $\sigma_t^2 = \text{Var}(a_t | F_{t-1})$ is the conditional variance of $a
 After estimating the parameters of a volatility model, the fitted model is checked for possible misspecification. In particular, the standardized residuals
 
 $$
+
 \hat{\epsilon}_t = \frac{\hat{a}_t}{\hat{\sigma}_t}
 $$
 

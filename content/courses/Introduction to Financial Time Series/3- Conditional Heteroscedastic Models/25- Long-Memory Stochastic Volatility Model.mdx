@@ -17,6 +17,7 @@ Long-memory stochastic volatility models combine the features of long-memory pro
 A basic long-memory stochastic volatility (LMSV) model can be specified as follows:
 
 $$
+
 \begin{aligned}
 r_t &= \sigma_t \epsilon_t \\
 \log(\sigma_t^2) &= \mu + h_t \\
@@ -46,6 +47,7 @@ The key feature of this model is the fractional differencing operator $(1-L)^d$ 
 3. **Autocorrelation Function**: The autocorrelation function of $\log(\sigma_t^2)$ decays at a hyperbolic rate:
 
 $$
+
 \rho(k) \sim C k^{2d-1} \quad \text{as } k \to \infty
 $$
 
@@ -54,6 +56,7 @@ where $C$ is a constant and $k$ is the lag.
 4. **Spectral Density**: The spectral density of $\log(\sigma_t^2)$ has a pole at zero frequency:
 
 $$
+
 f(\lambda) \sim C \lambda^{-2d} \quad \text{as } \lambda \to 0
 $$
 
@@ -78,6 +81,7 @@ Estimation of LMSV models is challenging due to the latent nature of the volatil
 Consider applying an LMSV model to daily returns of the S&P 500 index. The model can be specified as:
 
 $$
+
 \begin{aligned}
 r_t &= \sigma_t \epsilon_t \\
 \log(\sigma_t^2) &= \mu + h_t \\
@@ -106,6 +110,7 @@ Several extensions of the basic LMSV model have been proposed in the literature:
 1. **LMSV with Leverage**: Incorporating a correlation between return innovations and volatility innovations to capture leverage effects:
 
 $$
+
 \begin{aligned}
 r_t &= \sigma_t \epsilon_t \\
 \log(\sigma_t^2) &= \mu + h_t \\
@@ -117,6 +122,7 @@ $$
 2. **LMSV with Heavy-Tailed Distributions**: Using Student's t-distribution or other heavy-tailed distributions for $\epsilon_t$ to better capture extreme returns:
 
 $$
+
 \epsilon_t \sim t_\nu
 $$
 
@@ -125,6 +131,7 @@ where $\nu$ is the degrees of freedom parameter.
 3. **Multifactor LMSV**: Incorporating multiple volatility components with different memory characteristics:
 
 $$
+
 \log(\sigma_t^2) = \mu + h_{1t} + h_{2t}
 $$
 
@@ -133,6 +140,7 @@ where $h_{1t}$ and $h_{2t}$ have different fractional differencing parameters.
 4. **LMSV with Jumps**: Adding a jump component to capture sudden, large movements in returns:
 
 $$
+
 r_t = \sigma_t \epsilon_t + J_t
 $$
 
@@ -143,12 +151,14 @@ where $J_t$ is a jump process.
 Forecasting volatility using LMSV models involves predicting future values of $h_t$. The long-memory property implies that forecasts will depend on a large number of past observations. For an LMSV model, the optimal l-step ahead forecast of log-volatility is:
 
 $$
+
 \hat{h}_{T+l|T} = E[h_{T+l} | h_T, h_{T-1}, ..., h_1] = \sum_{j=0}^{\infty} \psi_j h_{T-j}
 $$
 
 where $\psi_j$ are the coefficients of the infinite MA representation of the fractional differencing operator:
 
 $$
+
 (1-L)^{-d} = \sum_{j=0}^{\infty} \psi_j L^j
 $$
 
