@@ -51,10 +51,3 @@ To perform WLS, each observation in the regression model is weighted by the inve
 Suppose you are analyzing household expenditure data where expenditure variability increases with income. If it is known that $$ \text{Var}(u_i) = \sigma^2 x_i^2 $$, where $$ x_i $$ represents income, then WLS can be applied with weights $$ w_i = 1/x_i^2 $$. This transformation will stabilize the variance across observations, allowing for more reliable inference from the regression model.
 
 By using WLS when heteroskedasticity is known up to a multiplicative constant, econometricians can obtain more reliable estimates and make valid inferences about economic relationships.
-
-[^1]: https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/30626316/2be59c8f-ac44-43e7-a595-38c5bea42df7/Jeffrey_M_Wooldridge_Introductory_Econometrics_A_Modern_Approach.pdf
-[^2]: https://ms.mcmaster.ca/canty/teaching/stat3a03/Lectures7.pdf
-[^3]: https://gregorygundersen.com/blog/2022/08/09/weighted-ols/
-[^4]: https://en.wikipedia.org/wiki/Weight_matrix
-[^5]: https://bookdown.org/ccolonescu/RPoE4/heteroskedasticity.html
-[^6]: https://www.youtube.com/watch?v=wCJ8I-MtJdQ
