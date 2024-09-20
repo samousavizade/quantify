@@ -25,11 +25,6 @@ export default function PostLayout({ content, author, children, next, prev }: Pr
           <dl>
             <dt className="sr-only">Published on</dt>
             <dd className="flex flex-col justify-center text-base font-medium leading-6 text-white sm:flex-row sm:space-x-2">
-              <div className="flex items-center justify-center space-x-2">
-                {/*<time dateTime={date}>*/}
-                {/*  {`${new Date(date).toLocaleDateString(siteMetadata.locale, postDateTemplate)}`}*/}
-                {/*</time>*/}
-              </div>
               <span className={'text-gray-500 text-lg font-serif'}>{readingTime.text}</span>
             </dd>
           </dl>

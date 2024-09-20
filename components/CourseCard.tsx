@@ -49,7 +49,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ courses }) => {
               <div className="xl:w-2/3 lg:w-2/3 md:w-2/3 sm:w-full p-4 my-auto">
                 {/* Course Title */}
                 <Link
-                  prefetch={true}
+                  prefetch={false}
                   href={`/courses/${title.replaceAll(' ', '-')}`}
                   className={
                     'horizontal-underline mb-2 text-3xl font-normal active:horizontal-underline-active'
