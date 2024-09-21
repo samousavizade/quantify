@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import '@/css/courses_sliderbar.css';
 import {
+  FaArrowRight,
   FaBrain,
   FaCalculator,
   FaChartLine,
@@ -307,8 +308,6 @@ export default function CoursesListLayout() {
         filteredCourses: filteredCourses,
       };
     });
-
-    console.log('Len of Filtered Courses field click', filteredCourses.length);
   };
 
   const handleSearchValue = (searchValue: string) => {
@@ -320,44 +319,51 @@ export default function CoursesListLayout() {
 
   const allFields = Array.from(new Set(coursesData.map((p: { field: string }) => p.field))).sort();
 
-  return (
-    <div>
-      <motion.h1
-        key={'search'}
-        className="py-2 text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-5xl md:leading-14"
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.6 }}
-      >
-        Search
-      </motion.h1>
-      <div className="w-full bg-bg-gray-100 dark:bg-gray-800 p-6 rounded-2xl">
-        <span className="text-left text-lg font-semibold">Fields</span>
-        <div className="flex justify-items-stretch justify-around flex-wrap mb-4">
-          <div className="flex flex-row flex-wrap gap-5">
-            {allFields.map((field: any, index) => {
-              return (
-                <LinkButton
-                  key={index}
-                  className={`flex items-center p-2 text-sm ${
-                    headerTitle === field ? 'bg-primary-500' : ''
-                  }`}
-                  onClick={() => {
-                    handleFieldClick(field);
-                  }}
-                >
-                  <span className="mr-2 text-lg">{fieldToIcon.get(field)}</span>
-                  <span className={'ml-2 text-xl'}>{field}</span>
-                </LinkButton>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+  const [isSidebarVisible, setIsSidebarVisible] = useState(false);
 
-      <div className="w-full bg-bg-gray-100 dark:bg-gray-800 p-6 mt-3 rounded-2xl">
+  const toggleSidebar = () => {
+    setIsSidebarVisible(!isSidebarVisible);
+  };
+
+  return (
+    <div className={'flex'}>
+      {/* Toggle Button with Right Arrow Icon */}
+      <button
+        onClick={toggleSidebar}
+        className="sm:hidden p-2 bg-gray-500 bg-opacity-30 text-black dark:text-white rounded-lg"
+      >
+        <FaArrowRight />
+      </button>
+
+      <div
+        className={`xl:w-1/4 lg:w-1/3 md:w-1/3 sm:1/3 bg-bg-gray-100 dark:bg-gray-800 p-4 rounded-2xl ${
+          isSidebarVisible ? 'block' : 'hidden'
+        } sm:block w-64`}
+      >
+        {/* Fields Section */}
+        <span className="text-left text-lg font-semibold">Fields</span>
+        <div className="flex flex-col gap-2 my-4">
+          {allFields.map((field: any, index) => {
+            return (
+              <LinkButton
+                key={index}
+                className={`flex items-center p-2 text-sm ${
+                  headerTitle === field ? 'bg-primary-500' : ''
+                }`}
+                onClick={() => {
+                  handleFieldClick(field);
+                }}
+              >
+                <span className="mr-2 text-lg">{fieldToIcon.get(field)}</span>
+                <span className={'ml-2 text-xl'}>{field}</span>
+              </LinkButton>
+            );
+          })}
+        </div>
+
+        {/* Tags Section */}
         <span className="text-left text-lg font-semibold">Tags</span>
-        <div className="flex flex-row flex-wrap gap-2 mt-3">
+        <div className="flex flex-wrap gap-2 mt-4">
           {sortedTags.map((tag: any) => (
             <button
               key={tag}
@@ -376,44 +382,56 @@ export default function CoursesListLayout() {
         </div>
       </div>
 
-      <div className="w-full bg-bg-gray-100 dark:bg-gray-800 p-2 mt-3 rounded-2xl">
-        <input
-          aria-label="Search articles"
-          type="text"
-          onChange={(e) => {
-            setSearchValue(e.target.value);
-            handleSearchValue(e.target.value);
-          }}
-          placeholder="Search courses"
-          className="block w-full rounded-md border-0 bg-gray-200 bg-opacity-50 px-4 py-3 text-gray-900 focus:border-sky-500 focus:ring-sky-500 dark:border-gray-900 dark:bg-gray-800 dark:text-gray-100"
-        />
-        <svg
-          className="absolute right-3 top-3 h-6 w-6 text-gray-400 dark:text-gray-300"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+      <div className="xl:w-3/4 lg:w-2/3 md:w-2/3 sm:2/3 p-4">
+        <motion.h1
+          key={'search'}
+          className="py-2 text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-5xl md:leading-14"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.6 }}
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
-      </div>
+          Search
+        </motion.h1>
 
-      <motion.h1
-        key={headerTitle}
-        className="mt-2 py-1 text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-5xl md:leading-14"
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.6 }}
-      >
-        {headerTitle}
-      </motion.h1>
-      <div className="space-y-2 pt-3 pb-3 md:space-y-5">
-        <CourseCard courses={pagination.filteredCourses} />
+        <div className="w-full bg-bg-gray-100 dark:bg-gray-800 p-2 mt-3 rounded-2xl">
+          <input
+            aria-label="Search articles"
+            type="text"
+            onChange={(e) => {
+              setSearchValue(e.target.value);
+              handleSearchValue(e.target.value);
+            }}
+            placeholder="Search courses"
+            className="block w-full rounded-md border-0 bg-gray-200 bg-opacity-50 px-4 py-3 text-gray-900 focus:border-sky-500 focus:ring-sky-500 dark:border-gray-900 dark:bg-gray-800 dark:text-gray-100"
+          />
+          <svg
+            className="absolute right-3 top-3 h-6 w-6 text-gray-400 dark:text-gray-300"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </div>
+
+        <motion.h1
+          key={headerTitle}
+          className="mt-2 py-1 text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-5xl md:leading-14"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.6 }}
+        >
+          {headerTitle}
+        </motion.h1>
+        <div className="space-y-2 pt-1 pb-1 md:space-y-5">
+          <CourseCard courses={pagination.filteredCourses} />
+        </div>
       </div>
     </div>
   );

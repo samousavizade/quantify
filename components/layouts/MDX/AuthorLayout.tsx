@@ -10,7 +10,7 @@ interface Props {
 
 export default function AuthorLayout({ children, content }: Props) {
   const { avatar, name, occupation, company, email, github, linkedin, twitter } = content;
-  console.log(company, email, github, linkedin, twitter);
+  console.log(company);
   return (
     <div className="pt-4">
       <div className="mb-4 space-x-2 flex flex-col-reverse justify-center items-center sm:flex-row sm:items-center">
@@ -23,7 +23,7 @@ export default function AuthorLayout({ children, content }: Props) {
             className="rounded-full object-scale-down grayscale"
           />
         </div>
-        <div className="text-center sm:text-left space-y-1 text-gray-300">
+        <div className="text-center sm:text-left ml-2 space-y-1 text-gray-300">
           <h3 className="flex justify-center space text-xl font-bold md:text-2xl lg:text-3xl">
             {name}
           </h3>
@@ -31,16 +31,16 @@ export default function AuthorLayout({ children, content }: Props) {
             {occupation}
           </h4>
           <div className="flex justify-center space-x-4 mt-2">
-            <a href="mailto:youremail@example.com" aria-label="Email">
+            <a href={email} aria-label="Email">
               <FaEnvelope className="h-6 w-6" />
             </a>
-            <a href="https://github.com/yourusername" aria-label="GitHub">
+            <a href={github} aria-label="GitHub">
               <FaGithub className="h-6 w-6" />
             </a>
-            <a href="https://www.linkedin.com/in/yourprofile/" aria-label="LinkedIn">
+            <a href={linkedin} aria-label="LinkedIn">
               <FaLinkedin className="h-6 w-6" />
             </a>
-            <a href="https://twitter.com/yourusername" aria-label="Twitter">
+            <a href={twitter} aria-label="Twitter">
               <FaTwitter className="h-6 w-6" />
             </a>
           </div>

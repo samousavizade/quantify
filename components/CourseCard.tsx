@@ -34,7 +34,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ courses }) => {
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.6, delay: index / 10 }}
             >
-              <div className="xl:w-1/3 lg:w-1/3 md:w-1/3 sm:w-0">
+              <div className="xl:w-1/3 lg:w-0 md:w-0 sm:w-0">
                 <div className="relative w-full h-full">
                   <Image
                     src={imageSrc}
@@ -46,7 +46,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ courses }) => {
                 </div>
               </div>
 
-              <div className="xl:w-2/3 lg:w-2/3 md:w-2/3 sm:w-full p-4 my-auto">
+              <div className="xl:w-2/3 lg:w-full md:w-full sm:w-full p-4 my-auto">
                 {/* Course Title */}
                 <Link
                   prefetch={false}

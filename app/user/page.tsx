@@ -7,7 +7,6 @@ import * as React from 'react'; // If you're using date-fns
 
 export default function User() {
   const { data: session } = useSession();
-  console.log('user session', session?.user);
 
   // @ts-ignore
   return (

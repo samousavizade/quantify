@@ -193,7 +193,7 @@ function SignInComponent() {
               <form
                 action={async () => {
                   signIn('github', { callbackUrl: '/' }).then((r) => {
-                    console.log(r);
+                    console.log(r?.ok);
                   });
                 }}
               >

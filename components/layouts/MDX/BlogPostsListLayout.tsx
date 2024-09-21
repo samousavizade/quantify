@@ -53,21 +53,12 @@ export default function BlogPostsListLayout({ posts }: Props) {
   const [selectedField, setSelectedField] = useState('');
   const [headerTitle, setHeaderTitle] = useState('Blog');
 
-  console.log('search value: ', searchValue);
-
   const filteredBlogPosts = filterPosts(posts, searchValue, selectedField, selectedTags);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     filteredPosts: filteredBlogPosts,
     totalPages: Math.ceil(filteredBlogPosts.length / POSTS_PER_PAGE),
   });
-
-  console.log(
-    'Filtered post: ',
-    pagination.filteredPosts.map((fp) => {
-      return fp.title;
-    })
-  );
 
   const initialDisplayPosts = pagination.filteredPosts.slice(
     (pagination.currentPage - 1) * POSTS_PER_PAGE,

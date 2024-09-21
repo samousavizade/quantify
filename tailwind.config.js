@@ -7,15 +7,6 @@ module.exports = {
   darkMode: 'class',
   theme: {
     extend: {
-      keyframes: {
-        slideDown: {
-          '0%': { height: '0', opacity: '0' },
-          '100%': { height: 'var(--content-height)', opacity: '1' },
-        },
-      },
-      animation: {
-        slideDown: 'slideDown 0.8s ease-out forwards',
-      },
       spacing: {
         '9/16': '56.25%',
         0.75: '0.1875rem',
