@@ -8,144 +8,128 @@ import TOCInline from 'pliny/ui/TOCInline';
 
 <TOCInline toc={props.toc} asDisclosure />
 
-## Asset Returns
+## 1.1 ASSET RETURNS
 
-Most financial studies involve returns, instead of prices, of assets. There are two main reasons for using returns:
+Most financial studies involve returns, instead of prices, of assets. Campbell, Lo, and MacKinlay (1997) give two main reasons for using returns. First, for average investors, return of an asset is a complete and scale-free summary of the investment opportunity. Second, return series are easier to handle than price series because the former have more attractive statistical properties. There are, however, several definitions of an asset return. Let $P_t$ be the price of an asset at time index $t$. We discuss some definitions of returns that are used throughout the book. Assume for the moment that the asset pays no dividends.
 
-1. For average investors, return of an asset is a complete and scale-free summary of the investment opportunity.
+### 1.1.1 One-Period Simple Return
 
-2. Return series are easier to handle than price series because they have more attractive statistical properties.
+Holding the asset for one period from date $t-1$ to date $t$ would result in a simple gross return:
 
-There are several definitions of asset returns that are commonly used:
+$$1+R_t = \frac{P_t}{P_{t-1}} \quad \text{or} \quad P_t = P_{t-1}(1+R_t)$$
 
-### One-Period Simple Return
+The corresponding one-period simple net return or simple return is
 
-Let $P_t$ be the price of an asset at time index $t$. Holding the asset for one period from date $t-1$ to date $t$ would result in a simple gross return $1 + R_t = \frac{P_t}{P_{t-1}}$ or $P_t = P_{t-1}(1 + R_t)$, The corresponding one-period simple net return or simple return is:
+$$R_t = \frac{P_t}{P_{t-1}} - 1 = \frac{P_t - P_{t-1}}{P_{t-1}}$$
 
-$$
-R_t = \frac{P_t}{P_{t-1}} - 1 = \frac{P_t - P_{t-1}}{P_{t-1}}
-$$
-
-### Multiperiod Simple Return
+### 1.1.2 Multi-period Simple Return
 
 Holding the asset for $k$ periods between dates $t-k$ and $t$ gives a $k$-period simple gross return:
 
 $$
-1 + R_t[k] = \frac{P_t}{P_{t-k}} = \frac{P_t}{P_{t-1}} \times \frac{P_{t-1}}{P_{t-2}} \times \cdots \times \frac{P_{t-k+1}}{P_{t-k}} = (1 + R_t)(1 + R_{t-1}) \cdots (1 + R_{t-k+1}) = \prod_{j=0}^{k-1} (1 + R_{t-j})
+\begin{aligned}
+1+R_t[k] = \frac{P_t}{P_{t-k}} &= \frac{P_t}{P_{t-1}} \times \frac{P_{t-1}}{P_{t-2}} \times \cdots \times \frac{P_{t-k+1}}{P_{t-k}} \\
+&= (1+R_t)(1+R_{t-1})\cdots(1+R_{t-k+1}) \\
+&= \prod_{j=0}^{k-1}(1+R_{t-j})
+\end{aligned}
 $$
 
-Thus, the $k$-period simple gross return is just the product of the $k$ one-period simple gross returns involved. This is called a compound return.
+Thus, the $k$-period simple gross return is just the product of the $k$ one-period simple gross returns involved. This is called a compound return. The $k$-period simple net return is $R_t[k] = (P_t - P_{t-k})/P_{t-k}$. In practice, the actual time interval is important in discussing and comparing returns (e.g., monthly return or annual return). If the time interval is not given, then it is implicitly assumed to be one year. If the asset was held for $k$ years, then the annualized (average) return is defined as
 
-The $k$-period simple net return is:
+$$\text{Annualized}\{R_t[k]\} = \left[\prod_{j=0}^{k-1}(1+R_{t-j})\right]^{1/k} - 1$$
 
-$$
-R_t[k] = (P_t - P_{t-k})/P_{t-k}
-$$
+This is a geometric mean of the $k$ one-period simple gross returns involved and can be computed by
 
-If the asset was held for $k$ years, then the annualized (average) return is defined as:
+$$\text{Annualized}\{R_t[k]\} = \exp\left[\frac{1}{k}\sum_{j=0}^{k-1}\ln(1+R_{t-j})\right] - 1$$
 
-$$
-\text{Annualized } \{R_t[k]\} = \left[\prod_{j=0}^{k-1} (1 + R_{t-j})\right]^{1/k} - 1
-$$
+where $\exp(x)$ denotes the exponential function and $\ln(x)$ is the natural logarithm of the positive number $x$. Because it is easier to compute arithmetic average than geometric mean and the one-period returns tend to be small, one can use a first-order Taylor expansion to approximate the annualized return and obtain
 
-This is a geometric mean of the $k$ one-period simple gross returns involved and can be computed by:
+$$\text{Annualized}\{R_t[k]\} \approx \frac{1}{k}\sum_{j=0}^{k-1}R_{t-j}$$ \label{eq:1.3}
 
-$$
-\text{Annualized } \{R_t[k]\} = \exp\left(\frac{1}{k} \sum_{j=0}^{k-1} \ln(1 + R_{t-j})\right) - 1
-$$
+Accuracy of the approximation in Eq. \eqref{eq:1.3} may not be sufficient in some applications, however.
 
-where $\exp(x)$ denotes the exponential function and $\ln(x)$ is the natural logarithm of the positive number $x$.
+### 1.1.3 Continuous Compounding
 
-Because it is easier to compute arithmetic average than geometric mean and the one-period returns tend to be small, one can use a first-order Taylor expansion to approximate the annualized return:
+Before introducing continuously compounded return, we discuss the effect of compounding. Assume that the interest rate of a bank deposit is $10\%$ per annum and the initial deposit is $\$1.00$. If the bank pays interest once a year, then the net value of the deposit becomes $\$1(1+0.1)=\$1.1$ one year later. If the bank pays interest semiannually, the 6-month interest rate is $10\%/2=5\%$ and the net value is $\$1(1+0.1/2)^2=\$1.1025$ after the first year. In general, if the bank pays interest $m$ times a year, then the interest rate for each payment is $10\%/m$ and the net value of the deposit becomes $\$1(1+0.1/m)^m$ one year later. Table 1.1 gives the results for some commonly used time intervals on a deposit of $\$1.00$ with interest rate of $10\%$ per annum. In particular, the net value approaches $\$1.1052$, which is obtained by $\exp(0.1)$ and referred to as the result of continuous compounding. The effect of compounding is clearly seen. In general, the net asset value $A$ of continuous compounding is
 
-$$
-\text{Annualized } \{R_t[k]\} \approx \frac{1}{k} \sum_{j=0}^{k-1} R_{t-j}
-$$
+$$A = C\exp(r \times n)$$ \label{eq:1.4}
 
-However, accuracy of this approximation may not be sufficient in some applications.
+where $r$ is the interest rate per annum, $C$ is the initial capital, and $n$ is the number of years. From Eq. \eqref{eq:1.4}, we have
 
-### Continuous Compounding
+$$C = A\exp(-r \times n)$$ \label{eq:1.5}
 
-Before introducing continuously compounded return, we discuss the effect of compounding. Assume that the interest rate of a bank deposit is 10% per annum and the initial deposit is $1.00. If the bank pays interest once a year, then the net value of the deposit becomes $1(1 + 0.1) = $1.1 one year later. If the bank pays interest semiannually, the 6-month interest rate is 10%/2 = 5% and the net value is $1(1 + 0.1/2)^2 = $1.1025 after the first year.
+| Type       | Number of Payments | Interest Rate per Period | Net Value |
+| ---------- | ------------------ | ------------------------ | --------- |
+| Annual     | 1                  | 0.1                      | $1.10000  |
+| Semiannual | 2                  | 0.05                     | $1.10250  |
+| Quarterly  | 4                  | 0.025                    | $1.10381  |
+| Monthly    | 12                 | 0.0083                   | $1.10471  |
+| Weekly     | 52                 | 0.1/52                   | $1.10506  |
+| Daily      | 365                | 0.1/365                  | $1.10516  |
 
-In general, if the bank pays interest $m$ times a year, then the interest rate for each payment is 10%/$m$ and the net value of the deposit becomes $1(1 + 0.1/m)^m$ one year later. As $m$ increases, the net value approaches $1.1052, which is obtained by $\exp(0.1)$ and referred to as the result of continuous compounding.
-
-In general, the net asset value $A$ of continuous compounding is:
-
-$$
-A = C \exp(r \times n)
-$$
-
-where $r$ is the interest rate per annum, $C$ is the initial capital, and $n$ is the number of years.
-
-From this, we have:
-
-$$
-C = A \exp(-r \times n)
-$$
-
-which is referred to as the present value of an asset that is worth $A$ dollars $n$ years from now, assuming that the continuously compounded interest rate is $r$ per annum.
+which is referred to as the present value of an asset that is worth A dollars n
+years from now, assuming that the continuously compounded interest rate is r per
+annum.
 
 ### Continuously Compounded Return
 
 The natural logarithm of the simple gross return of an asset is called the continuously compounded return or log return:
 
-$$
-r_t = \ln(1 + R_t) = \ln\left(\frac{P_t}{P_{t-1}}\right) = p_t - p_{t-1}
-$$
+$$r_t = \ln(1+R_t) = \ln\frac{P_t}{P_{t-1}} = p_t - p_{t-1}$$
 
-where $p_t = \ln(P_t)$.
-
-Continuously compounded returns $r_t$ enjoy some advantages over the simple net returns $R_t$. For multiperiod returns:
+where $p_t = \ln(P_t)$. Continuously compounded returns $r_t$ enjoy some advantages over the simple net returns $R_t$. First, consider multiperiod returns. We have
 
 $$
-r_t[k] = \ln(1 + R_t[k]) = \ln[(1 + R_t)(1 + R_{t-1}) \cdots (1 + R_{t-k+1})] = \ln(1 + R_t) + \ln(1 + R_{t-1}) + \cdots + \ln(1 + R_{t-k+1}) = r_t + r_{t-1} + \cdots + r_{t-k+1}
+\begin{aligned}
+r_t[k] &= \ln(1+R_t[k]) = \ln[(1+R_t)(1+R_{t-1})\cdots(1+R_{t-k+1})] \\
+&= \ln(1+R_t) + \ln(1+R_{t-1}) + \cdots + \ln(1+R_{t-k+1}) \\
+&= r_t + r_{t-1} + \cdots + r_{t-k+1}
+\end{aligned}
 $$
 
-Thus, the continuously compounded multiperiod return is simply the sum of continuously compounded one-period returns involved.
+Thus, the continuously compounded multiperiod return is simply the sum of continuously compounded one-period returns involved. Second, statistical properties of log returns are more tractable.
 
 ### Portfolio Return
 
-The simple net return of a portfolio consisting of $N$ assets is a weighted average of the simple net returns of the assets involved, where the weight on each asset is the percentage of the portfolio's value invested in that asset. Let $p$ be a portfolio that places weight $w_i$ on asset $i$. Then the simple return of $p$ at time $t$ is:
-
-$$
-R_{p,t} = \sum_{i=1}^N w_i R_{it}
-$$
-
-where $R_{it}$ is the simple return of asset $i$.
-
-The continuously compounded returns of a portfolio, however, do not have this convenient property. If the simple returns $R_{it}$ are all small in magnitude, then we have:
-
-$$
-r_{p,t} \approx \sum_{i=1}^N w_i r_{it}
-$$
-
-where $r_{p,t}$ is the continuously compounded return of the portfolio at time $t$. This approximation is often used to study portfolio returns.
+The simple net return of a portfolio consisting of $N$ assets is a weighted average of the simple net returns of the assets involved, where the weight on each asset is the percentage of the portfolio's value invested in that asset. Let $p$ be a portfolio that places weight $w_i$ on asset $i$. Then the simple return of $p$ at time $t$ is $R_{p,t} = \sum_{i=1}^N w_i R_{it}$, where $R_{it}$ is the simple return of asset $i$. The continuously compounded returns of a portfolio, however, do not have the above convenient property. If the simple returns $R_{it}$ are all small in magnitude, then we have $r_{p,t} \approx \sum_{i=1}^N w_i r_{it}$, where $r_{p,t}$ is the continuously compounded return of the portfolio at time $t$. This approximation is often used to study portfolio returns.
 
 ### Dividend Payment
 
-If an asset pays dividends periodically, we must modify the definitions of asset returns. Let $D_t$ be the dividend payment of an asset between dates $t-1$ and $t$ and $P_t$ be the price of the asset at the end of period $t$. Thus, dividend is not included in $P_t$. Then the simple net return and continuously compounded return at time $t$ become:
+If an asset pays dividends periodically, we must modify the definitions of asset returns. Let $D_t$ be the dividend payment of an asset between dates $t-1$ and $t$ and $P_t$ be the price of the asset at the end of period $t$. Thus, dividend is not included in $P_t$. Then the simple net return and continuously compounded return at time $t$ become
 
-$$
-R_t = \frac{P_t + D_t}{P_{t-1}} - 1
-$$
-
-$$
-r_t = \ln(P_t + D_t) - \ln(P_{t-1})
-$$
+$$R_t = \frac{P_t + D_t}{P_{t-1}} - 1, \quad r_t = \ln(P_t + D_t) - \ln(P_{t-1})$$
 
 ### Excess Return
 
-Excess return of an asset at time $t$ is the difference between the asset's return and the return on some reference asset. The reference asset is often taken to be riskless such as a short-term U.S. Treasury bill return. The simple excess return and log excess return of an asset are then defined as:
+Excess return of an asset at time $t$ is the difference between the asset's return and the return on some reference asset. The reference asset is often taken to be riskless such as a short-term U.S. Treasury bill return. The simple excess return and log excess return of an asset are then defined as
+
+$$Z_t = R_t - R_{0t}, \quad z_t = r_t - r_{0t}$$
+
+where $R_{0t}$ and $r_{0t}$ are the simple and log returns of the reference asset, respectively. In the finance literature, the excess return is thought of as the payoff on an arbitrage portfolio that goes long in an asset and short in the reference asset with no net initial investment.
+
+Remark. A long financial position means owning the asset. A short position involves selling an asset one does not own. This is accomplished by borrowing the asset from an investor who has purchased it. At some subsequent date, the short seller is obligated to buy exactly the same number of shares borrowed to pay back the lender. Because the repayment requires equal shares rather than equal dollars, the short seller benefits from a decline in the price of the asset. If cash dividends are paid on the asset while a short position is maintained, these are paid to the buyer of the short sale. The short seller must also compensate the lender by matching the cash dividends from his own resources. In other words, the short seller is also obligated to pay cash dividends on the borrowed asset to the lender.
+
+### Summary of Relationship
+
+The relationships between simple return $R_t$ and continuously compounded (or log) return $r_t$ are
+
+$$r_t = \ln(1+R_t), \quad R_t = e^{r_t} - 1$$
+
+If the returns $R_t$ and $r_t$ are in percentages, then
+
+$$r_t = 100\ln(1+\frac{R_t}{100}), \quad R_t = 100(e^{r_t/100} - 1)$$
+
+Temporal aggregation of the returns produces
 
 $$
-Z_t = R_t - R_{0t}
+\begin{aligned}
+1+R_t[k] &= (1+R_t)(1+R_{t-1})\cdots(1+R_{t-k+1}) \\
+r_t[k] &= r_t + r_{t-1} + \cdots + r_{t-k+1}
+\end{aligned}
 $$
 
-$$
-z_t = r_t - r_{0t}
-$$
+If the continuously compounded interest rate is $r$ per annum, then the relationship between present and future values of an asset is
 
-where $R_{0t}$ and $r_{0t}$ are the simple and log returns of the reference asset, respectively.
+$$A = C\exp(r \times n), \quad C = A\exp(-r \times n)$$
 
-In the finance literature, the excess return is thought of as the payoff on an arbitrage portfolio that goes long in an asset and short in the reference asset with no net initial investment.
+Example 1.1. If the monthly log return of an asset is 4.46%, then the corresponding monthly simple return is $100[\exp(4.46/100)-1] = 4.56\%$. Also, if the monthly log returns of the asset within a quarter are 4.46%, −7.34%, and 10.77%, respectively, then the quarterly log return of the asset is $(4.46-7.34+10.77)\% = 7.89\%$.

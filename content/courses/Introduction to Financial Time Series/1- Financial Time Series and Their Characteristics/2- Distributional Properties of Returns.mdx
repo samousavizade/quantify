@@ -145,12 +145,23 @@ which is asymptotically distributed as a chi-squared random variable with 2 degr
 The most general model for the log returns $\{r_{it}; i = 1,\ldots,N; t = 1,\ldots,T \}$ is its joint distribution function:
 
 $$
-F_r(r_{11},\ldots,r_{N1}; r_{12},\ldots,r_{N2}; \ldots; r_{1T},\ldots,r_{NT}; Y; \theta),
+F_r(r_{11},\ldots,r_{N1}; r_{12},\ldots,r_{N2}; \ldots; r_{1T},\ldots,r_{NT}; Y; \theta), \label{eq1}
 $$
 
 where $Y$ is a state vector consisting of variables that summarize the environment in which asset returns are determined and $\theta$ is a vector of parameters that uniquely determines the distribution function $F_r(\cdot)$. The probability distribution $F_r(\cdot)$ governs the stochastic behavior of the returns $r_{it}$ and $Y$. In many financial studies, the state vector $Y$ is treated as given and the main concern is the conditional distribution of $\{r_{it}\}$ given $Y$. Empirical analysis of asset returns is then to estimate the unknown parameter $\theta$ and to draw statistical inference about the behavior of $\{r_{it}\}$ given some past log returns.
 
-The model in Eq. (1.14) is too general to be of practical value. However, it provides a general framework with respect to which an econometric model for asset returns $r_{it}$ can be put in a proper perspective. Some financial theories such as the capital asset pricing model (CAPM) of Sharpe (1964) focus on the joint distribution of $N$ returns at a single time index $t$ (i.e., the distribution of $\{r_{1t},\ldots,r_{Nt}\}$). Other theories emphasize the dynamic structure of individual asset returns (i.e., the distribution of $\{r_{i1},\ldots,r_{iT}\}$ for a given asset $i$). In this book, we focus on both. In the univariate analysis of Chapters 2–7, our main concern is the joint distribution of $\{r_{it}\}_{t=1}^T$ for asset $i$. To this end, it is useful to partition the joint distribution as
+The model in Eq.\ref{req} is too general to be of practical value.
+However,
+it provides a general framework with respect to which an econometric model for asset returns $r_{it}$ can be put in a proper perspective.
+Some financial theories such as the capital asset pricing model (CAPM) of Sharpe
+(1964) focus on the joint distribution of $N$ returns at a single time index $t$
+(i.e., the distribution of $\{r_{1t},\ldots,r_{Nt}\}$).
+Other theories emphasize the dynamic structure of individual asset returns
+(i.e., the distribution of $\{r_{i1},\ldots,r_{iT}\}$ for a given asset $i$).
+In this book, we focus on both.
+In the univariate analysis of Chapters 2–7,
+our main concern is the joint distribution of $\{r_{it}\}_{t=1}^T$ for asset $i$.
+To this end, it is useful to partition the joint distribution as
 
 $$
 F(r_{i1},\ldots,r_{iT}; \theta) = F(r_{i1})F(r_{i2}|r_{i1}) \cdots F(r_{iT}|r_{i,T-1},\ldots,r_{i1}) = F(r_{i1}) \prod_{t=2}^T F(r_{it}|r_{i,t-1},\ldots,r_{i1}),

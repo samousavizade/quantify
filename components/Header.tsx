@@ -37,11 +37,15 @@ export default function Header({ logoIcon }) {
         </Link>
         <Link
           prefetch={false}
+          aria-disabled={true}
           href={'/register'}
           className="bg-transparent text-white px-4 py-2 rounded-r-lg border-2 border-green-600 transition-colors duration-750 ease-in-out hover:bg-green-600 hover:bg-opacity-50"
           aria-label="Register"
+          onClick={(e) => e.preventDefault()}
         >
-          <span className="text-xl tracking-wide text-black dark:text-white">Register</span>
+          <span className="disabled:opacity-50 text-xl tracking-wide text-black dark:text-white">
+            Register
+          </span>
         </Link>
       </div>
     );
